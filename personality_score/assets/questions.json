@@ -1,0 +1,1736 @@
+[
+    {
+        "text": "Ich treffe selbstbestimmt meine Entscheidungen",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich hinterfrage mich selbst oft kritisch.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich habe den starken Drang, mein Leben zu verändern.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich investiere regelmäßig Zeit und Geld, um an mir zu arbeiten.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich mache mir häufig Gedanken über mich und mein Leben.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Im Allgemeinen lerne ich sehr schnell aus Fehlern.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich sollte Maßnahmen ergreifen, um meine Persönlichkeit weiterzuentwickeln.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich bin immer auf der Suche nach neuen Wegen mich zu verbessern.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich weiß, dass ich Dinge optimieren kann um meine Zeit und meine Finanzen besser in den Griff zu bekommen.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich weiß, wie ich meine Entscheidungen optimieren kann in der Zukunft, um Fehler zu minimieren.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich kann selbst aus der größten Niederlage noch Vorteile ziehen.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich bin völlig selbstbestimmt über meine Zeit.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich bin finanziell unabhängig und müsste nicht mehr wegen Geld arbeiten.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich weiß ganz genau, was ich will.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Mein Leben ist so organisiert, dass ich automatisch viele Highlights habe.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Mein Leben ist meiner Lebensvision zum Greifen nahe.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich lebe in Freiheit und Selbstbestimmtheit.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Meine inneren Themen habe ich weitestgehend überwunden, sodass sie mich heute kaum noch berühren.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich lebe an dem Ort und in dem Haus, in dem ich immer leben wollte.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ist dein Leben genau so, wie du es dir vorstellst, oder sind noch einige Punkte offen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Würdest du sagen, deine inneren Themen wirklich vollständig gelöst zu haben oder ist noch ein wenig offen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Wie sehr kannst du negative Dinge sogar voll für dein Leben nutzen und sie zu etwas sehr Positivem verwandeln?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Hast du exzellente Beziehungen zu völlig unterschiedlichen Menschen unterschiedlicher Persönlichkeitsstufen/sozialem Status?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Wie sehr kannst du dich über banale Dinge oder Kleinigkeiten freuen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Wie weit würdest du der Aussage zustimmen: Ich bin heute so attraktiv wie nie zuvor?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Hast du eine Spitzenfigur und kannst essen dennoch voll genießen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Gibt es für dich meist mehr entweder oder? Oder mehr ich kann beides haben?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Wie gut ist deine Balance zwischen im hier und jetzt und ich will noch viel erreichen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Unterscheidet sich ein \"Arbeitstag\" bei dir sehr von einem \"freien Tag\"?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Haben andere Menschen schon mal gesagt, du kannst sehr weich gegen andere aber hart gegen dich sein?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Würdest du sagen, du hast schon ein stressiges Leben oder hast du wirklich viel Zeit?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Würde das Business/Investments komplett ohne dich laufen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Hast du mehr einen großen Bekanntenkreis oder mehr enge Freunde?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "bist du mehr ein Kind oder kannst du mehr ernsthaft über tiefgründige Dinge dich unterhalten?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Wie häufig lachst du und bringst andere zum Lachen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Wie oft lachst du über dich selbst?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Empfindest du deinen Wohlstand auch manchmal als Belastung?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Magst du lieber den totalen Luxus oder mehr das einfache Leben?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "bist du mehr der, der an deinen Zielen arbeitet oder der, der das Leben wirklich genießt?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Wenn du ehrlich bist, kannst du echte Demut zeigen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Die wichtigsten Bereiche deines Lebens sind alle sehr ausgeglichen gut?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Erhältst du mehr vom Leben oder gibst du mehr?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Baut sich dein Kreis an interessanten Kontakten aktuell immer mehr aus?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Kannst du, wenn es richtig stressig ist, sehr überlegt handeln?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Du arbeitest täglich daran, an deinem Leben aktiv zu arbeiten und arbeitest nicht nur Prios ab?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Sind andere Menschen dir gegenüber manchmal ein wenig ehrfürchtig?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Du hast einen extrem positiven Einfluss auf dein Umfeld?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Du bist ein sehr spiritueller Mensch und nutzt dies aktiv in deinem Leben?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "LifeArtist"
+    },
+    {
+        "text": "Ich suche, erkenne und nutze die Chancen in meinem Leben.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe klare Ziele.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin davon überzeugt, schwierige Aufgaben lösen zu können.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe dauerhaft viele sehr gute Gewohnheiten in meinem Leben integriert.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich lerne ständig Neues dazu.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin der Kapitän meines Lebens.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin finanziell gemessen an objektiven Kriterien stark überdurchschnittlich erfolgreich.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Meine finanzielle Zukunft sieht hervorragend aus.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich kann meinen finanziellen Erfolg voll genießen.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Mein Leben gibt mir grundsätzlich mehr Energie, als es mich kostet.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin ein Tausendsassa mit vielen Fähigkeiten.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe das Gefühl, mein Leben ist zutiefst sinnerfüllt.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich gehe so in meiner Arbeit auf, dass ich sie auch für weniger Geld machen würde.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin davon überzeugt, dass ich die nächsten Jahre finanziell große Fortschritte machen werde.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe in meinen Lebensbereichen viele Samen gesät und gehe davon aus, davon stark profitieren zu werden.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe in den letzten Jahren geschäftlich überwiegend richtige Entscheidungen getroffen.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin ein positiver Beitrag im Leben vieler Menschen, ohne notwendigerweise etwas zurück zu erwarten.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Wenn etwas in deinem Leben nicht gut läuft, sind dafür tendenziell andere oder du selbst verantwortlich?",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Würde es dir leicht fallen, deine drei größten Schwächen zu benennen?",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Niederschläge in meinem Leben haben sich oft als Chancen erwiesen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Wenn mein Leben sich in den nächsten 10 Jahren kaum verändern würde, wäre ich glücklich.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Mir entgehen häufig Chancen.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich habe das nagende Gefühl, ich sollte mehr Gas geben im Leben.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich setze mir oft Ziele, die ich nicht erreiche.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Es fällt mir leicht, kurzfristig auf etwas zu verzichten, um langfristig mehr zu bekommen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich bin nicht sehr weit entwickelt im Vergleich zu dem Menschen, der ich gerne wäre.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich merke oft, wieviel ungenutztes Potenzial in mir steckt.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Oft mache ich mir Gedanken über Lösungen zu meinen aktuellen Herausforderungen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich muss neue Menschen kennenlernen, die mir in meinem Leben weiterhelfen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich will den Einfluss von negativen Menschen in meinem Umfeld vermindern.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich weiß, welche Lebensmittel ich vermeiden sollte um mehr Lebensenergie zu bekommen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich glaube, zu wahrem Erfolg gehört es, anderen zu helfen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Obwohl ich älter werde, wird mein Leben immer besser.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Menschen suchen aktiv meinen Rat.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich bin Herr meiner Emotionen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich bin mit meinem Traumpartner zusammen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich bin aktuell in der besten Form meines Lebens.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Mein Energielevel war noch nie höher.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich habe bereits viel mehr erreicht, als ich mir hätte träumen lassen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich habe ein nahezu riesiges Netzwerk.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich habe das Gefühl, angekommen zu sein.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Oft empfinde ich tiefes Glück im aktuellen Moment.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Es fällt mir leicht, mit neuen Beziehungen eine vertrauensvolle Verbindung aufzubauen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Rückschläge sind für mich ein Indikator für eine wichtige positive Lebenserfahrung.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Um erfolgreicher zu werden, muss ich aktiv neue Gewohnheiten etablieren.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Brauchst du noch bewusste Maßnahmen, um deine Lebensvision zu erreichen?",
+        "value": 1,
+        "relevancy": 8,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Würdest du sagen, dass die Herausforderungen vor denen du aktuell stehst grösser sind als die vor 10 Jahren?",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Adventurer"
+    },
+    {
+        "text": "Könnte ein extrem negatives Ereignis dich langfristig noch aus Bahn werfen?",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Adventurer"
+    },
+    {
+        "text": "Wie sehr musst du dich um dein Business oder Investments noch kümmern?",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Adventurer"
+    },
+    {
+        "text": "In meinem Leben BewussteInkompetenzeten sich viele Chancen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin häufig im Hier und Jetzt.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Meine Energie ist im Durchschnitt recht hoch.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich kann mich an den kleinen Dingen des Lebens erfreuen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Wenn ich in einer Gruppe bin und die nicht wissen, was zu tun ist, übernehme ich gern die Verantwortung.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "In der Vergangenheit bin ich durch Rückschläge meistens stärker geworden.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "In meinem Leben haben sich Katastrophen oft als Glücksfälle erwiesen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich lebe in Balance zwischen Anspannung und Entspannung.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Es fällt mir leicht, mit vertrauten Menschen tiefgründige Gespräche zu führen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich mag Menschen grundsätzlich.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich behandle Menschen, die im sozialen Rang unter mir stehen, sehr respektvoll.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin mit mir und meiner selbst im Reinen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich genieße es, mit mir und meinen Gedanken allein zu sein.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin es wert, geliebt zu werden.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich mache mir so gut wie nie Vorwürfe.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe das Gefühl, die Welt besser zu hinterlassen, als ich sie vorgefunden habe.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin davon überzeugt, dass mein Leben in 5 Jahren besser ist als heute.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin für mein Alter überdurchschnittlich attraktiv.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Leute hören mir gerne zu.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Mir fällt es leicht, Menschen von mir oder meinen Ideen zu begeistern.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Menschen fragen mich häufig nach Rat.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "In Diskussionen behalte ich meistens die Oberhand.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich befinde mich in absoluter Topform.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich lebe in meinem persönlichen Traumkörper.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe ein gesundheitlich hohes Energieniveau.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Meine Freunde teilen sehr stark meine Werte.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich komme beim anderen Geschlecht sehr gut an.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich sehe mich als Lebemann, der das Leben zu genießen weiß.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Die letzten 5 Jahre war ich geschäftlich sehr erfolgreich.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich investiere viel Zeit und Geld in meine FortBewussteInkompetenzldung.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Andere schauen zu meinem Erfolg auf.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Meine Investitionen sichern mir einen guten Lebensstandard.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich kann mir den Großteil meiner Wünsche finanziell erfüllen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Meine Leistung ist angemessen honoriert.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe sehr positive Assoziationen zum Thema Geld.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich erfreue mich an einem super Lebensstandard.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich bin die letzten Jahre finanziell stark vorangekommen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Dinge, die anderen schwerfallen, fallen mir oft leicht.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Mein exzellentes Netzwerk öffnet mir ständig neue Türen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Bist du der Meinung, du hast einen starken Einfluss auf mein Leben",
+        "value": 1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Mein Umfeld wundert sich oft darüber, dass ich mich verändern möchte.",
+        "value": 1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich bin oft Unzufriedenheit mit mir selbst.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich verändere mich nur Ungern",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich mag Veränderungen nicht so gern.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Es ist mir unangenehm, aus der Masse herauszustechen",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Man sollte damit zufrieden sein, was das Leben einem gibt.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Mit meinem aktuellen Lebensstand bin ich vollkommen zufrieden.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Es gibt viele Gründe, wie Arbeit, Familie oder Ungerechtigkeiten, die dich hindern im Leben weiter zu kommen.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Meine Eltern/ Freunde wissen was das Beste für mich ist.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "In einigen Situation verspüre ich Angst oder Unsicherheit.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich stehe häufig unter Strom.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich bin fast durchgehend am hustlen.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Die meisten Sachen sind ehrlich gesagt besser erledigt, wenn ich sie selbst mache.",
+        "value": 1,
+        "relevancy": 7,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich habe einen leichten Zugang zu allen Menschen, egal ob Müllmann oder Promi.",
+        "value": 1,
+        "relevancy": 7,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Andere Menschen oder negative Ereignisse können mich aus der Ruhe bringen.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich bin sehr versiert im Umgang mit dem anderen Geschlecht.",
+        "value": 1,
+        "relevancy": 7,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Mein Leben ist der Wahnsinn.",
+        "value": 1,
+        "relevancy": 7,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich habe meistens das Gefühl, genügend Zeit zu haben.",
+        "value": 1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich fühle mich häufig überfordert.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe viele offene Konflikte in meinem nahen Umfeld.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Negative Rückmeldung von anderen lassen mich an mir selbst zweifeln.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich verliere in emotional hitzigen Situationen oft die Kontrolle.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Mein Leben hat sich im letzten Jahr eher zum Negativen gewandelt.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Wenn ich ehrlich bin, bin ich oft eher Problem- als lösungsorientiert.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Wenn sich an meinem derzeitigen Beziehungsstatus für den Rest meines Lebens nichts mehr ändern würde, wäre ich glücklich.",
+        "value": 1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich muss am Monatsende oft schauen, wie ich über die Runden komme.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich fühle mich oft fremdbestimmt von den Wünschen und Forderungen anderer.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich wünschte, ich könnte die Früchte meiner Arbeit voll ernten.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe oft das Gefühl, mein sozialer Kreis versteht mich nicht.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Wegen Geld und Karriere bleiben viele andere Dinge auf der Strecke in meinem Leben.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Wenn ich ehrlich bin, folge ich meistens der Meinung der Masse (Schwarmintelligenz).",
+        "value": -1,
+        "relevancy": 6,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich habe starkes Vertrauen in Institutionen.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich sehe Dinge oft sehr schwarz weiß",
+        "value": -1,
+        "relevancy": 6,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich bin überrascht, dass mich manche Menschen nicht mögen.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Wenn ich sehr viele Aufgaben gleichzeitig habe, fällt es mir schwer, mich voll auf eine Sache zu konzentrieren.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich mache mir hin und wieder Sorgen um meine Zukunft.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich habe keine hohen Erwartungen an das Verhalten der meisten Menschen.",
+        "value": 1,
+        "relevancy": 6,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich fühle mich oft gestresst.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Musst du oft die Verantwortung für die Arbeit anderer übernehmen?",
+        "value": -1,
+        "relevancy": 6,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich schiebe Dinge oft vor mir her.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich habe das Gefühl, die Zeit vergeht immer schneller.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Oft wünsche ich mir, das Leben hätte mir bessere Karten ausgeteilt.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich liebe es, möglichst oft im Mittelpunkt zu stehen.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Alleine bin ich oft kompetenter als im Team.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich sitze Dinge häufig aus, bevor ich proaktiv handle.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich ärgere mich, dass Leute meine Erwartungen nicht erfüllen.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich schiebe Entscheidungen oft auf die lange Bank.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Häufig nehme ich meine Entscheidungen wieder zurück.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Mir ist wichtig, mich anderen überlegen zu fühlen.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich wünschte, im Bereich Liebe / Dating würde ich mehr schöne Momente erleben.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Der Bereich Liebe / Dating kostet mich viel Energie.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Ich vergesse oft Themen, weil mir alles zu viel wird.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Kompetenz"
+    },
+    {
+        "text": "Inwieweit würdest du dieser Aussage zustimmen: Das Leben passiert, während du andere Pläne machst?",
+        "value": 0,
+        "relevancy": 5,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Gedanken über den Sinn des Lebens sind für mich oft vergeudete Zeit",
+        "value": -1,
+        "relevancy": 5,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Es ist für mich nicht nachvollziehbar, warum Leute auf teure Seminare gehen.",
+        "value": -1,
+        "relevancy": 5,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich mache mir kaum Gedanken darüber, wo die Menschheit in 100 Jahren steht.",
+        "value": -1,
+        "relevancy": 5,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Dass manche Menschen erfolgreicher sind als andere ist unfair.",
+        "value": -1,
+        "relevancy": 5,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Meditieren habe ich bis jetzt noch nicht gebraucht.",
+        "value": -1,
+        "relevancy": 5,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Wenn du meditierst, fällt es dir leicht, manchmal nichts zu denken.",
+        "value": -1,
+        "relevancy": 5,
+        "set": "BewussteKompetenz"
+    },
+    {
+        "text": "Ich weiß gar nicht, warum ich diesen Test überhaupt mache",
+        "value": -1,
+        "relevancy": 4,
+        "set": "BewussteInkompetenz"
+    },
+    {
+        "text": "Ich fühle mich wohl mit meinem derzeitigen Leben.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich rate oft anderen davon ab, neue Dinge auszuprobieren, weil ich die möglichen negativen Folgen sehe.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Politik und gesellschaftliche Themen interessieren mich wenig, weil ich glaube, dass ich keinen Einfluss darauf habe.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich habe klare Meinungen zu politischen Fragen und diskutiere sie auch gerne.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich fühle mich in hierarchischen Strukturen sehr wohl.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich vergleiche meine Erfolge oft mit denen anderer.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich empfinde es als wichtig, mein Leben in vollen Zügen zu genießen, ohne mir zu viele Sorgen über die Zukunft zu machen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich habe keinen sehr großen sozialen Kreis.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Wenn jemand in meinem Umfeld Erfolg hat, freue ich mich aufrichtig für ihn.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Resident"
+    },
+    {
+        "text": "Ehrlich gesagt bin ich hin und wieder neidisch auf die Erfolge anderer.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich hatte schon oft das Gefühl, dass es andere leichter haben im Leben als ich.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Es bereitet mir manchmal Freude zu sehen, wenn Leute von ihrem hohen Ross geholt werden.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Meine Beziehungen sind in der Regel sehr harmonisch und wenig von Konflikten geprägt.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Eine mögliche Beförderung ist ein starker Motivationskick für mich.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich habe ein feines Gespür dafür, ob jemand in der Hierarchie unter oder über mir steht.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Politische Nachrichten interessieren mich.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Negative Nachrichten beeinflussen oft meine Sicht auf die Welt.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich kann mich sehr an den einfachen Dingen im Leben erfreuen.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich lege großen Wert auf Statussymbole wie Autos, Handys oder Markenklamotten.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich mag es, wenn es in der Arbeit klare Strukturen und Hierarchien gibt.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich denke manchmal, dass das Leben anderen gegenüber großzügiger ist als mir.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich finde es wichtig, dass sich andere an Regeln halten.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Es braucht nicht viel, damit ich glücklich bin.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich habe oft das Gefühl, meine Meinung ist fundierter als die Meinung anderer.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich erlebe oft Ungerechtigkeiten.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich finde einen Beamtenstatus sehr erstrebenswert.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich hatte noch nie so große Ziele in meinem Leben.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich rede gern darüber, wie sportlich, attraktiv oder erfolgreich ich früher war.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich weiß, dass ich mit mehr Anstrengung mehr hätte erreichen können.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Status ist mir nicht besonders wichtig.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich befinde mich oft im Konkurrenzkampf.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Resident"
+    },
+    {
+        "text": "Ich habe meine Ziele schon sehr strukturiert aufgeschrieben.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe mir viele Gedanken über meine Gewohnheiten gemacht und setze diese um.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "In den letzten zwei Jahren durfte ich mehrere Menschen kennenlernen, die auf dem gleichen Weg oder weiter sind als ich.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich investiere regelmäßig Zeit und Energie in Fortbildung.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich weiß, dass Fortbildung auch künftig ein fester Bestandteil meines Lebens sein wird.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich probiere viele Dinge im Bereich Persönlichkeitsentwicklung aus.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe schon ein paar Seminare besucht, die mich begeistert haben.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe im letzten Jahr viele bahnbrechende Erkenntnisse für mein Leben aus Büchern oder Videos gesammelt.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe eine brennende Motivation, mich weiterzuentwickeln.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe ein Gefühl dafür, wieviel Potenzial in mir steckt.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich weiß nicht genau, wie ich meine Ziele erreichen kann.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich fühle mich oft überfordert, weil es so viel zu wissen gibt.",
+        "value": -1,
+        "relevancy": 8,
+        "set": "Reacher"
+    },
+    {
+        "text": "Mein Bekanntenkreis hat sich in den letzten Jahren mit mir ziemlich mitverändert.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe in den letzten zwei Jahren sehr viele wertvolle Erkenntnisse sammeln dürfen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich verbringe viel Zeit damit, nach Informationen über Persönlichkeitsentwicklung zu suchen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe in letzter Zeit mehrere gute Ratschläge von Ratgebern umgesetzt.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Reacher"
+    },
+    {
+        "text": "Mich nerven Menschen, die nichts in ihrem Leben erreichen wollen.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich probiere aktuell viel aus.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe schon eine Zielplanung, auch wenn ich noch nicht so viele Ziele erreiche.",
+        "value": 1,
+        "relevancy": 8,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe nicht so viele Menschen in meinem Umfeld, die sich auch so weiterentwickeln wollen wie ich.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Reacher"
+    },
+    {
+        "text": "Manchmal zweifle ich daran, ob ich mein Leben wirklich grundlegend verändern kann.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich will mehr vom Leben, weiß allerdings noch nicht so richtig, wohin.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich werde immer wieder von Versagensängsten oder Minderwertigkeitskomplexen geplagt.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Reacher"
+    },
+    {
+        "text": "Die Meinung anderer verunsichert mich oft.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich bin oft frustriert mit meiner derzeitigen Situation.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe schon einige Ideen, komme aber noch nicht so richtig in die Umsetzung.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich habe oft das Gefühl, dass ich mehr tun könnte, wenn ich besser wüsste, wie.",
+        "value": -1,
+        "relevancy": 7,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich zweifle daran, ob es sich lohnt, in Persönlichkeitsentwicklung zu investieren.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich weiß noch nicht genau, wie mein künftiges Leben aussehen wird.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich bin unzufrieden mit meiner Arbeit, weiß aber auch noch nicht, was ich sonst machen soll.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Reacher"
+    },
+    {
+        "text": "Ich fühle mich mit meinem Willen, mein Leben zu verändern, oft alleine.",
+        "value": -1,
+        "relevancy": 6,
+        "set": "Reacher"
+    },
+    {
+        "text": "hast du das Gefühl, das was du unterminnst ist eher dazu geeignet dein Potential zu nutzen oder diene Herausforderungen zu lösen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "was würdest du sagen, wie klar sind deine Lebensvision, Ziele und Pläne ausformuliert und niedergeschrieben?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "bist du mehr in der Phase des erntens deiner Bemühungen oder überwiegt noch das säen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "wie gut ist dein Leben bereits in allen Lebensbereichen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "hast du viel mehr erreicht, als du vor 10 Jahren gedacht hättest?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "bist du am Höhepunkt deines Lebens?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "wie sehr hast du eine Balance zwischen deinen Lebensbereichen bereits heute erreicht?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "war deine Fitness und Gesundheit mal wesentlich besser?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "schleppst du Herausforderungen meist lange mit dir rum?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "wir siehst du Herausforderungen? Mehr als lästig oder mehr als Chance?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "wie selbstbestimmt ist deine Zeit und Energieeinsatz?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "hast du das Gefühl, mehr den eigenen ode rmehr fremden Zielen zu dienen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "kannst du leicht auf Dinge verzichten um dich deinen langfristigen Zielen näher zu bringen?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "bedeutet diszipliniert zu sein für dich mehr Schmerz oder mehr Freude?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "hast du das Gefühl noch viele unerkannte innere Themen zu haben?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "hattest du in den letzten 2 Jahren längere Phasen der Stagnation?",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Es kostet mich noch viel Willenstärke, meine guten Gewohnheiten umzusetzen.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Ich muss mich oft gegenüber anderen für meine Veränderung rechtfertigen.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Ich konnte in den letzten 2 Jahren große finanzielle Erfolge feiern.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Ich mache mir hin und wieder Sorgen über Probleme, die in der Zukunft auftreten könnten.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Ich finde, die Menschen in meinem Umfeld passen sehr gut zu mir und meinen Zielen.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Es gibt aktuell in meinem Leben eine Situation, die mich konstant viel Energie kostet.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Meine Entwicklung ist eher davon motiviert, \"weg von\" etwas zu wollen als \"hin zu\".",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Ich bin zutiefst überzeugt davon, meine Lebensziele und -Vision zu erreichen.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Es wäre für mich in Ordnung, auf meiner jetzigen Persönlichkeitsstufe stehen zu bleiben.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Der Bereich Dating / Beziehung läuft genau so, wie ich es mir vorstelle.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Meine äußeren Erfolge spiegeln meine starke innere Entwicklung noch nicht wirklich wieder.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Ich bin mit meiner aktuellen Arbeit rundum zufrieden.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Ich bin gut darin \"Tests des Lebens\" zu erkennen und zu meistern.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    },
+    {
+        "text": "Manche derzeitigen Eigenschaften an mir möchte ich ungern akzeptieren.",
+        "value": 1,
+        "relevancy": 9,
+        "set": "Individual"
+    }
+]

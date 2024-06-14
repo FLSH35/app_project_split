@@ -1,0 +1,494 @@
+[
+  {
+    "text": "Ich treffe selbstbestimmt meine Entscheidungen",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Bist du der Meinung, du hast einen starken Einfluss auf mein Leben",
+    "value": "+1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Wenn etwas in deinem Leben nicht gut läuft, sind dafür tendenziell andere oder du selbst verantwortlich?",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Würde es dir leicht fallen, deine drei größten Schwächen zu benennen?",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich hinterfrage mich selbst oft kritisch.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Niederschläge in meinem Leben haben sich oft als Chancen erwiesen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich habe den starken Drang, mein Leben zu verändern.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Wenn ich ehrlich bin, folge ich meistens der Meinung der Masse (Schwarmintelligenz).",
+    "value": "-1",
+    "relevancy": 6,
+    "set": "FKL"
+  },
+  {
+    "text": "Mein Umfeld wundert sich oft darüber, dass ich mich verändern möchte.",
+    "value": "+1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Wenn mein Leben sich in den nächsten 10 Jahren kaum verändern würde, wäre ich glücklich.",
+    "value": "-1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Mir entgehen häufig Chancen.",
+    "value": "-1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich habe das nagende Gefühl, ich sollte mehr Gas geben im Leben.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich bin oft Unzufriedenheit mit mir selbst.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich investiere regelmäßig Zeit und Geld, um an mir zu arbeiten.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich mache mir häufig Gedanken über mich und mein Leben.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Im Allgemeinen lerne ich sehr schnell aus Fehlern.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich verändere mich nur Ungern",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich mag Veränderungen nicht so gern.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich setze mir oft Ziele, die ich nicht erreiche.",
+    "value": "-1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Es ist mir unangenehm, aus der Masse herauszustechen",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Man sollte damit zufrieden sein, was das Leben einem gibt.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich habe starkes Vertrauen in Institutionen.",
+    "value": "-1",
+    "relevancy": 6,
+    "set": "FKL"
+  },
+  {
+    "text": "Es fällt mir leicht, kurzfristig auf etwas zu verzichten, um langfristig mehr zu bekommen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Gedanken über den Sinn des Lebens sind für mich oft vergeudete Zeit",
+    "value": "-1",
+    "relevancy": 5,
+    "set": "FKL"
+  },
+  {
+    "text": "Es ist für mich nicht nachvollziehbar, warum Leute auf teure Seminare gehen.",
+    "value": "-1",
+    "relevancy": 5,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich bin nicht sehr weit entwickelt im Vergleich zu dem Menschen, der ich gerne wäre.",
+    "value": "-1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich mache mir kaum Gedanken darüber, wo die Menschheit in 100 Jahren steht.",
+    "value": "-1",
+    "relevancy": 5,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich weiß gar nicht, warum ich diesen Test überhaupt mache",
+    "value": "-1",
+    "relevancy": 4,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich merke oft, wieviel ungenutztes Potenzial in mir steckt.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich sehe Dinge oft sehr schwarz weiß",
+    "value": "-1",
+    "relevancy": 6,
+    "set": "FKL"
+  },
+  {
+    "text": "Oft mache ich mir Gedanken über Lösungen zu meinen aktuellen Herausforderungen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Mit meinem aktuellen Lebensstand bin ich vollkommen zufrieden.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich sollte Maßnahmen ergreifen, um meine Persönlichkeit weiterzuentwickeln.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich bin immer auf der Suche nach neuen Wegen mich zu verbessern.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Es gibt viele Gründe, wie Arbeit, Familie oder Ungerechtigkeiten, die dich hindern im Leben weiter zu kommen.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Meine Eltern/ Freunde wissen was das Beste für mich ist.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich muss neue Menschen kennenlernen, die mir in meinem Leben weiterhelfen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Dass manche Menschen erfolgreicher sind als andere ist unfair.",
+    "value": "-1",
+    "relevancy": 5,
+    "set": "FKL"
+  },
+  {
+    "text": "Meditieren habe ich bis jetzt noch nicht gebraucht.",
+    "value": "-1",
+    "relevancy": 5,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich bin überrascht, dass mich manche Menschen nicht mögen.",
+    "value": "-1",
+    "relevancy": 6,
+    "set": "FKL"
+  },
+  {
+    "text": "In einigen Situation verspüre ich Angst oder Unsicherheit.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich will den Einfluss von negativen Menschen in meinem Umfeld vermindern.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich weiß, dass ich Dinge optimieren kann um meine Zeit und meine Finanzen besser in den Griff zu bekommen.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich weiß, wie ich meine Entscheidungen optimieren kann in der Zukunft, um Fehler zu minimieren.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "FKL"
+  },
+  {
+    "text": "Ich weiß, welche Lebensmittel ich vermeiden sollte um mehr Lebensenergie zu bekommen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "FKL"
+  },
+  {
+    "text": "Wenn du meditierst, fällt es dir leicht, manchmal nichts zu denken.",
+    "value": "-1",
+    "relevancy": 5,
+    "set": "BK"
+  },
+  {
+    "text": "Wenn ich sehr viele Aufgaben gleichzeitig habe, fällt es mir schwer, mich voll auf eine Sache zu konzentrieren.",
+    "value": "-1",
+    "relevancy": 6,
+    "set": "BK"
+  },
+  {
+    "text": "Ich mache mir hin und wieder Sorgen um meine Zukunft.",
+    "value": "-1",
+    "relevancy": 6,
+    "set": "BK"
+  },
+  {
+    "text": "Ich stehe häufig unter Strom.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "BK"
+  },
+  {
+    "text": "Ich bin fast durchgehend am „hustlen“.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "BK"
+  },
+  {
+    "text": "Die meisten Sachen sind ehrlich gesagt besser erledigt, wenn ich sie selbst mache.",
+    "value": "+1",
+    "relevancy": 7,
+    "set": "BK"
+  },
+  {
+    "text": "Ich habe keine hohen Erwartungen an das Verhalten der meisten Menschen.",
+    "value": "+1",
+    "relevancy": 6,
+    "set": "BK"
+  },
+  {
+    "text": "Ich kann selbst aus der größten Niederlage noch Vorteile ziehen.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "BK"
+  },
+  {
+    "text": "Ich bin völlig selbstbestimmt über meine Zeit.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "BK"
+  },
+  {
+    "text": "Ich glaube, zu wahrem Erfolg gehört es, anderen zu helfen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Ich bin finanziell unabhängig und müsste nicht mehr wegen Geld arbeiten.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "BK"
+  },
+  {
+    "text": "Obwohl ich älter werde, wird mein Leben immer besser.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Menschen suchen aktiv meinen Rat.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Ich habe einen leichten Zugang zu allen Menschen, egal ob Müllmann oder Promi.",
+    "value": "+1",
+    "relevancy": 7,
+    "set": "BK"
+  },
+  {
+    "text": "Andere Menschen oder negative Ereignisse können mich aus der Ruhe bringen.",
+    "value": "-1",
+    "relevancy": 7,
+    "set": "BK"
+  },
+  {
+    "text": "Ich fühle mich oft gestresst.",
+    "value": "-1",
+    "relevancy": 6,
+    "set": "BK"
+  },
+  {
+    "text": "Ich weiß ganz genau, was ich will.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "BK"
+  },
+  {
+    "text": "Ich bin Herr meiner Emotionen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Mein Leben ist so organisiert, dass ich automatisch viele Highlights habe.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "BK"
+  },
+  {
+    "text": "Mein Leben ist meiner Lebensvision zum Greifen nahe.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "BK"
+  },
+  {
+    "text": "Ich lebe in Freiheit und Selbstbestimmtheit.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "BK"
+  },
+  {
+    "text": "Meine inneren Themen habe ich weitestgehend überwunden, sodass sie mich heute kaum noch berühren.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "BK"
+  },
+  {
+    "text": "Ich bin mit meinem Traumpartner zusammen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Ich bin sehr versiert im Umgang mit dem anderen Geschlecht.",
+    "value": "+1",
+    "relevancy": 7,
+    "set": "BK"
+  },
+  {
+    "text": "Ich bin aktuell in der besten Form meines Lebens.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Mein Energielevel war noch nie höher.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Mein Leben ist der Wahnsinn.",
+    "value": "+1",
+    "relevancy": 7,
+    "set": "BK"
+  },
+  {
+    "text": "Ich habe bereits viel mehr erreicht, als ich mir hätte träumen lassen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Ich habe ein nahezu riesiges Netzwerk.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Ich habe das Gefühl, angekommen zu sein.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Ich lebe an dem Ort und in dem Haus, in dem ich immer leben wollte.",
+    "value": "+1",
+    "relevancy": 9,
+    "set": "BK"
+  },
+  {
+    "text": "Oft empfinde ich tiefes Glück im aktuellen Moment.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Es fällt mir leicht, mit neuen Beziehungen eine vertrauensvolle Verbindung aufzubauen.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Rückschläge sind für mich ein Indikator für eine wichtige positive Lebenserfahrung.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Um erfolgreicher zu werden, muss ich aktiv neue Gewohnheiten etablieren.",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  },
+  {
+    "text": "Musst du oft die Verantwortung für die Arbeit anderer übernehmen?",
+    "value": "-1",
+    "relevancy": 6,
+    "set": "BK"
+  },
+  {
+    "text": "Brauchst du noch bewusste Maßnahmen, um deine Lebensvision zu erreichen?",
+    "value": "+1",
+    "relevancy": 8,
+    "set": "BK"
+  }
+]
