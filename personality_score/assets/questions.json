@@ -1597,18 +1597,18 @@
     },
     {
         "text": "war deine Fitness und Gesundheit mal wesentlich besser?",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     },
     {
         "text": "schleppst du Herausforderungen meist lange mit dir rum?",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     },
     {
-        "text": "wir siehst du Herausforderungen? Mehr als lästig oder mehr als Chance?",
+        "text": "wie siehst du Herausforderungen? Mehr als lästig oder mehr als Chance?",
         "value": 1,
         "relevancy": 9,
         "set": "Individual"
@@ -1620,7 +1620,7 @@
         "set": "Individual"
     },
     {
-        "text": "hast du das Gefühl, mehr den eigenen ode rmehr fremden Zielen zu dienen?",
+        "text": "hast du das Gefühl, mehr den eigenen oder mehr fremden Zielen zu dienen?",
         "value": 1,
         "relevancy": 9,
         "set": "Individual"
@@ -1639,7 +1639,7 @@
     },
     {
         "text": "hast du das Gefühl noch viele unerkannte innere Themen zu haben?",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     },
@@ -1651,13 +1651,13 @@
     },
     {
         "text": "Es kostet mich noch viel Willenstärke, meine guten Gewohnheiten umzusetzen.",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     },
     {
         "text": "Ich muss mich oft gegenüber anderen für meine Veränderung rechtfertigen.",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     },
@@ -1669,7 +1669,7 @@
     },
     {
         "text": "Ich mache mir hin und wieder Sorgen über Probleme, die in der Zukunft auftreten könnten.",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     },
@@ -1681,13 +1681,13 @@
     },
     {
         "text": "Es gibt aktuell in meinem Leben eine Situation, die mich konstant viel Energie kostet.",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     },
     {
         "text": "Meine Entwicklung ist eher davon motiviert, \"weg von\" etwas zu wollen als \"hin zu\".",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     },
@@ -1711,7 +1711,7 @@
     },
     {
         "text": "Meine äußeren Erfolge spiegeln meine starke innere Entwicklung noch nicht wirklich wieder.",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     },
@@ -1729,7 +1729,7 @@
     },
     {
         "text": "Manche derzeitigen Eigenschaften an mir möchte ich ungern akzeptieren.",
-        "value": 1,
+        "value": -1,
         "relevancy": 9,
         "set": "Individual"
     }

@@ -210,15 +210,16 @@ class QuestionnaireModel with ChangeNotifier {
 
     double possibleScore = _questions.length * 3; // Calculate possible score for the final set
 
-    if (_questions.first.set == 'Traveller') {
+    if (_questions.first.set == 'Individual') {
       if (_totalScore > (possibleScore * 0.5)) {
-        finalCharacter = "Traveller.webp";
-        finalCharacterDescription = """Als ständiger Abenteurer strebt der Traveller nach neuen Erfahrungen und persönlichem Wachstum, stets begleitet von Neugier und Offenheit.
-Er inspiriert durch seine Entschlossenheit, das Leben in vollen Zügen zu genießen und sich kontinuierlich weiterzuentwickeln.""";
-      } else {
         finalCharacter = "Individual.webp";
         finalCharacterDescription = """Der Individual strebt nach Klarheit und Verwirklichung seiner Ziele, beeindruckt durch Selbstbewusstsein und klare Entscheidungen.
 Er inspiriert andere durch seine Entschlossenheit und positive Ausstrahlung.""";
+      } else {
+        finalCharacter = "Traveller.webp";
+        finalCharacterDescription = """Als ständiger Abenteurer strebt der Traveller nach neuen Erfahrungen und persönlichem Wachstum, stets begleitet von Neugier und Offenheit.
+Er inspiriert durch seine Entschlossenheit, das Leben in vollen Zügen zu genießen und sich kontinuierlich weiterzuentwickeln.""";
+
       }
     } else if (_questions.first.set == 'Reacher') {
       if (_totalScore > (possibleScore * 0.5)) {
