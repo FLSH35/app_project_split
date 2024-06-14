@@ -29,9 +29,9 @@ class QuestionnaireModel with ChangeNotifier {
   final QuestionService _questionService = QuestionService();
   List<Question> _questions = [];
   int _currentQuestionIndex = 0;
-  int _totalScore = 0;
+  double _totalScore = 0; // Changed to double for more precision
   int _currentPage = 0;
-  List<int?> _answers = [];
+  List<double?> _answers = []; // Changed to list of doubles
   String? _personalityType;
   int _progress = 0;
   bool _isFirstTestCompleted = false;
@@ -39,9 +39,9 @@ class QuestionnaireModel with ChangeNotifier {
 
   List<Question> get questions => _questions;
   int get currentQuestionIndex => _currentQuestionIndex;
-  int get totalScore => _totalScore;
+  double get totalScore => _totalScore;
   int get currentPage => _currentPage;
-  List<int?> get answers => _answers;
+  List<double?> get answers => _answers;
   String? get personalityType => _personalityType;
   int get progress => _progress;
   bool get isFirstTestCompleted => _isFirstTestCompleted;
@@ -49,11 +49,11 @@ class QuestionnaireModel with ChangeNotifier {
 
   Future<void> loadQuestions(String set) async {
     _questions = await _questionService.loadQuestions(set);
-    _answers = List<int?>.filled(_questions.length, null);
+    _answers = List<double?>.filled(_questions.length, null);
     notifyListeners();
   }
 
-  void answerQuestion(int index, int value) {
+  void answerQuestion(int index, double value) {
     _answers[index] = value;
     _totalScore = _answers.where((a) => a != null).fold(0, (sum, a) => sum + a!);
     notifyListeners();
@@ -76,7 +76,7 @@ class QuestionnaireModel with ChangeNotifier {
     _currentQuestionIndex = 0;
     _currentPage = 0;
     _progress = 0;
-    _answers = List<int?>.filled(_questions.length, null);
+    _answers = List<double?>.filled(_questions.length, null);
     _personalityType = null;
     _isFirstTestCompleted = false;
     _isSecondTestCompleted = false;
@@ -94,9 +94,9 @@ class QuestionnaireModel with ChangeNotifier {
     List<String> teamCharacters;
     String nextSet;
 
-    int possibleScore = _questions.length * 3; // Calculate possible score for the current set
+    double possibleScore = _questions.length * 3; // Calculate possible score for the current set
 
-    if (_totalScore > (possibleScore * 0.5)) { // Check if total score is more than 50% of possible score
+    if (_totalScore > (possibleScore * 0.5)) {
       message = 'Im Bereich der Kompetenz hast du folgende Punktzahl: $_totalScore\n\n Jetzt kennst du dein Team. Wenn du dein wahres Ich kennenlernen willst, fülle noch die nächsten Fragen aus!';
       teamCharacters = ["Life Artist.webp", "Individual.webp", "Adventurer.webp", "Traveller.webp"];
       nextSet = 'BewussteKompetenz';
@@ -128,7 +128,7 @@ class QuestionnaireModel with ChangeNotifier {
                 loadQuestions(nextSet); // Load next set of questions
                 _currentPage = 0;
                 _totalScore = 0;
-                _answers = List<int?>.filled(_questions.length, null);
+                _answers = List<double?>.filled(_questions.length, null);
                 notifyListeners();
                 Navigator.of(context).pop();
               },
@@ -146,25 +146,25 @@ class QuestionnaireModel with ChangeNotifier {
     List<String> teamCharacters;
     String nextSet;
 
-    int possibleScore = _questions.length * 3; // Calculate possible score for the current set
+    double possibleScore = _questions.length * 3; // Calculate possible score for the current set
 
-    if (_totalScore > (possibleScore * 0.5)) { // Check if total score is more than 50% of possible score
+    if (_totalScore > (possibleScore * 0.5)) {
       if (_questions.first.set == 'BewussteKompetenz') {
-        message = 'Your total score is: $_totalScore\n\n Bist du ein Life Artist oder ein Adventurer? Das ist ein riesiger Unteschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
+        message = 'Your total score is: $_totalScore\n\n Bist du ein Life Artist oder ein Adventurer? Das ist ein riesiger Unterschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
         teamCharacters = ["Life Artist.webp", "Adventurer.webp"];
         nextSet = 'LifeArtist';
       } else {
-        message = 'Your total score is: $_totalScore\n\n Bist du ein Reacher oder ein Explorer? Das ist ein riesiger Unteschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
+        message = 'Your total score is: $_totalScore\n\n Bist du ein Reacher oder ein Explorer? Das ist ein riesiger Unterschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
         teamCharacters = ["Reacher.webp", "Explorer.webp"];
         nextSet = 'Reacher';
       }
     } else {
       if (_questions.first.set == 'BewussteKompetenz') {
-        message = 'Your total score is: $_totalScore\n\n Bist du ein Individual oder ein Traveller? Das ist ein riesiger Unteschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
+        message = 'Your total score is: $_totalScore\n\n Bist du ein Individual oder ein Traveller? Das ist ein riesiger Unterschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
         teamCharacters = ["Individual.webp", "Traveller.webp"];
         nextSet = 'Individual';
       } else {
-        message = 'Your total score is: $_totalScore\n\n Bist du ein Resident oder ein Anonymous? Das ist ein riesiger Unteschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
+        message = 'Your total score is: $_totalScore\n\n Bist du ein Resident oder ein Anonymous? Das ist ein riesiger Unterschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
         teamCharacters = ["Resident.webp", "Anonymous.webp"];
         nextSet = 'Resident';
       }
@@ -192,7 +192,7 @@ class QuestionnaireModel with ChangeNotifier {
                 loadQuestions(nextSet); // Load final set of questions
                 _currentPage = 0;
                 _totalScore = 0;
-                _answers = List<int?>.filled(_questions.length, null);
+                _answers = List<double?>.filled(_questions.length, null);
                 notifyListeners();
                 Navigator.of(context).pop();
               },
@@ -208,7 +208,7 @@ class QuestionnaireModel with ChangeNotifier {
     String finalCharacter;
     String finalCharacterDescription;
 
-    int possibleScore = _questions.length * 3; // Calculate possible score for the final set
+    double possibleScore = _questions.length * 3; // Calculate possible score for the final set
 
     if (_questions.first.set == 'Traveller') {
       if (_totalScore > (possibleScore * 0.5)) {
@@ -220,8 +220,7 @@ Er inspiriert durch seine Entschlossenheit, das Leben in vollen Zügen zu genie�
         finalCharacterDescription = """Der Individual strebt nach Klarheit und Verwirklichung seiner Ziele, beeindruckt durch Selbstbewusstsein und klare Entscheidungen.
 Er inspiriert andere durch seine Entschlossenheit und positive Ausstrahlung.""";
       }
-      }
-    else if (_questions.first.set == 'Reacher') {
+    } else if (_questions.first.set == 'Reacher') {
       if (_totalScore > (possibleScore * 0.5)) {
         finalCharacter = "Reacher.webp";
         finalCharacterDescription = """Als Initiator der Veränderung strebt der Reacher nach Wissen und persönlicher Entwicklung, trotz der Herausforderungen und Unsicherheiten.
@@ -231,8 +230,7 @@ Seine Motivation und innere Stärke führen ihn auf den Weg des persönlichen Wa
         finalCharacterDescription = """Immer offen für neue Wege der Entwicklung, erforscht der Explorer das Unbekannte und gestaltet sein Leben aktiv.
 Seine Offenheit und Entschlossenheit führen ihn zu neuen Ideen und persönlichem Wachstum.""";
       }
-    }
-    else if  (_questions.first.set == 'Resident') {
+    } else if (_questions.first.set == 'Resident') {
       if (_totalScore < (possibleScore * 0.5)) {
         finalCharacter = "Resident.webp";
         finalCharacterDescription = """Im ständigen Kampf mit inneren Dämonen sucht der Resident nach persönlichem Wachstum und Klarheit, unterstützt andere trotz eigener Herausforderungen.
@@ -242,8 +240,7 @@ Seine Erfahrungen und Wissen bieten Orientierung, während er nach Selbstvertrau
         finalCharacterDescription = """Der Anonymous operiert im Verborgenen, mit einem tiefen Weitblick und unaufhaltsamer Ruhe, beeinflusst er subtil aus dem Schatten.
 Sein unsichtbares Netzwerk und seine Anpassungsfähigkeit machen ihn zum verlässlichen Berater derjenigen im Rampenlicht.""";
       }
-    }
-    else {
+    } else {
       if (_totalScore > (possibleScore * 0.5)) {
         finalCharacter = "Life Artist.webp";
         finalCharacterDescription = """Der Life Artist lebt seine Vision des Lebens mit Dankbarkeit und Energie, verwandelt Schwierigkeiten in bedeutungsvolle Erlebnisse.
@@ -253,7 +250,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
         finalCharacterDescription = """Der Adventurer meistert das Leben mit Leichtigkeit und fasziniert durch seine Ausstrahlung und Selbstsicherheit, ein Magnet für Erfolg und Menschen.
 Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannender Herausforderungen.""";
       }
-      }
+    }
 
     TextEditingController emailController = TextEditingController();
 
@@ -301,7 +298,6 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
       },
     );
   }
-
 
   void setPersonalityType(String type) {
     _personalityType = type;
@@ -351,22 +347,15 @@ class QuestionnaireScreen extends StatelessWidget {
                     int questionIndex = start + index;
                     return ListTile(
                       title: Center(child: Text(question.text)),
-                      subtitle: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(4, (i) {
-                          return Expanded(
-                            child: RadioListTile<int>(
-                              value: i,
-                              groupValue: model.answers[questionIndex],
-                              onChanged: (val) {
-                                if (val != null) {
-                                  model.answerQuestion(questionIndex, val);
-                                }
-                              },
-                              title: Center(child: Text(i.toString())), // Display 0-3
-                            ),
-                          );
-                        }),
+                      subtitle: Slider(
+                        value: model.answers[questionIndex] ?? 0.0,
+                        onChanged: (val) {
+                          model.answerQuestion(questionIndex, val);
+                        },
+                        min: 0,
+                        max: 100,
+                        divisions: 100,
+                        label: model.answers[questionIndex]?.toStringAsFixed(0),
                       ),
                     );
                   },
@@ -443,7 +432,4 @@ class QuestionnaireScreen extends StatelessWidget {
       },
     );
   }
-
-
-
 }
