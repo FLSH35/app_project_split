@@ -52,7 +52,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             elevation: 0, // No shadow effect
           ),
           onPressed: () {
-
+            _handleTakeTest(context);
             (context); // Call the new method here
           },
           child: Text(
