@@ -25,7 +25,6 @@ class QuestionnaireScreen extends StatelessWidget {
           ),
           Consumer2<AuthService, QuestionnaireModel>(
             builder: (context, authService, model, child) {
-
               // If the user is not authenticated, navigate to the sign-in screen
               if (authService.user == null) {
                 Future.microtask(() {
@@ -91,6 +90,8 @@ class QuestionnaireScreen extends StatelessWidget {
                       fontFamily: 'Roboto',
                     ),
                     textAlign: TextAlign.center,
+                    maxLines: null, // Allow multiple lines
+                    softWrap: true,  // Wrap text automatically
                   ),
                 ],
               ),
@@ -112,10 +113,14 @@ class QuestionnaireScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        question.text,
-                        style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 22),
-                        textAlign: TextAlign.center,
+                      Flexible(
+                        child: Text(
+                          question.text,
+                          style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 22),
+                          textAlign: TextAlign.center,
+                          maxLines: 3, // Limit to a maximum of 3 lines
+                          overflow: TextOverflow.ellipsis, // Show ellipsis if the text is too long
+                        ),
                       ),
                       SizedBox(height: 8.0), // Reduced height
                       Slider(

@@ -39,54 +39,32 @@ class _HomeScreenState extends State<HomeScreen> {
           SingleChildScrollView(
             child: Column(
               children: [
-                Container(
-                  height: screenHeight,
-                  width: screenWidth,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                  ),
-                  child: Stack(
-                    children: [
-                      // SVG background for the personality types section
-                      Positioned.fill(
-                        child: SvgPicture.asset(
-                          'assets/left_background_personality_type.svg',
-                          fit: BoxFit.fitWidth,
-                          width: screenWidth * 0.5, // customize size here with width relative to screen width
-                        ),
+                SizedBox(height: 350),
+                Stack(
+                  children: [
+                    Positioned.fill(
+                      child: SvgPicture.asset(
+                        'assets/left_background_personality_type.svg',
+                        fit: BoxFit.fitWidth,
+                        width: screenWidth * 0.5, // customize size here with width relative to screen width
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(0.0),
-                            child: Text(
-                              "It’s so incredible to finally be understood.",
-                              textAlign: TextAlign.center,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              "Curious how accurate we are about you?",
                               style: TextStyle(
-                                fontSize: screenHeight * 0.056, // 30% smaller
+                                fontSize: screenHeight * 0.042, // 30% smaller
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                                 fontFamily: 'Roboto',
                               ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text(
-                              "Only 10 minutes to get a 'freakishly accurate' description of who you are and why you do things the way you do.",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: screenHeight * 0.021, // 30% smaller
-                                color: Colors.black,
-                                fontFamily: 'Roboto',
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 30),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: ElevatedButton(
+                            SizedBox(height: 50),
+                            ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Color(0xFFCB9935),
                                 padding: EdgeInsets.symmetric(
@@ -106,12 +84,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 350),
                 Stack(

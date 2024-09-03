@@ -27,8 +27,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           _buildNavButton(context, 'PERSONALITY SCORE', '/home'),
           SizedBox(width: 20),
           _buildNavButton(context, 'Personality Types', '/personality_types'),
-          SizedBox(width: 20),
-          _buildNavButton(context, 'Team Description', '/team_description'), // Add this route to your MaterialApp
         ],
       ),
       actions: [
