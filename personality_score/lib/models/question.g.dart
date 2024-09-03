@@ -2,18 +2,20 @@
 
 part of 'question.dart';
 
-Question _$QuestionFromJson(Map<String, dynamic> json) {
-  return Question(
-    text: json['text'] as String,
-    value: json['value'] as int,
-    relevancy: json['relevancy'] as int,
-    set: json['set'] as String,
-  );
-}
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Question _$QuestionFromJson(Map<String, dynamic> json) => Question(
+      text: json['text'] as String,
+      value: (json['value'] as num).toInt(),
+      relevancy: (json['relevancy'] as num).toInt(),
+      set: json['set'] as String,
+    );
 
 Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
-  'text': instance.text,
-  'value': instance.value,
-  'relevancy': instance.relevancy,
-  'set': instance.set,
-};
+      'text': instance.text,
+      'value': instance.value,
+      'relevancy': instance.relevancy,
+      'set': instance.set,
+    };

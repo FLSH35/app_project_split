@@ -1,17 +1,21 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
-import '../models/question.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:personality_score/models/question.dart';
+
 
 class QuestionService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   Future<List<Question>> loadQuestions(String set) async {
-    final String response = await rootBundle.loadString('assets/questions.json');
-    final List<dynamic> data = json.decode(response);
+    final snapshot = await _firestore.collection('questions').where('set', isEqualTo: set).get();
+    return snapshot.docs.map((doc) => Question.fromJson(doc.data() as Map<String, dynamic>)).toList();
+  }
 
-    List<Question> questions = data
-        .where((item) => item['set'] == set)
-        .map((item) => Question.fromJson(item))
-        .toList();
+  Future<void> saveUserData(String userId, Map<String, dynamic> data) async {
+    await _firestore.collection('users').doc(userId).set(data);
+  }
 
-    return questions;
+  Future<Map<String, dynamic>?> loadUserData(String userId) async {
+    final doc = await _firestore.collection('users').doc(userId).get();
+    return doc.exists ? doc.data() : null;
   }
 }
