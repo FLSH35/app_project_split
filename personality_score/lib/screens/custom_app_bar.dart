@@ -44,21 +44,24 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             );
           },
         ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFFCB9935),
-            elevation: 0, // No shadow effect
-          ),
-          onPressed: () {
-            _handleTakeTest(context);
-            (context); // Call the new method here
-          },
-          child: Text(
-            'Take the Test ->',
-            style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+        Padding(
+          padding: const EdgeInsets.only(right: 80.0), // Add padding only on the right side
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFCB9935),
+              elevation: 0, // No shadow effect
+            ),
+            onPressed: () {
+              _handleTakeTest(context);
+            },
+            child: Text(
+              'Take the Test ->',
+              style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+            ),
           ),
         ),
       ],
+
     );
   }
 
