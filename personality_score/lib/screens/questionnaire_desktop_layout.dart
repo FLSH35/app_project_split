@@ -1,30 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:responsive_builder/responsive_builder.dart';
-import '../models/questionaire_model.dart';
-import 'questionnaire_desktop_layout.dart'; // Desktop layout
-import 'mobile_sidebar.dart'; // Mobile sidebar
+import 'package:personality_score/models/questionaire_model.dart';
 import '../auth/auth_service.dart';
 import '../models/question.dart';
+import 'package:lottie/lottie.dart';
+import 'custom_app_bar.dart';
 
-class QuestionnaireScreen extends StatelessWidget {
-  final ScrollController _scrollController = ScrollController();
+class QuestionnaireDesktopLayout extends StatelessWidget {
+  final ScrollController scrollController;
+
+  QuestionnaireDesktopLayout({required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
-    return ScreenTypeLayout(
-      mobile: _buildMobileLayout(context),
-      desktop: QuestionnaireDesktopLayout(
-        scrollController: _scrollController,
-      ), // Desktop layout
-    );
-  }
-
-  // Mobile Layout
-  Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(context), // Add AppBar with a menu button
-      endDrawer: MobileSidebar(), // Mobile sidebar for navigation
+      appBar: CustomAppBar(
+        title: 'Personality Score',
+      ),
       body: Stack(
         children: [
           Positioned.fill(
@@ -55,56 +47,39 @@ class QuestionnaireScreen extends StatelessWidget {
     );
   }
 
-  // Mobile AppBar with a menu button to open the sidebar
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Text('Questionnaire'),
-      backgroundColor: Colors.grey[300], // Light grey for mobile
-      actions: [
-        Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu), // Menu icon to open the sidebar
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // Open the sidebar for mobile
-            },
-          ),
-        ),
-      ],
-      automaticallyImplyLeading: false, // Remove back button for mobile
-    );
-  }
-
-  // Build the questionnaire for mobile layout
   Widget _buildQuestionnaire(BuildContext context, QuestionnaireModel model) {
     int totalSteps = (model.questions.length / 7).ceil();
     int currentStep = model.currentPage;
 
     return SingleChildScrollView(
-      controller: _scrollController,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 40),
-          _buildTestDescription(context),
-          CustomProgressBar(totalSteps: totalSteps, currentStep: currentStep),
-          _buildQuestionsList(context, model),
-          _buildNavigationButtons(context, model),
-          SizedBox(height: 40),
-        ],
+      controller: scrollController,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 80.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 40),
+            _buildTestDescription(context),
+            CustomProgressBar(totalSteps: totalSteps, currentStep: currentStep),
+            _buildQuestionsList(context, model),
+            _buildNavigationButtons(context, model),
+            SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTestDescription(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.0), // No margins for mobile
+      height: MediaQuery.of(context).size.height / 3,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             'Test Description',
             style: TextStyle(
-              fontSize: 22, // Reduced font size
+              fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.black,
               fontFamily: 'Roboto',
@@ -115,7 +90,7 @@ class QuestionnaireScreen extends StatelessWidget {
           Text(
             'This test will help us understand your personality better. Please answer the questions honestly and thoughtfully.',
             style: TextStyle(
-              fontSize: 16, // Reduced font size for mobile
+              fontSize: 20,
               color: Colors.grey,
               fontFamily: 'Roboto',
             ),
@@ -135,8 +110,9 @@ class QuestionnaireScreen extends StatelessWidget {
       children: currentQuestions.map((question) {
         int questionIndex = start + currentQuestions.indexOf(question);
         return Container(
-          margin: EdgeInsets.only(bottom: 40.0), // Increased margin between questions
-          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+          height: MediaQuery.of(context).size.height / 6, // Each question takes 1/6 of the screen height
+          margin: EdgeInsets.only(bottom: 10.0), // Reduced bottom margin
+          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: MediaQuery.of(context).size.width / 8),
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(12.0),
@@ -144,14 +120,16 @@ class QuestionnaireScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                question.text,
-                style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18), // Reduced font size
-                textAlign: TextAlign.center,
-                maxLines: null, // Allow unlimited lines
-                overflow: TextOverflow.visible, // Ensure text isn't cut off
+              Flexible(
+                child: Text(
+                  question.text,
+                  style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 22),
+                  textAlign: TextAlign.center,
+                  maxLines: 3, // Limit to a maximum of 3 lines
+                  overflow: TextOverflow.ellipsis, // Show ellipsis if the text is too long
+                ),
               ),
-              SizedBox(height: 8.0),
+              SizedBox(height: 8.0), // Reduced height
               Slider(
                 value: (model.answers[questionIndex] ?? 0).toDouble(),
                 onChanged: (val) {
@@ -165,7 +143,7 @@ class QuestionnaireScreen extends StatelessWidget {
                 inactiveColor: Colors.grey,
                 thumbColor: Color(0xFFCB9935),
               ),
-              SizedBox(height: 4),
+              SizedBox(height: 4), // Reduced height
               Text(
                 model.answers[questionIndex]?.toString() ?? '0',
                 style: TextStyle(color: Colors.grey[400], fontSize: 16),
@@ -178,8 +156,7 @@ class QuestionnaireScreen extends StatelessWidget {
   }
 
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
-    int start = model.currentPage * 7;
-    int end = start + 7;
+    int end = (model.currentPage + 1) * 7;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -194,7 +171,7 @@ class QuestionnaireScreen extends StatelessWidget {
             onPressed: () => model.prevPage(),
             child: Text(
               'Zurück',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
         if (end < model.questions.length)
@@ -209,10 +186,10 @@ class QuestionnaireScreen extends StatelessWidget {
             },
             child: Text(
               'Weiter',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
-        if (end >= model.questions.length)
+        if (end >= model.questions.length && !model.isFirstTestCompleted)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
@@ -224,7 +201,38 @@ class QuestionnaireScreen extends StatelessWidget {
             },
             child: Text(
               'Fertigstellen',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+            ),
+          ),
+        if (end >= model.questions.length && model.isFirstTestCompleted && !model.isSecondTestCompleted)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              backgroundColor: Color(0xFFCB9935),
+            ),
+            onPressed: () {
+              model.completeSecondTest(context);
+              _scrollToFirstQuestion(context);
+              _showRewardAnimation(context, 'stars.json');
+            },
+            child: Text(
+              'Fertigstellen',
+              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+            ),
+          ),
+        if (end >= model.questions.length && model.isSecondTestCompleted)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              backgroundColor: Color(0xFFCB9935),
+            ),
+            onPressed: () {
+              model.completeFinalTest(context);
+              _scrollToFirstQuestion(context);
+            },
+            child: Text(
+              'Fertigstellen',
+              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
       ],
@@ -232,11 +240,38 @@ class QuestionnaireScreen extends StatelessWidget {
   }
 
   void _scrollToFirstQuestion(BuildContext context) {
-    final double questionPosition = MediaQuery.of(context).size.height / 4;
-    _scrollController.animateTo(
+    final double questionPosition = MediaQuery.of(context).size.height / 3;
+    scrollController.animateTo(
       questionPosition,
       duration: Duration(seconds: 1),
       curve: Curves.easeInOut,
+    );
+  }
+
+  void _showRewardAnimation(BuildContext context, String animationAsset) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.of(context).pop();
+        });
+
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              color: Colors.transparent,
+            ),
+            Lottie.asset(
+              'assets/$animationAsset',
+              width: 150,
+              height: 150,
+              fit: BoxFit.contain,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -250,7 +285,7 @@ class CustomProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 80.0),
       child: Row(
         children: List.generate(totalSteps, (index) {
           return Expanded(

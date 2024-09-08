@@ -1,70 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:responsive_builder/responsive_builder.dart';
-import 'home_desktop_layout.dart';
+import 'custom_app_bar.dart'; // Import your custom app bar
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:personality_score/models/questionaire_model.dart';
-import 'mobile_sidebar.dart'; // Import the new MobileSidebar
-import 'package:personality_score/auth/auth_service.dart';
+import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
+import 'package:personality_score/models/questionaire_model.dart'; // Import your QuestionnaireModel
+class DesktopLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: Color(0xFFEDE8DB),
-      endDrawer: MediaQuery.of(context).size.width < 600 ? MobileSidebar() : null, // Use MobileSidebar for mobile
-      appBar: MediaQuery.of(context).size.width < 600 ? _buildAppBar(context) : null, // Add AppBar for mobile
-      body: ScreenTypeLayout(
-        mobile: _buildMobileLayout(),
-        desktop: DesktopLayout(), // Desktop uses the layout from desktop_layout.dart
-      ),
-    );
-  }
-
-  // Mobile AppBar (grey background, button for right drawer)
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Text('Personality Score'),
-      backgroundColor: Colors.grey[300], // Light grey for mobile
-      actions: [
-        Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu), // Menu icon to open the right-side drawer for mobile
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // Open the right-side drawer for mobile
-            },
-          ),
+      backgroundColor: Color(0xFFEDE8DB), // Updated background color for the entire scaffold
+      appBar: CustomAppBar(title: 'Personality Score'), // Use the custom app bar
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 350),
+            _buildHeaderSection(context, screenHeight, screenWidth),
+            SizedBox(height: 350),
+            _buildPersonalityTypesSection(context, screenHeight, screenWidth),
+            SizedBox(height: 350),
+            _buildCuriousSection(context, screenHeight, screenWidth), // New Section Added
+            SizedBox(height: 350),
+          ],
         ),
-      ],
-      automaticallyImplyLeading: false, // Remove back button for mobile
-    );
-  }
-
-  // Mobile Layout
-  Widget _buildMobileLayout() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SizedBox(height: 350),
-          _buildHeaderSection(MediaQuery.of(context).size.width),
-          SizedBox(height: 350),
-          _buildPersonalityTypesSection(context,
-              MediaQuery.of(context).size.height, MediaQuery.of(context).size.width),
-          SizedBox(height: 350),
-          _buildCuriousSection(context, MediaQuery.of(context).size.height, MediaQuery.of(context).size.width),
-          SizedBox(height: 350),
-        ],
       ),
     );
   }
 
-  // Header section for both mobile and desktop
-  Widget _buildHeaderSection(double screenWidth) {
+  Widget _buildHeaderSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
       children: [
         // SVG background for the personality types section
@@ -83,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   "Curious how accurate we are about you?",
                   style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.height * 0.042,
+                    fontSize: screenHeight * 0.042,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -93,8 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFCB9935),
                     padding: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.07,
-                      vertical: MediaQuery.of(context).size.height * 0.021,
+                      horizontal: screenWidth * 0.07,
+                      vertical: screenHeight * 0.021,
                     ),
                   ),
                   onPressed: () {
@@ -104,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     'Take the Test',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: MediaQuery.of(context).size.height * 0.021,
+                      fontSize: screenHeight * 0.021,
                     ),
                   ),
                 ),
@@ -116,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Personality types section for both mobile and desktop
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
       children: [
@@ -130,70 +94,79 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Padding(
           padding: const EdgeInsets.only(left: 20.0, right: 20, top: 50, bottom: 0),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Text Section
-              Text(
-                "PERSONALITY TYPES",
-                style: TextStyle(
-                  fontSize: screenHeight * 0.021,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "PERSONALITY TYPES",
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.021,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Understand others",
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.056,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "In our free type descriptions you’ll learn what really drives, inspires, and worries different personality types, helping you build more meaningful relationships.",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Roboto',
+                        fontSize: screenHeight * 0.021,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 70),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFCB9935),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.07,
+                          vertical: screenHeight * 0.021,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/personality_types');
+                      },
+                      child: Text(
+                        'Learn More',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Roboto',
+                          fontSize: screenHeight * 0.021,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 20),
-              Text(
-                "Understand others",
-                style: TextStyle(
-                  fontSize: screenHeight * 0.056,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 20),
-              Text(
-                "In our free type descriptions you’ll learn what really drives, inspires, and worries different personality types, helping you build more meaningful relationships.",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                  fontSize: screenHeight * 0.021,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 70),
-
-              // Learn More Button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFCB9935),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.07,
-                    vertical: screenHeight * 0.021,
+              SizedBox(width: 16.0),
+              Expanded(
+                flex: 1,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: SizedBox(
+                    width: screenWidth * 0.35,
+                    height: screenHeight * 0.35,
+                    child: Image.asset('assets/adventurer_front.png'),
                   ),
                 ),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/personality_types');
-                },
-                child: Text(
-                  'Learn More',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Roboto',
-                    fontSize: screenHeight * 0.021,
-                  ),
-                ),
-              ),
-
-              // Image Section (moved below the text for mobile)
-              SizedBox(height: 40),
-              SizedBox(
-                width: screenWidth * 0.7, // Adjusted size for mobile
-                height: screenHeight * 0.35,
-                child: Image.asset('assets/adventurer_front.png'),
               ),
             ],
           ),
@@ -201,17 +174,15 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
-
   // New function added to build the "Curious" section
   Widget _buildCuriousSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
       children: [
-        // SVG background for the personality types section
         Positioned.fill(
           child: SvgPicture.asset(
-            'assets/background_personality_type.svg',
-            fit: BoxFit.cover,
-            width: screenWidth, // Size adjusted to screen width
+            'assets/left_background_personality_type.svg',
+            fit: BoxFit.fitWidth,
+            width: screenWidth * 0.5, // customize size here with width relative to screen width
           ),
         ),
         Padding(
@@ -256,7 +227,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
-
   void _handleTakeTest(BuildContext context) {
     final model = Provider.of<QuestionnaireModel>(context, listen: false);
 
@@ -292,4 +262,5 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigator.of(context).pushNamed('/questionnaire');
     }
   }
+
 }
