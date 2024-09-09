@@ -1,8 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
+import 'profile_desktop_layout.dart'; // Import the desktop layout
+import 'mobile_sidebar.dart'; // Import the mobile sidebar
 import 'package:personality_score/auth/auth_service.dart';
-import 'custom_app_bar.dart'; // Import the custom AppBar
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -62,17 +64,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return ScreenTypeLayout(
+      mobile: _buildMobileLayout(context), // Mobile layout
+      desktop: ProfileDesktopLayout(
+        nameController: _nameController,
+        finalCharacterData: finalCharacterData,
+        isEditingName: _isEditingName,
+        onEditName: () {
+          setState(() {
+            _isEditingName = true;
+          });
+        },
+        onSaveName: updateUserName,
+      ), // Desktop layout
+    );
+  }
+
+  // Mobile Layout
+  Widget _buildMobileLayout(BuildContext context) {
     final user = Provider.of<AuthService>(context).user;
 
     if (user == null) {
       return Scaffold(
-        appBar: CustomAppBar(
-          title: 'Profile',
-        ),
+        appBar: _buildAppBar(context), // Add AppBar for mobile with menu button
+        endDrawer: MobileSidebar(), // Use the mobile sidebar
         body: Center(
           child: Text(
             'Please sign in to see your profile.',
-            style: TextStyle(fontSize: 18, color: Colors.white, fontFamily: 'Roboto'),
+            style: TextStyle(fontSize: 18, color: Colors.black, fontFamily: 'Roboto'),
           ),
         ),
       );
@@ -85,9 +104,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
-      appBar: CustomAppBar(
-        title: 'Personality Score',
-      ),
+      appBar: _buildAppBar(context), // Add AppBar for mobile with menu button
+      endDrawer: MobileSidebar(), // Use the mobile sidebar
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -122,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  _nameController.text, // Use the updated name controller text
+                  _nameController.text,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black, fontFamily: 'Roboto'),
                 ),
                 IconButton(
@@ -174,4 +192,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  // Mobile AppBar with a menu button to open the sidebar
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      title: Text('Questionnaire'),
+      backgroundColor: Colors.grey[300], // Light grey for mobile
+      actions: [
+        Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu), // Menu icon to open the sidebar
+            onPressed: () {
+              Scaffold.of(context).openEndDrawer(); // Open the sidebar for mobile
+            },
+          ),
+        ),
+      ],
+      automaticallyImplyLeading: false, // Remove back button for mobile
+    );
+  }
+
 }

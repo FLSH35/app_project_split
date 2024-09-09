@@ -1,18 +1,13 @@
+// personality_types_desktop_layout.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:responsive_builder/responsive_builder.dart';
-import 'personality_types_desktop_layout.dart'; // Import the desktop layout
-import 'mobile_sidebar.dart'; // Import the mobile sidebar
-import 'package:personality_score/models/questionaire_model.dart'; // Import your QuestionnaireModel
+import 'package:personality_score/models/questionaire_model.dart';
 
-class PersonalityTypesPage extends StatefulWidget {
-  @override
-  _PersonalityTypesPageState createState() => _PersonalityTypesPageState();
-}
+import 'custom_app_bar.dart';
 
-class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
-  final PageController _pageController = PageController(viewportFraction: 0.33);
+class PersonalityTypesDesktopLayout extends StatelessWidget {
+  final PageController pageController = PageController(viewportFraction: 0.33);
 
   final List<Map<String, String>> personalityTypes = [
     {
@@ -67,21 +62,14 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
 
   @override
   Widget build(BuildContext context) {
-    return ScreenTypeLayout(
-      mobile: _buildMobileLayout(context), // Mobile layout
-      desktop: PersonalityTypesDesktopLayout(), // Desktop layout
-    );
-  }
-
-  // Mobile Layout
-  Widget _buildMobileLayout(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
-      endDrawer: MobileSidebar(), // Use the mobile sidebar
-      appBar: _buildAppBar(context), // Add AppBar for mobile
+      appBar: CustomAppBar(
+        title: 'Personality Score',
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -99,7 +87,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                       "What is your type?",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 40, // Adjust font size for mobile
+                        fontSize: 60,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                         fontFamily: 'Roboto',
@@ -112,7 +100,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                       "Discover what makes you special.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 18, // Adjust font size for mobile
+                        fontSize: 22,
                         color: Colors.black,
                         fontFamily: 'Roboto',
                       ),
@@ -129,7 +117,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                   Text(
                     "PERSONALITY TYPES",
                     style: TextStyle(
-                      fontSize: 22, // Adjust font size for mobile
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                       fontFamily: 'Roboto',
@@ -140,6 +128,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                     children: personalityTypes.asMap().entries.map((entry) {
                       int index = entry.key;
                       Map<String, String> type = entry.value;
+                      bool isOdd = index % 2 == 1;
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: Card(
@@ -147,32 +136,59 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                           margin: EdgeInsets.all(20),
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
-                            child: Column(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image.asset(
-                                  type["image"]!,
-                                  width: screenWidth * 0.5,
-                                  height: screenHeight * 0.3,
-                                  fit: BoxFit.contain,
-                                ),
-                                SizedBox(height: 20),
-                                Text(
-                                  type["name"]!,
-                                  style: TextStyle(
-                                    fontSize: 30, // Adjust font size for mobile
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                                if (!isOdd)
+                                  Expanded(
+                                    flex: 1,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20.0),
+                                      child: SizedBox(
+                                        width: 500,
+                                        height: 500,
+                                        child: Image.asset(type["image"]!),
+                                      ),
+                                    ),
+                                  ),
+                                Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        type["name"]!,
+                                        style: TextStyle(
+                                          fontSize: 60,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(height: 20),
+                                      Text(
+                                        type["description"]!,
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                          color: Colors.black,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                SizedBox(height: 20),
-                                Text(
-                                  type["description"]!,
-                                  style: TextStyle(
-                                    fontSize: 18, // Adjust font size for mobile
-                                    color: Colors.black,
+                                if (isOdd)
+                                  Expanded(
+                                    flex: 1,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20.0),
+                                      child: SizedBox(
+                                        width: 500,
+                                        height: 500,
+                                        child: Image.asset(type["image"]!),
+                                      ),
+                                    ),
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
                               ],
                             ),
                           ),
@@ -201,7 +217,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                         Text(
                           "Curious how accurate we are about you?",
                           style: TextStyle(
-                            fontSize: screenHeight * 0.042, // Adjust for mobile
+                            fontSize: screenHeight * 0.042,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                             fontFamily: 'Roboto',
@@ -238,25 +254,6 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
           ],
         ),
       ),
-    );
-  }
-
-  // Build Mobile AppBar with a menu button to open the sidebar
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Text('Personality Types'),
-      backgroundColor: Colors.grey[300],
-      actions: [
-        Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // Open the sidebar
-            },
-          ),
-        ),
-      ],
-      automaticallyImplyLeading: false, // Remove back button for mobile
     );
   }
 

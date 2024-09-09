@@ -17,14 +17,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
-      endDrawer: MediaQuery.of(context).size.width < 600 ? MobileSidebar() : null, // Use MobileSidebar for mobile
-      appBar: MediaQuery.of(context).size.width < 600 ? _buildAppBar(context) : null, // Add AppBar for mobile
+      endDrawer: MobileSidebar(), // Use MobileSidebar for mobile
+      appBar: getValueForScreenType<bool>(
+        context: context,
+        mobile: false, // No app bar for mobile
+        desktop: true,  // App bar only for desktop
+      )
+          ? null  // Build desktop app bar
+          : _buildAppBar(context), // No app bar for mobile
       body: ScreenTypeLayout(
         mobile: _buildMobileLayout(),
         desktop: DesktopLayout(), // Desktop uses the layout from desktop_layout.dart
       ),
     );
   }
+
 
   // Mobile AppBar (grey background, button for right drawer)
   AppBar _buildAppBar(BuildContext context) {
