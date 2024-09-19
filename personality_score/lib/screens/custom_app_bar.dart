@@ -4,6 +4,7 @@ import 'package:personality_score/auth/auth_service.dart';
 import 'package:personality_score/models/questionaire_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';  // Import the flutter_svg package
 
+
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
@@ -11,57 +12,71 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: Color(0xFFF7F5EF),
-      leading: IconButton(
-        icon: SvgPicture.asset(
-          'assets/logok.svg'
-        ),
-        onPressed: () {
-          Navigator.of(context).pushNamed('/home');
-        },
-      ),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Container(
+      color: Color(0xFFF7F5EF),
+      // Make the container transparent to match the background
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      // Padding for spacing
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        // Ensure the column doesn't take unnecessary space
         children: [
-          _buildNavButton(context, 'PERSONALITY SCORE', '/home'),
-          SizedBox(width: 20),
-          _buildNavButton(context, 'Personality Types', '/personality_types'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Consumer<AuthService>(
+                builder: (context, authService, child) {
+                  return IconButton(
+                    icon: Icon(Icons.person, color: _getIconColor(context, '/profile')),
+                    onPressed: () {
+                      if (authService.user == null) {
+                        Navigator.of(context).pushNamed('/signin');
+                      } else {
+                        Navigator.of(context).pushNamed('/profile');
+                      }
+                    },
+                  );
+                },
+              ),
+              SizedBox(width: 10),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFCB9935), // Button background color
+                  elevation: 0, // No shadow effect
+                  shape: RoundedRectangleBorder( // Create square corners
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                  ),
+                ),
+                onPressed: () {
+                  _handleTakeTest(context); // Your button action
+                },
+                child: Text(
+                  'Take the Test ->',
+                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                ),
+              ),
+
+              SizedBox(width: 20),
+              // Add space between the buttons and the right end
+            ],
+          ),
+          SizedBox(height: 8), // Space between the two rows
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildNavButton(context, 'About', '/home'),
+              SizedBox(width: 10),
+              SvgPicture.asset(
+                'assets/logo.svg', // Your logo file
+                height: 40, // Adjust logo size if needed
+              ),
+              SizedBox(width: 10),
+              _buildNavButton(
+                  context, 'Types', '/personality_types'),
+            ],
+          ),
         ],
       ),
-      actions: [
-        Consumer<AuthService>(
-          builder: (context, authService, child) {
-            return IconButton(
-              icon: Icon(Icons.person, color: _getIconColor(context, '/profile')),
-              onPressed: () {
-                if (authService.user == null) {
-                  Navigator.of(context).pushNamed('/signin');
-                } else {
-                  Navigator.of(context).pushNamed('/profile');
-                }
-              },
-            );
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 80.0), // Add padding only on the right side
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFCB9935),
-              elevation: 0, // No shadow effect
-            ),
-            onPressed: () {
-              _handleTakeTest(context);
-            },
-            child: Text(
-              'Take the Test ->',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-            ),
-          ),
-        ),
-      ],
-
     );
   }
 
@@ -95,13 +110,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + 60); //
+
   Widget _buildNavButton(BuildContext context, String label, String route) {
-    bool isSelected = ModalRoute.of(context)?.settings.name == route;
+    bool isSelected = ModalRoute
+        .of(context)
+        ?.settings
+        .name == route;
     return TextButton(
       style: TextButton.styleFrom(
         backgroundColor: Colors.transparent, // No background color
         padding: EdgeInsets.symmetric(horizontal: 20),
-        foregroundColor: isSelected ? Color(0xFFCB9935) : Colors.black, // Text color based on selection
       ),
       onPressed: () {
         Navigator.of(context).pushReplacementNamed(route);
@@ -109,7 +129,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Color(0xFFCB9935) : Colors.black, // Gold when selected
+          color: isSelected ? Color(0xFFCB9935) : Colors.black,
+          // Gold when selected
           fontFamily: 'Roboto',
         ),
       ),
@@ -121,7 +142,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ? Color(0xFFCB9935) // Gold when on the profile page
         : Colors.black; // Default color for the icon
   }
-
-  @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
+
+
+

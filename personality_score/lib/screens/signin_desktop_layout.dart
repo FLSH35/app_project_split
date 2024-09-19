@@ -45,6 +45,15 @@ class SignInDesktopLayout extends StatelessWidget {
 
                   // Sign In Button
                   ElevatedButton(
+
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                      backgroundColor: Color(0xFFCB9935),
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder( // Create square corners
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                      ),
+                    ),
                     onPressed: () async {
                       final authService = Provider.of<AuthService>(context, listen: false);
                       await authService.signInWithEmail(
@@ -55,6 +64,7 @@ class SignInDesktopLayout extends StatelessWidget {
                         Navigator.of(context).pushReplacementNamed('/home');
                       }
                     },
+
                     child: Text('Sign In'),
                   ),
 

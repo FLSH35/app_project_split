@@ -167,6 +167,9 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Colors.black,
               side: BorderSide(color: Color(0xFFCB9935)),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
             ),
             onPressed: () => model.prevPage(),
             child: Text(
@@ -179,7 +182,11 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
             ),
+
             onPressed: () {
               model.nextPage(context);
               _scrollToFirstQuestion(context);
@@ -194,6 +201,9 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
             ),
             onPressed: () {
               model.completeFirstTest(context);
@@ -209,6 +219,9 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
             ),
             onPressed: () {
               model.completeSecondTest(context);
@@ -225,6 +238,9 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
             ),
             onPressed: () {
               model.completeFinalTest(context);

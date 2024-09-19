@@ -57,6 +57,9 @@ class DesktopLayout extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFCB9935),
+                    shape: RoundedRectangleBorder( // Create square corners
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                    ),
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.07,
                       vertical: screenHeight * 0.021,
@@ -140,6 +143,9 @@ class DesktopLayout extends StatelessWidget {
                           horizontal: screenWidth * 0.07,
                           vertical: screenHeight * 0.021,
                         ),
+                        shape: RoundedRectangleBorder( // Create square corners
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                        ),
                       ),
                       onPressed: () {
                         Navigator.of(context).pushNamed('/personality_types');
@@ -203,6 +209,9 @@ class DesktopLayout extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFCB9935),
+                    shape: RoundedRectangleBorder( // Create square corners
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                    ),
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.07,
                       vertical: screenHeight * 0.021,
