@@ -51,7 +51,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   _handleTakeTest(context); // Your button action
                 },
                 child: Text(
-                  'Take the Test ->',
+                  'Beginne den Test',
                   style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                 ),
               ),
@@ -64,7 +64,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildNavButton(context, 'About', '/home'),
+              _buildNavButton(context, 'Allgemein', '/home'),
               SizedBox(width: 10),
               SvgPicture.asset(
                 'assets/logo.svg', // Your logo file
@@ -72,7 +72,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               SizedBox(width: 10),
               _buildNavButton(
-                  context, 'Types', '/personality_types'),
+                  context, 'Stufen', '/personality_types'),
             ],
           ),
         ],

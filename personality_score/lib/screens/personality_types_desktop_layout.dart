@@ -11,49 +11,49 @@ class PersonalityTypesDesktopLayout extends StatelessWidget {
 
   final List<Map<String, String>> personalityTypes = [
     {
-      "name": "Anonymous",
+      "name": "Stufe 1: Anonymous",
       "image": "assets/Anonymous.webp",
       "description": """Der Anonymous operiert im Verborgenen, mit einem tiefen Weitblick und unaufhaltsamer Ruhe, beeinflusst er subtil aus dem Schatten.
 Sein unsichtbares Netzwerk und seine Anpassungsfähigkeit machen ihn zum verlässlichen Berater derjenigen im Rampenlicht.""",
     },
     {
-      "name": "Resident",
+      "name": "Stufe 2: Resident",
       "image": "assets/Resident.webp",
       "description": """Im ständigen Kampf mit inneren Dämonen sucht der Resident nach persönlichem Wachstum und Klarheit, unterstützt andere trotz eigener Herausforderungen.
 Seine Erfahrungen und Wissen bieten Orientierung, während er nach Selbstvertrauen und Stabilität strebt.""",
     },
     {
-      "name": "Explorer",
+      "name": "Stufe 3: Explorer",
       "image": "assets/Explorer.webp",
       "description": """Immer offen für neue Wege der Entwicklung, erforscht der Explorer das Unbekannte und gestaltet sein Leben aktiv.
 Seine Offenheit und Entschlossenheit führen ihn zu neuen Ideen und persönlichem Wachstum.""",
     },
     {
-      "name": "Reacher",
+      "name": "Stufe 4: Reacher",
       "image": "assets/Reacher.webp",
       "description": """Als Initiator der Veränderung strebt der Reacher nach Wissen und persönlicher Entwicklung, trotz der Herausforderungen und Unsicherheiten.
 Seine Motivation und innere Stärke führen ihn auf den Weg des persönlichen Wachstums.""",
     },
     {
-      "name": "Traveller",
+      "name": "Stufe 5: Traveller",
       "image": "assets/Traveller.webp",
       "description": """Als ständiger Abenteurer strebt der Traveller nach neuen Erfahrungen und persönlichem Wachstum, stets begleitet von Neugier und Offenheit.
 Er inspiriert durch seine Entschlossenheit, das Leben in vollen Zügen zu genießen und sich kontinuierlich weiterzuentwickeln.""",
     },
     {
-      "name": "Individual",
+      "name": "Stufe 6: Individual",
       "image": "assets/Individual.webp",
       "description": """Der Individual strebt nach Klarheit und Verwirklichung seiner Ziele, beeindruckt durch Selbstbewusstsein und klare Entscheidungen.
 Er inspiriert andere durch seine Entschlossenheit und positive Ausstrahlung.""",
     },
     {
-      "name": "Adventurer",
+      "name": "Stufe 7: Adventurer",
       "image": "assets/Adventurer.webp",
       "description": """Der Adventurer meistert das Leben mit Leichtigkeit und fasziniert durch seine Ausstrahlung und Selbstsicherheit, ein Magnet für Erfolg und Menschen.
 Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannender Herausforderungen.""",
     },
     {
-      "name": "Life Artist",
+      "name": "Stufe 8: Life Artist",
       "image": "assets/Life Artist.webp",
       "description": """Der Life Artist lebt seine Vision des Lebens mit Dankbarkeit und Energie, verwandelt Schwierigkeiten in bedeutungsvolle Erlebnisse.
 Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfülltes Leben inspiriert.""",
@@ -236,7 +236,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                             _handleTakeTest(context);
                           },
                           child: Text(
-                            'Take the Test',
+                            'Beginne den Test',
                             style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Roboto',

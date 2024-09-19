@@ -220,7 +220,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                             _handleTakeTest(context);
                           },
                           child: Text(
-                            'Take the Test',
+                            'Beginne den Test',
                             style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Roboto',

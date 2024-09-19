@@ -36,8 +36,8 @@ void main() {
       // Verify the presence of the description text
       expect(find.text("Only 10 minutes to get a 'freakishly accurate' description of who you are and why you do things the way you do."), findsOneWidget);
 
-      // Verify the presence of the 'Take the Test' button
-      expect(find.text('Take the Test'), findsOneWidget);
+      // Verify the presence of the 'Beginne den Test' button
+      expect(find.text('Beginne den Test'), findsOneWidget);
 
       // Verify the presence of statistics
       expect(find.text('1M+'), findsOneWidget);
@@ -60,8 +60,8 @@ void main() {
     testWidgets('should navigate to questionnaire screen on pressing Take the Test button', (WidgetTester tester) async {
       await tester.pumpWidget(createHomeScreen());
 
-      // Tap the 'Take the Test' button
-      await tester.tap(find.text('Take the Test'));
+      // Tap the 'Beginne den Test' button
+      await tester.tap(find.text('Beginne den Test'));
       await tester.pumpAndSettle();
 
       // Verify the questionnaire screen is displayed

@@ -27,15 +27,25 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
   List<Question> get questions => _questions;
+
   int get currentQuestionIndex => _currentQuestionIndex;
+
   int get totalScore => _totalScore;
+
   int get currentPage => _currentPage;
+
   List<int?> get answers => _answers;
+
   String? get personalityType => _personalityType;
+
   int get progress => _progress;
+
   bool get isFirstTestCompleted => _isFirstTestCompleted;
+
   bool get isSecondTestCompleted => _isSecondTestCompleted;
+
   String? get finalCharacter => _finalCharacter;
+
   String? get finalCharacterDescription => _finalCharacterDescription;
 
   Future<void> loadQuestions(String set) async {
@@ -48,7 +58,8 @@ class QuestionnaireModel with ChangeNotifier {
     List<Question> uniqueQuestions = [];
 
     for (var question in loadedQuestions) {
-      if (uniqueQuestionTexts.add(question.text)) { // Assuming `text` is the unique identifier for the question
+      if (uniqueQuestionTexts.add(question
+          .text)) { // Assuming `text` is the unique identifier for the question
         uniqueQuestions.add(question);
       }
     }
@@ -91,7 +102,8 @@ class QuestionnaireModel with ChangeNotifier {
         _totalScore = data['totalScore'];
         _isFirstTestCompleted = data['isCompleted'];
         _currentPage = data['currentPage'] ?? 0;
-        _answers = List<int?>.from(data['answers'] ?? List<int?>.filled(_questions.length, null));
+        _answers = List<int?>.from(
+            data['answers'] ?? List<int?>.filled(_questions.length, null));
         _finalCharacter = data['finalCharacter'];
         _finalCharacterDescription = data['finalCharacterDescription'];
         notifyListeners();
@@ -101,7 +113,8 @@ class QuestionnaireModel with ChangeNotifier {
 
   void answerQuestion(int index, int value) {
     _answers[index] = value;
-    _totalScore = _answers.where((a) => a != null).fold(0, (sum, a) => sum + a!);
+    _totalScore =
+        _answers.where((a) => a != null).fold(0, (sum, a) => sum + a!);
     saveProgress();
     notifyListeners();
   }
@@ -130,7 +143,7 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
 
-void prevPage() {
+  void prevPage() {
     if (_currentPage > 0) {
       _currentPage--;
       saveProgress();
@@ -168,15 +181,30 @@ void prevPage() {
     List<String> teamCharacters;
     String nextSet;
 
-    int possibleScore = _questions.length * 3; // Calculate possible score for the current set
+    int possibleScore = _questions.length *
+        3; // Calculate possible score for the current set
 
-    if (_totalScore > (possibleScore * 0.5)) { // Check if total score is more than 50% of possible score
-      message = 'Im Bereich der Kompetenz hast du folgende Punktzahl: $_totalScore\n\n Jetzt kennst du dein Team. Wenn du dein wahres Ich kennenlernen willst, fülle noch die nächsten Fragen aus!';
-      teamCharacters = ["Life Artist.webp", "Individual.webp", "Adventurer.webp", "Traveller.webp"];
+    if (_totalScore > (possibleScore *
+        0.5)) { // Check if total score is more than 50% of possible score
+      message =
+      """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
+      Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 1 und Stufe 4. Noch hast du wahre „Lebenskompetenz“ (diese beginnt ab Stufe 5) nicht erreicht, sondern befindest dich auf dem Weg dahin. Das ist aber überhaupt nicht schlimm, sondern völlig normal. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 zu verorten sind.
+    Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
+    """;
+      teamCharacters = [
+        "Life Artist.webp",
+        "Individual.webp",
+        "Adventurer.webp",
+        "Traveller.webp"
+      ];
       nextSet = 'BewussteKompetenz';
     } else {
-      message = 'Im Bereich der Kompetenz hast du folgende Punktzahl: $_totalScore\n\n  Jetzt kennst du dein Team. Wenn du dein wahres Ich kennenlernen willst, fülle noch die nächsten Fragen aus!';
-      teamCharacters = ["resident.webp", "Explorer.webp", "Reacher.webp", "Anonymous.webp"];
+      message ="""Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
+Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 8. Damit hast du bereits echte „Lebenskompetenz“ erreicht und gehörst damit bereits zu einer kleinen Minderheit. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 im Bereich der „Inkompetenz“ zu verorten sind. Für deine bisherige Entwicklung also schonmal ein dickes Lob.
+Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
+""";
+    teamCharacters =
+      ["resident.webp", "Explorer.webp", "Reacher.webp", "Anonymous.webp"];
       nextSet = 'BewussteInkompetenz';
     }
 
@@ -184,33 +212,43 @@ void prevPage() {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Total Score'),
+          backgroundColor: Color(0xFFF7F5EF), // Soft background
+          title: Text('$_totalScore Punkte erreicht', style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(message),
+                Text(message, style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
                 SizedBox(height: 10),
                 Wrap(
-                  spacing: 10.0, // Space between adjacent items
-                  runSpacing: 10.0, // Space between lines
-                  alignment: WrapAlignment.center, // Align items in the center
-                  children: teamCharacters.map((character) => Image.asset('assets/$character', width: 100, height: 100)).toList(),
+                  spacing: 10.0,
+                  runSpacing: 10.0,
+                  alignment: WrapAlignment.center,
+                  children: teamCharacters
+                      .map((character) => Image.asset('assets/$character', width: 100, height: 100))
+                      .toList(),
                 ),
               ],
             ),
           ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Color(0xFFCB9935), // Gold background for the button
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder( // Create square corners
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                ),
+              ),
               onPressed: () {
-                loadQuestions(nextSet); // Load next set of questions
+                loadQuestions(nextSet);
                 _currentPage = 0;
                 _totalScore = 0;
                 _answers = List<int?>.filled(_questions.length, null);
                 notifyListeners();
                 Navigator.of(context).pop();
               },
-              child: Text('Next'),
+              child: Text('Next', style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
             ),
           ],
         );
@@ -218,31 +256,48 @@ void prevPage() {
     );
   }
 
+
   void completeSecondTest(BuildContext context) {
     _isSecondTestCompleted = true;
     String message;
     List<String> teamCharacters;
     String nextSet;
 
-    int possibleScore = _questions.length * 3; // Calculate possible score for the current set
+    int possibleScore = _questions.length *
+        3; // Calculate possible score for the current set
 
-    if (_totalScore > (possibleScore * 0.5)) { // Check if total score is more than 50% of possible score
+    if (_totalScore > (possibleScore *
+        0.5)) { // Check if total score is more than 50% of possible score
       if (_questions.first.set == 'BewussteKompetenz') {
-        message = 'Your total score is: $_totalScore\n\n Bist du ein Life Artist oder ein Adventurer? Das ist ein riesiger Unteschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
+        message ="""Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 7 und Stufe 8. 
+Falls du nicht geschummelt hast 😉, müssen wir dir an dieser Stelle aufrichtige Anerkennung zollen: Diesen Bereich der „unbewussten Kompetenz“ erreichen unter 1% aller Menschen.
+Hier musst du gar nicht mehr groß drüber nachdenken, um Erfolg im Leben zu realisieren. Was dich einst massive Anstrengung gekostet hat, passiert heute fast wie von selbst. 
+Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Adventurer“ oder „Life Artist“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
+""";
         teamCharacters = ["Life Artist.webp", "Adventurer.webp"];
         nextSet = 'LifeArtist';
       } else {
-        message = 'Your total score is: $_totalScore\n\n Bist du ein Reacher oder ein Explorer? Das ist ein riesiger Unteschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
-        teamCharacters = ["Reacher.webp", "Explorer.webp"];
+        message = """Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. 
+Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 3 und Stufe 4. Dies ist der Bereich der „bewussten Inkompetenz“. Das hört sich zwar nicht schön an, damit bist du aber schon weiter als schätzungsweise drei Viertel aller Menschen. Zwar hast du noch einen langen Weg vor dir, bist aber bereits dabei, dein volles Potenzial zu erkennen. Wie nur wenige Menschen blickst du über deinen eigenen Tellerrand hinaus.
+Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Explorer“ oder „Reacher“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
+""";
+            teamCharacters = ["Reacher.webp", "Explorer.webp"];
         nextSet = 'Reacher';
       }
     } else {
       if (_questions.first.set == 'BewussteKompetenz') {
-        message = 'Your total score is: $_totalScore\n\n Bist du ein Individual oder ein Traveller? Das ist ein riesiger Unteschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
+        message = """Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. 
+Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 6. Dies ist der Bereich der „bewussten Kompetenz“. Zwar bist du schon ungewöhnlich erfolgreich in deinem Leben, allerdings erreichst du deine Ziele noch meist nicht „wie von selbst“ (unbewusste Kompetenz) sondern teilweise unter großer Anstrengung. 
+Du bist schon auf einem sehr hohen Level der Persönlichkeitsentwicklung, dass nur die wenigsten Menschen in ihrem Leben erreichen. Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Traveller“ oder „Individual“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
+""";
         teamCharacters = ["Individual.webp", "Traveller.webp"];
         nextSet = 'Individual';
       } else {
-        message = 'Your total score is: $_totalScore\n\n Bist du ein Resident oder ein Anonymous? Das ist ein riesiger Unteschied. Noch 5 Minuten und du findest deine Stärken und blinden Flecken heraus!';
+        message =
+        """Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. 
+Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 1 und Stufe 2. Du befindest dich damit (wie über drei Viertel aller Menschen) im Bereich der „unbewussten Inkompetenz“. Das hört sich zwar nicht schön an, bedeutet aber eigentlich nur, dass du dein volles Potenzial noch nicht erkannt hast. Es gibt also noch viel zu entdecken.
+Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“ oder „Resident“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
+""";
         teamCharacters = ["resident.webp", "Anonymous.webp"];
         nextSet = 'Resident';
       }
@@ -251,32 +306,54 @@ void prevPage() {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Total Score'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(message),
-              SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: teamCharacters.map((character) => Image.asset('assets/$character', width: 150, height: 150)).toList(),
+          backgroundColor: Color(0xFFF7F5EF),
+          title: Text(
+            '$_totalScore Punkte erreicht',
+            style: TextStyle(fontFamily: 'Roboto'),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  message,
+                  style: TextStyle(fontFamily: 'Roboto'),
                 ),
-              ),
-            ],
+                SizedBox(height: 10),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: teamCharacters
+                        .map((character) => Image.asset('assets/$character',
+                        width: 150, height: 150))
+                        .toList(),
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFCB9935),
+                elevation: 0,
+                shape: RoundedRectangleBorder( // Create square corners
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                ),
+              ),
               onPressed: () {
-                loadQuestions(nextSet); // Load final set of questions
+                loadQuestions(nextSet);
                 _currentPage = 0;
                 _totalScore = 0;
                 _answers = List<int?>.filled(_questions.length, null);
                 notifyListeners();
                 Navigator.of(context).pop();
               },
-              child: Text('Next'),
+              child: Text(
+                'Next',
+                style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+              ),
             ),
           ],
         );
@@ -288,7 +365,8 @@ void prevPage() {
     String finalCharacter;
     String finalCharacterDescription;
 
-    int possibleScore = _questions.length * 3; // Calculate possible score for the final set
+    int possibleScore = _questions.length *
+        3; // Calculate possible score for the final set
 
     if (_questions.first.set == 'Individual') {
       if (_totalScore > (possibleScore * 0.5)) {
@@ -370,41 +448,64 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Final Character'),
+          backgroundColor: Color(0xFFF7F5EF),
+          // Background color for consistency
+          title: Text('Deine Persönlichkeitsstufe',
+              style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Your final character is:'),
+                Text('Dein Finaler Charakter:', style: TextStyle(
+                    color: Colors.black, fontFamily: 'Roboto')),
                 SizedBox(height: 10),
                 Wrap(
-                  spacing: 10.0, // Space between adjacent items
-                  runSpacing: 10.0, // Space between lines
-                  alignment: WrapAlignment.center, // Align items in the center
+                  spacing: 10.0,
+                  runSpacing: 10.0,
+                  alignment: WrapAlignment.center,
                   children: [
-                    Image.asset('assets/$finalCharacter', width: 200, height: 200),
+                    Image.asset(
+                        'assets/$finalCharacter', width: 200, height: 200),
                   ],
                 ),
                 SizedBox(height: 10),
-                Text(finalCharacterDescription),
+                Text(finalCharacterDescription, style: TextStyle(
+                    color: Colors.black, fontFamily: 'Roboto')),
               ],
             ),
           ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Color(0xFFCB9935),
+                // Gold background for finish button
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder( // Create square corners
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                ),
+              ),
               onPressed: () {
-                reset(); // Reset the state
+                reset();
                 Navigator.of(context).pop();
-                notifyListeners();
               },
-              child: Text('Finish'),
+              child: Text('Finish',
+                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
             ),
             TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                // Transparent for the share button
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder( // Create square corners
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                ),
+              ),
               onPressed: () {
-                String shareText = 'My final character is $finalCharacter.\n\nDescription: $finalCharacterDescription';
-                Share.share(shareText); // Share the result
+                String shareText = 'Du bist ein $finalCharacter.\n\nDescription: $finalCharacterDescription';
+                Share.share(shareText);
               },
-              child: Text('Share'),
+              child: Text('Share', style: TextStyle(
+                  color: Color(0xFFCB9935), fontFamily: 'Roboto')),
             ),
           ],
         );

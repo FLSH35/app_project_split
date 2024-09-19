@@ -102,7 +102,7 @@ class QuestionnaireScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Test Description',
+            'Persönlichkeitsstufen-Test: Wo stehst du?',
             style: TextStyle(
               fontSize: 22, // Reduced font size
               fontWeight: FontWeight.bold,
@@ -113,7 +113,7 @@ class QuestionnaireScreen extends StatelessWidget {
           ),
           SizedBox(height: 16),
           Text(
-            'This test will help us understand your personality better. Please answer the questions honestly and thoughtfully.',
+            'Bitte beantworte die Fragen so ehrlich und selbstreflektiert wie möglich, um ein aussagekräftiges Ergebnis zu erhalten.',
             style: TextStyle(
               fontSize: 16, // Reduced font size for mobile
               color: Colors.grey,

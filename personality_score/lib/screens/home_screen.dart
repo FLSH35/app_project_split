@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _handleTakeTest(context); // Call to the test function
                   },
                   child: Text(
-                    'Take the Test',
+                    'Beginne den Test',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: MediaQuery.of(context).size.height * 0.021,
@@ -248,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _handleTakeTest(context); // Call to the test function
                   },
                   child: Text(
-                    'Take the Test',
+                    'Beginne den Test',
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Roboto',

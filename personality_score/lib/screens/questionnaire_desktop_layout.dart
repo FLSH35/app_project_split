@@ -77,7 +77,7 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Test Description',
+            'Persönlichkeitsstufen-Test: Wo stehst du?',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -88,7 +88,7 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
           ),
           SizedBox(height: 16),
           Text(
-            'This test will help us understand your personality better. Please answer the questions honestly and thoughtfully.',
+            'Bitte beantworte die Fragen so ehrlich und selbstreflektiert wie möglich, um ein aussagekräftiges Ergebnis zu erhalten.',
             style: TextStyle(
               fontSize: 20,
               color: Colors.grey,

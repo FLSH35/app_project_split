@@ -46,10 +46,18 @@ class DesktopLayout extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  "Curious how accurate we are about you?",
+                  "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
                     fontSize: screenHeight * 0.042,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  "Erhalte messerscharfe Klarheit über deinen Entwicklungsstand und erfahre, wie du das nächste Level erreichen kannst.",
+                  style: TextStyle(
+                    fontSize: screenHeight * 0.02,
+                    fontWeight: FontWeight.normal,
                     color: Colors.black,
                   ),
                 ),
@@ -69,7 +77,7 @@ class DesktopLayout extends StatelessWidget {
                     _handleTakeTest(context); // Call to the test function
                   },
                   child: Text(
-                    'Take the Test',
+                    'Beginne den Test',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: screenHeight * 0.021,
@@ -107,7 +115,7 @@ class DesktopLayout extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "PERSONALITY TYPES",
+                      "PERSOENLICHKEITSSTUFEN",
                       style: TextStyle(
                         fontSize: screenHeight * 0.021,
                         fontWeight: FontWeight.bold,
@@ -117,7 +125,7 @@ class DesktopLayout extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
                     Text(
-                      "Understand others",
+                      "Verstehe dich selbst und andere ",
                       style: TextStyle(
                         fontSize: screenHeight * 0.056,
                         fontWeight: FontWeight.bold,
@@ -127,7 +135,7 @@ class DesktopLayout extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
                     Text(
-                      "In our free type descriptions you’ll learn what really drives, inspires, and worries different personality types, helping you build more meaningful relationships.",
+                      "Vom Anonymus zum Life Artist: Die 8 Stufen symbolisieren die wichtigsten Etappen auf dem Weg, dein Potenzial voll auszuschöpfen. Mit einem fundierten Verständnis des Modells wirst du nicht nur dich selbst, sondern auch andere Menschen viel besser verstehen und einordnen können.",
                       style: TextStyle(
                         color: Colors.black,
                         fontFamily: 'Roboto',
@@ -197,7 +205,7 @@ class DesktopLayout extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  "Curious how accurate we are about you?",
+                  "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
                     fontSize: screenHeight * 0.042,
                     fontWeight: FontWeight.bold,
@@ -221,7 +229,7 @@ class DesktopLayout extends StatelessWidget {
                     _handleTakeTest(context); // Call to the test function
                   },
                   child: Text(
-                    'Take the Test',
+                    'Beginne den Test',
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Roboto',
