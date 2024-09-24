@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:personality_score/models/questionaire_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';  // Import the flutter_svg package
+import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -48,7 +49,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 onPressed: () {
-                  _handleTakeTest(context); // Your button action
+                  handleTakeTest(context); // Your button action
                 },
                 child: Text(
                   'Beginne den Test',
@@ -64,7 +65,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildNavButton(context, 'Allgemein', '/home'),
+              _buildNavButton(context, 'ALLGEMEIN', '/home'),
               SizedBox(width: 10),
               SvgPicture.asset(
                 'assets/logo.svg', // Your logo file
@@ -72,38 +73,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               SizedBox(width: 10),
               _buildNavButton(
-                  context, 'Stufen', '/personality_types'),
+                  context, 'STUFEN', '/personality_types'),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _handleTakeTest(BuildContext context) {
-    final model = Provider.of<QuestionnaireModel>(context, listen: false);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Continue or Start Over?'),
-        content: Text('Would you like to continue where you left off or start over?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              model.resetQuestionnaire();
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
-            },
-            child: Text('Start Over'),
-          ),
-          TextButton(
-            onPressed: () {
-              model.continueFromLastPage();
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamed('/questionnaire'); // Continue from where left off
-            },
-            child: Text('Continue'),
           ),
         ],
       ),

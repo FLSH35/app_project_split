@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/models/questionaire_model.dart';
-
+import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'custom_app_bar.dart';
 
 class PersonalityTypesDesktopLayout extends StatelessWidget {
@@ -84,7 +84,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                   Padding(
                     padding: const EdgeInsets.all(0.0),
                     child: Text(
-                      "What is your type?",
+                      "Die 8 Persönlichkeitsstufen",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 60,
@@ -97,7 +97,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
-                      "Discover what makes you special.",
+                      "Lerne das Modell kennen.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 22,
@@ -172,7 +172,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                                           fontSize: 22,
                                           color: Colors.black,
                                         ),
-                                        textAlign: TextAlign.center,
+                                        textAlign: TextAlign.left,
                                       ),
                                     ],
                                   ),
@@ -215,7 +215,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                     child: Column(
                       children: [
                         Text(
-                          "Curious how accurate we are about you?",
+                          "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                           style: TextStyle(
                             fontSize: screenHeight * 0.042,
                             fontWeight: FontWeight.bold,
@@ -227,13 +227,16 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFCB9935),
+                            shape: RoundedRectangleBorder( // Create square corners
+                              borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                            ),
                             padding: EdgeInsets.symmetric(
                               horizontal: screenWidth * 0.07,
                               vertical: screenHeight * 0.021,
                             ),
                           ),
                           onPressed: () {
-                            _handleTakeTest(context);
+                            handleTakeTest(context);
                           },
                           child: Text(
                             'Beginne den Test',
@@ -257,39 +260,4 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
     );
   }
 
-  void _handleTakeTest(BuildContext context) {
-    final model = Provider.of<QuestionnaireModel>(context, listen: false);
-
-    if (model.answers.any((answer) => answer != null)) {
-      // Show choice dialog if there's progress
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Continue or Start Over?'),
-          content: Text('Would you like to continue where you left off or start over?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                model.resetQuestionnaire();
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
-              },
-              child: Text('Start Over'),
-            ),
-            TextButton(
-              onPressed: () {
-                model.continueFromLastPage();
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/questionnaire'); // Continue from where left off
-              },
-              child: Text('Continue'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // If no progress, start the questionnaire directly
-      Navigator.of(context).pushNamed('/questionnaire');
-    }
-  }
 }

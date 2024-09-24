@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'custom_app_bar.dart'; // Import your custom app bar
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-
+import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:personality_score/models/questionaire_model.dart'; // Import your QuestionnaireModel
+
 class DesktopLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -74,7 +75,7 @@ class DesktopLayout extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    _handleTakeTest(context); // Call to the test function
+                    handleTakeTest(context); // Call to the test function
                   },
                   child: Text(
                     'Beginne den Test',
@@ -226,7 +227,7 @@ class DesktopLayout extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    _handleTakeTest(context); // Call to the test function
+                    handleTakeTest(context); // Call to the test function
                   },
                   child: Text(
                     'Beginne den Test',
@@ -243,41 +244,6 @@ class DesktopLayout extends StatelessWidget {
         ),
       ],
     );
-  }
-  void _handleTakeTest(BuildContext context) {
-    final model = Provider.of<QuestionnaireModel>(context, listen: false);
-
-    if (model.answers.any((answer) => answer != null)) {
-      // Show choice dialog if there's progress
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Continue or Start Over?'),
-          content: Text('Would you like to continue where you left off or start over?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                model.resetQuestionnaire();
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
-              },
-              child: Text('Start Over'),
-            ),
-            TextButton(
-              onPressed: () {
-                model.continueFromLastPage();
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/questionnaire'); // Continue from where left off
-              },
-              child: Text('Continue'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // If no progress, start the questionnaire directly
-      Navigator.of(context).pushNamed('/questionnaire');
-    }
   }
 
 }

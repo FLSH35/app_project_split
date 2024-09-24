@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:personality_score/models/questionaire_model.dart';
 import 'mobile_sidebar.dart'; // Import the new MobileSidebar
 import 'package:personality_score/auth/auth_service.dart';
+import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -105,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   onPressed: () {
-                    _handleTakeTest(context); // Call to the test function
+                    handleTakeTest(context); // Call to the test function
                   },
                   child: Text(
                     'Beginne den Test',
@@ -177,6 +178,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFCB9935),
+                  shape: RoundedRectangleBorder( // Create square corners
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                  ),
                   padding: EdgeInsets.symmetric(
                     horizontal: screenWidth * 0.07,
                     vertical: screenHeight * 0.021,
@@ -245,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   onPressed: () {
-                    _handleTakeTest(context); // Call to the test function
+                    handleTakeTest(context); // Call to the test function
                   },
                   child: Text(
                     'Beginne den Test',
@@ -264,39 +268,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _handleTakeTest(BuildContext context) {
-    final model = Provider.of<QuestionnaireModel>(context, listen: false);
 
-    if (model.answers.any((answer) => answer != null)) {
-      // Show choice dialog if there's progress
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Continue or Start Over?'),
-          content: Text('Would you like to continue where you left off or start over?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                model.resetQuestionnaire();
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
-              },
-              child: Text('Start Over'),
-            ),
-            TextButton(
-              onPressed: () {
-                model.continueFromLastPage();
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/questionnaire'); // Continue from where left off
-              },
-              child: Text('Continue'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // If no progress, start the questionnaire directly
-      Navigator.of(context).pushNamed('/questionnaire');
-    }
-  }
 }

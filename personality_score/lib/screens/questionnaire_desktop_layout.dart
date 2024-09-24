@@ -51,56 +51,30 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
     int totalSteps = (model.questions.length / 7).ceil();
     int currentStep = model.currentPage;
 
-    return SingleChildScrollView(
-      controller: scrollController,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 80.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 40),
-            _buildTestDescription(context),
-            CustomProgressBar(totalSteps: totalSteps, currentStep: currentStep),
-            _buildQuestionsList(context, model),
-            _buildNavigationButtons(context, model),
-            SizedBox(height: 40),
-          ],
+    return Column(
+      children: [
+        // Progress bar stays on top and does not scroll
+        CustomProgressBar(totalSteps: totalSteps, currentStep: currentStep),
+        // Scrollable content
+        Expanded(
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 80.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildQuestionsList(context, model),
+                  _buildNavigationButtons(context, model),
+                  SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
-
-  Widget _buildTestDescription(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height / 3,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Persönlichkeitsstufen-Test: Wo stehst du?',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontFamily: 'Roboto',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Bitte beantworte die Fragen so ehrlich und selbstreflektiert wie möglich, um ein aussagekräftiges Ergebnis zu erhalten.',
-            style: TextStyle(
-              fontSize: 20,
-              color: Colors.grey,
-              fontFamily: 'Roboto',
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildQuestionsList(BuildContext context, QuestionnaireModel model) {
     int start = model.currentPage * 7;
     int end = start + 7;
@@ -143,17 +117,32 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
                 inactiveColor: Colors.grey,
                 thumbColor: Color(0xFFCB9935),
               ),
-              SizedBox(height: 4), // Reduced height
-              Text(
-                model.answers[questionIndex]?.toString() ?? '0',
-                style: TextStyle(color: Colors.grey[400], fontSize: 16),
+              // Description under the slider
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'NEIN',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                  ),
+                  Text(
+                    model.answers[questionIndex]?.toString() ?? '0',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 16),
+                  ),
+                  Text(
+                    'JA',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                  ),
+                ],
               ),
+
             ],
           ),
         );
       }).toList(),
     );
   }
+
 
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
     int end = (model.currentPage + 1) * 7;
