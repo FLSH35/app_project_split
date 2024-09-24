@@ -49,7 +49,7 @@ class ProfileDesktopLayout extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CircleAvatar(
-              radius: 50,
+              radius: 250,
               backgroundImage: AssetImage('assets/${finalCharacterData?['finalCharacter'] ?? ''}'),
               backgroundColor: Colors.transparent, // Optional: set to transparent if no image available
             ),

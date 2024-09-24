@@ -443,14 +443,15 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
         'completionDate': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     }
+    String? name = user?.displayName;
+    String greetingText = 'Lieber $name' ;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Color(0xFFF7F5EF),
-          // Background color for consistency
-          title: Text('Deine Persönlichkeitsstufe',
+          title: Text(greetingText + ', deine Persönlichkeitsstufe',
               style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
           content: SingleChildScrollView(
             child: Column(
@@ -478,10 +479,9 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
             TextButton(
               style: TextButton.styleFrom(
                 backgroundColor: Color(0xFFCB9935),
-                // Gold background for finish button
                 padding: EdgeInsets.symmetric(horizontal: 20),
-                shape: RoundedRectangleBorder( // Create square corners
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 ),
               ),
               onPressed: () {
@@ -494,10 +494,9 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
             TextButton(
               style: TextButton.styleFrom(
                 backgroundColor: Colors.transparent,
-                // Transparent for the share button
                 padding: EdgeInsets.symmetric(horizontal: 20),
-                shape: RoundedRectangleBorder( // Create square corners
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 ),
               ),
               onPressed: () {
@@ -511,5 +510,6 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
         );
       },
     );
+
   }
 }

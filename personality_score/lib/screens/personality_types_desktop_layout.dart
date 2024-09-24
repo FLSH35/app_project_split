@@ -1,64 +1,85 @@
 // personality_types_desktop_layout.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // For rootBundle
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
-import 'package:personality_score/models/questionaire_model.dart';
-import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'custom_app_bar.dart';
 
-class PersonalityTypesDesktopLayout extends StatelessWidget {
-  final PageController pageController = PageController(viewportFraction: 0.33);
+class PersonalityTypesDesktopLayout extends StatefulWidget {
+  @override
+  _PersonalityTypesDesktopLayoutState createState() => _PersonalityTypesDesktopLayoutState();
+}
 
+class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopLayout> {
   final List<Map<String, String>> personalityTypes = [
     {
       "name": "Stufe 1: Anonymous",
       "image": "assets/Anonymous.webp",
-      "description": """Der Anonymous operiert im Verborgenen, mit einem tiefen Weitblick und unaufhaltsamer Ruhe, beeinflusst er subtil aus dem Schatten.
-Sein unsichtbares Netzwerk und seine Anpassungsfähigkeit machen ihn zum verlässlichen Berater derjenigen im Rampenlicht.""",
+      "descriptionPath": "assets/auswertungen/Anonymous.txt",
     },
     {
       "name": "Stufe 2: Resident",
       "image": "assets/Resident.webp",
-      "description": """Im ständigen Kampf mit inneren Dämonen sucht der Resident nach persönlichem Wachstum und Klarheit, unterstützt andere trotz eigener Herausforderungen.
-Seine Erfahrungen und Wissen bieten Orientierung, während er nach Selbstvertrauen und Stabilität strebt.""",
+      "descriptionPath": "assets/auswertungen/Resident.txt",
     },
     {
       "name": "Stufe 3: Explorer",
       "image": "assets/Explorer.webp",
-      "description": """Immer offen für neue Wege der Entwicklung, erforscht der Explorer das Unbekannte und gestaltet sein Leben aktiv.
-Seine Offenheit und Entschlossenheit führen ihn zu neuen Ideen und persönlichem Wachstum.""",
+      "descriptionPath": "assets/auswertungen/Explorer.txt",
     },
     {
       "name": "Stufe 4: Reacher",
       "image": "assets/Reacher.webp",
-      "description": """Als Initiator der Veränderung strebt der Reacher nach Wissen und persönlicher Entwicklung, trotz der Herausforderungen und Unsicherheiten.
-Seine Motivation und innere Stärke führen ihn auf den Weg des persönlichen Wachstums.""",
+      "descriptionPath": "assets/auswertungen/Reacher.txt",
     },
     {
       "name": "Stufe 5: Traveller",
       "image": "assets/Traveller.webp",
-      "description": """Als ständiger Abenteurer strebt der Traveller nach neuen Erfahrungen und persönlichem Wachstum, stets begleitet von Neugier und Offenheit.
-Er inspiriert durch seine Entschlossenheit, das Leben in vollen Zügen zu genießen und sich kontinuierlich weiterzuentwickeln.""",
+      "descriptionPath": "assets/auswertungen/Traveller.txt",
     },
     {
       "name": "Stufe 6: Individual",
       "image": "assets/Individual.webp",
-      "description": """Der Individual strebt nach Klarheit und Verwirklichung seiner Ziele, beeindruckt durch Selbstbewusstsein und klare Entscheidungen.
-Er inspiriert andere durch seine Entschlossenheit und positive Ausstrahlung.""",
+      "descriptionPath": "assets/auswertungen/Individual.txt",
     },
     {
       "name": "Stufe 7: Adventurer",
       "image": "assets/Adventurer.webp",
-      "description": """Der Adventurer meistert das Leben mit Leichtigkeit und fasziniert durch seine Ausstrahlung und Selbstsicherheit, ein Magnet für Erfolg und Menschen.
-Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannender Herausforderungen.""",
+      "descriptionPath": "assets/auswertungen/Adventurer.txt",
     },
     {
       "name": "Stufe 8: Life Artist",
       "image": "assets/Life Artist.webp",
-      "description": """Der Life Artist lebt seine Vision des Lebens mit Dankbarkeit und Energie, verwandelt Schwierigkeiten in bedeutungsvolle Erlebnisse.
-Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfülltes Leben inspiriert.""",
+      "descriptionPath": "assets/auswertungen/LifeArtist.txt",
     },
   ];
+
+  // Map to hold the loaded descriptions
+  Map<String, String> loadedDescriptions = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDescriptions(); // Call the method here
+  }
+
+  // The _loadDescriptions method is placed inside the state class
+  Future<void> _loadDescriptions() async {
+    for (var type in personalityTypes) {
+      String name = type['name']!;
+      String path = type['descriptionPath']!;
+      try {
+        String description = await rootBundle.loadString(path);
+        setState(() {
+          loadedDescriptions[name] = description;
+        });
+      } catch (e) {
+        setState(() {
+          loadedDescriptions[name] = 'Description not available.';
+        });
+        print('Error loading description for $name: $e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,25 +94,23 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // Header Section
             Container(
-              height: MediaQuery.of(context).size.height / 3,
+              height: screenHeight / 3,
               decoration: BoxDecoration(
                 color: Colors.transparent,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(0.0),
-                    child: Text(
-                      "Die 8 Persönlichkeitsstufen",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontFamily: 'Roboto',
-                      ),
+                  Text(
+                    "Die 8 Persönlichkeitsstufen",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 60,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontFamily: 'Roboto',
                     ),
                   ),
                   Padding(
@@ -109,90 +128,27 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                 ],
               ),
             ),
+            // Personality Types Section
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    "PERSONALITY TYPES",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontFamily: 'Roboto',
-                    ),
-                  ),
                   SizedBox(height: 10),
                   Column(
                     children: personalityTypes.asMap().entries.map((entry) {
                       int index = entry.key;
                       Map<String, String> type = entry.value;
                       bool isOdd = index % 2 == 1;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                        child: Card(
-                          color: Color(0xFFF7F5EF),
-                          margin: EdgeInsets.all(20),
-                          child: Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (!isOdd)
-                                  Expanded(
-                                    flex: 1,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20.0),
-                                      child: SizedBox(
-                                        width: 500,
-                                        height: 500,
-                                        child: Image.asset(type["image"]!),
-                                      ),
-                                    ),
-                                  ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        type["name"]!,
-                                        style: TextStyle(
-                                          fontSize: 60,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      SizedBox(height: 20),
-                                      Text(
-                                        type["description"]!,
-                                        style: TextStyle(
-                                          fontSize: 22,
-                                          color: Colors.black,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (isOdd)
-                                  Expanded(
-                                    flex: 1,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20.0),
-                                      child: SizedBox(
-                                        width: 500,
-                                        height: 500,
-                                        child: Image.asset(type["image"]!),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
+                      String name = type['name']!;
+                      String image = type['image']!;
+                      String? description = loadedDescriptions[name];
+
+                      return PersonalityTypeCard(
+                        name: name,
+                        image: image,
+                        description: description ?? 'Loading...', // Show 'Loading...' if not yet loaded
+                        isOdd: isOdd,
                       );
                     }).toList(),
                   ),
@@ -200,6 +156,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
               ),
             ),
             SizedBox(height: 350),
+            // Footer Section with Background Image and Button
             Stack(
               children: [
                 Positioned.fill(
@@ -227,8 +184,8 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFCB9935),
-                            shape: RoundedRectangleBorder( // Create square corners
-                              borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
                             ),
                             padding: EdgeInsets.symmetric(
                               horizontal: screenWidth * 0.07,
@@ -236,6 +193,7 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
                             ),
                           ),
                           onPressed: () {
+                            // Implement your handleTakeTest(context) method
                             handleTakeTest(context);
                           },
                           child: Text(
@@ -260,4 +218,192 @@ Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfüllt
     );
   }
 
+  // Implement your handleTakeTest method
+  void handleTakeTest(BuildContext context) {
+    // Navigate to the test page or implement the desired functionality
+  }
+}
+
+class PersonalityTypeCard extends StatefulWidget {
+  final String name;
+  final String image;
+  final String description;
+  final bool isOdd;
+
+  PersonalityTypeCard({
+    required this.name,
+    required this.image,
+    required this.description,
+    required this.isOdd,
+  });
+
+  @override
+  _PersonalityTypeCardState createState() => _PersonalityTypeCardState();
+}
+
+class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    String displayDescription;
+    if (isExpanded) {
+      displayDescription = widget.description;
+    } else {
+      // Show only the first 45 words
+      List<String> words = widget.description.split(' ');
+      if (words.length > 45) {
+        displayDescription = words.sublist(0, 45).join(' ') + '...';
+      } else {
+        displayDescription = widget.description;
+      }
+    }
+
+    // Set a fixed height for the card
+    double cardHeight = 600; // Adjust this value as needed
+
+    // Define the button style
+    final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+      backgroundColor: isExpanded ? Colors.black : Color(0xFFCB9935),
+      side: BorderSide(color: Color(0xFFCB9935)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Card(
+        color: Color(0xFFF7F5EF),
+        margin: EdgeInsets.all(20),
+        child: SizedBox(
+          height: cardHeight,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: isExpanded
+                ? Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  widget.name,
+                  style: TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      displayDescription,
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  style: buttonStyle,
+                  onPressed: () {
+                    setState(() {
+                      isExpanded = false;
+                    });
+                  },
+                  child: Text(
+                    'Lese weniger',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Roboto',
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ],
+            )
+                : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (!widget.isOdd)
+                  Expanded(
+                    flex: 1,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: SizedBox(
+                        width: 500,
+                        height: 500,
+                        child: Image.asset(widget.image),
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.name,
+                        style: TextStyle(
+                          fontSize: 60,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            displayDescription,
+                            style: TextStyle(
+                              fontSize: 22,
+                              color: Colors.black,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        style: buttonStyle,
+                        onPressed: () {
+                          setState(() {
+                            isExpanded = true;
+                          });
+                        },
+                        child: Text(
+                          'Lese weiter',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Roboto',
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (widget.isOdd)
+                  Expanded(
+                    flex: 1,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: SizedBox(
+                        width: 500,
+                        height: 500,
+                        child: Image.asset(widget.image),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
