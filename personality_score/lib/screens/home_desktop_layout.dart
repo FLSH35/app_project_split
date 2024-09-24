@@ -3,7 +3,9 @@ import 'custom_app_bar.dart'; // Import your custom app bar
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
-import 'package:personality_score/models/questionaire_model.dart'; // Import your QuestionnaireModel
+import 'package:personality_score/models/questionaire_model.dart';
+
+import 'custom_footer.dart'; // Import your QuestionnaireModel
 
 class DesktopLayout extends StatelessWidget {
   @override
@@ -24,6 +26,7 @@ class DesktopLayout extends StatelessWidget {
             SizedBox(height: 350),
             _buildCuriousSection(context, screenHeight, screenWidth), // New Section Added
             SizedBox(height: 350),
+            CustomFooter(),
           ],
         ),
       ),

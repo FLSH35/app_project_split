@@ -126,8 +126,15 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
                   Text(
+                    'EHER NEIN',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                  ),
+                  Text(
                     model.answers[questionIndex]?.toString() ?? '0',
                     style: TextStyle(color: Colors.grey[900], fontSize: 16),
+                  ),Text(
+                    'EHER JA',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
                   Text(
                     'JA',
@@ -215,7 +222,6 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
             onPressed: () {
               model.completeSecondTest(context);
               _scrollToFirstQuestion(context);
-              _showRewardAnimation(context, 'stars.json');
             },
             child: Text(
               'Fertigstellen',

@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthService(context)), // Pass context here
+        ChangeNotifierProvider(create: (_) => AuthService(context)),
         ChangeNotifierProvider(create: (_) => QuestionnaireModel()),
       ],
       child: MaterialApp(
@@ -41,7 +41,46 @@ class MyApp extends StatelessWidget {
           '/questionnaire': (context) => QuestionnaireScreen(),
           '/profile': (context) => ProfileScreen(),
           '/personality_types': (context) => PersonalityTypesPage(),
+          '/impressum': (context) => ImpressumPage(), // Add this route
+          '/datenschutz': (context) => DatenschutzPage(), // Add this route
         },
+      ),
+    );
+  }
+}
+class ImpressumPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Impressum'),
+        backgroundColor: Color(0xFFCB9935), // Same as the app's gold color
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          'This is the Impressum page where the legal information goes...',
+          style: TextStyle(fontFamily: 'Roboto'),
+        ),
+      ),
+    );
+  }
+}
+
+class DatenschutzPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Datenschutz'),
+        backgroundColor: Color(0xFFCB9935), // Same as the app's gold color
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          'This is the Datenschutz page where privacy policies go...',
+          style: TextStyle(fontFamily: 'Roboto'),
+        ),
       ),
     );
   }

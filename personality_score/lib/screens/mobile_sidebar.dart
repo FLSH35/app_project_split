@@ -7,45 +7,51 @@ class MobileSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
+      backgroundColor: Colors.white.withOpacity(0.8), // Half-transparent background
+      child: Container(
+        child: Align(
+          alignment: Alignment.topLeft, // Align content to the top
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5, // Limit height to content
             ),
-            child: Text('Menu', style: TextStyle(fontSize: 24)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // Only take up space required by content
+              children: [
+                SizedBox(height: 50),
+                ListTile(
+                  title: Text('ALLGEMEIN'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushNamed('/home');
+                  },
+                ),
+                ListTile(
+                  title: Text('STUFEN'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushNamed('/personality_types');
+                  },
+                ),
+                Consumer<AuthService>(
+                  builder: (context, authService, child) {
+                    return ListTile(
+                      title: Text('PROFIL'),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        if (authService.user == null) {
+                          Navigator.of(context).pushNamed('/signin');
+                        } else {
+                          Navigator.of(context).pushNamed('/profile');
+                        }
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-          ListTile(
-            title: Text('PERSONALITY SCORE'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamed('/home');
-            },
-          ),
-          ListTile(
-            title: Text('Personality Types'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamed('/personality_types');
-            },
-          ),
-          Consumer<AuthService>(
-            builder: (context, authService, child) {
-              return ListTile(
-                title: Text('Profile'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  if (authService.user == null) {
-                    Navigator.of(context).pushNamed('/signin');
-                  } else {
-                    Navigator.of(context).pushNamed('/profile');
-                  }
-                },
-              );
-            },
-          ),
-        ],
+        ),
       ),
     );
   }

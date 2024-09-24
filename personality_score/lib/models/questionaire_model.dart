@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:personality_score/services/question_service.dart';
 import 'package:personality_score/models/question.dart';
 import 'package:share_plus/share_plus.dart';
@@ -218,7 +219,9 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(message, style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
+                Text(message + '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n'
+                , style: TextStyle(color: Colors.black, fontFamily: 'Roboto',
+        fontSize: 18)),
                 SizedBox(height: 10),
                 Wrap(
                   spacing: 10.0,
@@ -316,8 +319,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  message,
-                  style: TextStyle(fontFamily: 'Roboto'),
+            message + '\n\nWinston Churchill: "Erfolg ist nicht endgültig, Misserfolg ist nicht fatal: Es ist der Mut, weiterzumachen, der zählt."\n',
+                      style: TextStyle(fontFamily: 'Roboto',
+                          fontSize: 18),
                 ),
                 SizedBox(height: 10),
                 SingleChildScrollView(
@@ -360,57 +364,37 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       },
     );
   }
+  Future<String> loadFinalCharacterDescription(String characterName) async {
+    String path = 'assets/auswertungen/$characterName.txt'; // Path to your description file
+    try {
+      String description = await rootBundle.loadString(path);
+      return description;
+    } catch (e) {
+      print('Error loading description for $characterName: $e');
+      return 'Beschreibung nicht verfügbar.'; // Default return if loading fails
+    }
+  }
 
   void completeFinalTest(BuildContext context) async {
     String finalCharacter;
-    String finalCharacterDescription;
 
-    int possibleScore = _questions.length *
-        3; // Calculate possible score for the final set
+    int possibleScore = _questions.length * 3; // Calculate possible score for the final set
 
+    // Determine final character based on score
     if (_questions.first.set == 'Individual') {
-      if (_totalScore > (possibleScore * 0.5)) {
-        finalCharacter = "Individual.webp";
-        finalCharacterDescription = """Der Individual strebt nach Klarheit und Verwirklichung seiner Ziele, beeindruckt durch Selbstbewusstsein und klare Entscheidungen.
-Er inspiriert andere durch seine Entschlossenheit und positive Ausstrahlung.""";
-      } else {
-        finalCharacter = "Traveller.webp";
-        finalCharacterDescription = """Als ständiger Abenteurer strebt der Traveller nach neuen Erfahrungen und persönlichem Wachstum, stets begleitet von Neugier und Offenheit.
-Er inspiriert durch seine Entschlossenheit, das Leben in vollen Zügen zu genießen und sich kontinuierlich weiterzuentwickeln.""";
-      }
+      finalCharacter = _totalScore > (possibleScore * 0.5) ? "Individual" : "Traveller";
     } else if (_questions.first.set == 'Reacher') {
-      if (_totalScore > (possibleScore * 0.5)) {
-        finalCharacter = "Reacher.webp";
-        finalCharacterDescription = """Als Initiator der Veränderung strebt der Reacher nach Wissen und persönlicher Entwicklung, trotz der Herausforderungen und Unsicherheiten.
-Seine Motivation und innere Stärke führen ihn auf den Weg des persönlichen Wachstums.""";
-      } else {
-        finalCharacter = "Explorer.webp";
-        finalCharacterDescription = """Immer offen für neue Wege der Entwicklung, erforscht der Explorer das Unbekannte und gestaltet sein Leben aktiv.
-Seine Offenheit und Entschlossenheit führen ihn zu neuen Ideen und persönlichem Wachstum.""";
-      }
+      finalCharacter = _totalScore > (possibleScore * 0.5) ? "Reacher" : "Explorer";
     } else if (_questions.first.set == 'Resident') {
-      if (_totalScore > (possibleScore * 0.5)) {
-        finalCharacter = "resident.webp";
-        finalCharacterDescription = """Im ständigen Kampf mit inneren Dämonen sucht der Resident nach persönlichem Wachstum und Klarheit, unterstützt andere trotz eigener Herausforderungen.
-Seine Erfahrungen und Wissen bieten Orientierung, während er nach Selbstvertrauen und Stabilität strebt.""";
-      } else {
-        finalCharacter = "Anonymous.webp";
-        finalCharacterDescription = """Der Anonymous operiert im Verborgenen, mit einem tiefen Weitblick und unaufhaltsamer Ruhe, beeinflusst er subtil aus dem Schatten.
-Sein unsichtbares Netzwerk und seine Anpassungsfähigkeit machen ihn zum verlässlichen Berater derjenigen im Rampenlicht.""";
-      }
+      finalCharacter = _totalScore > (possibleScore * 0.5) ? "resident" : "Anonymous";
     } else {
-      if (_totalScore > (possibleScore * 0.5)) {
-        finalCharacter = "Life Artist.webp";
-        finalCharacterDescription = """Der Life Artist lebt seine Vision des Lebens mit Dankbarkeit und Energie, verwandelt Schwierigkeiten in bedeutungsvolle Erlebnisse.
-Seine Gelassenheit und Charisma ziehen andere an, während er durch ein erfülltes Leben inspiriert.""";
-      } else {
-        finalCharacter = "Adventurer.webp";
-        finalCharacterDescription = """Der Adventurer meistert das Leben mit Leichtigkeit und fasziniert durch seine Ausstrahlung und Selbstsicherheit, ein Magnet für Erfolg und Menschen.
-Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannender Herausforderungen.""";
-      }
+      finalCharacter = _totalScore > (possibleScore * 0.5) ? "Life Artist" : "Adventurer";
     }
 
-    // Set final character and description in model
+    // Load the final character's description
+    String finalCharacterDescription = await loadFinalCharacterDescription(finalCharacter);
+
+    // Update final character and description in the model
     _finalCharacter = finalCharacter;
     _finalCharacterDescription = finalCharacterDescription;
     notifyListeners();
@@ -430,50 +414,79 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
       }, SetOptions(merge: true));
     }
 
-    if (user != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('results')
-          .doc(_currentSet)
-          .set({
-        'set': _currentSet,
-        'totalScore': _totalScore,
-        'isCompleted': true,
-        'completionDate': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-    }
+    // Show final result dialog
     String? name = user?.displayName;
-    String greetingText = 'Lieber $name' ;
+    String greetingText = 'Lieber $name';
+    showFinalResultDialog(context, finalCharacter, finalCharacterDescription, greetingText);
+  }
 
+  void showFinalResultDialog(BuildContext context, String finalCharacter, String finalCharacterDescription, String greetingText) {
+    bool isExpanded = false; // State variable for description expansion
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Color(0xFFF7F5EF),
-          title: Text(greetingText + ', deine Persönlichkeitsstufe',
+          title: Text('$greetingText, deine Persönlichkeitsstufe',
               style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Dein Finaler Charakter:', style: TextStyle(
-                    color: Colors.black, fontFamily: 'Roboto')),
-                SizedBox(height: 10),
-                Wrap(
-                  spacing: 10.0,
-                  runSpacing: 10.0,
-                  alignment: WrapAlignment.center,
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                        'assets/$finalCharacter', width: 200, height: 200),
+                    Text('Dein Finaler Charakter:', style: TextStyle(
+                        color: Colors.black, fontFamily: 'Roboto')),
+                    SizedBox(height: 10),
+                    if (!isExpanded)
+                      Image.asset(
+                          'assets/$finalCharacter.webp', width: 200, height: 200),
+                    SizedBox(height: 10),
+                    // Expandable description
+                    isExpanded
+                        ? Container(
+                      height: 150,
+                      child: SingleChildScrollView(
+                        child: Text(finalCharacterDescription,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Roboto',
+                                fontSize: 18)),
+                      ),
+                    )
+                        : Text(
+                      finalCharacterDescription.split(' ').take(15).join(' ') + '...',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Roboto',
+                          fontSize: 18),
+                    ),
+                    SizedBox(height: 10),
+                    // "Lese mehr" button with updated style
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                        backgroundColor: isExpanded ? Colors.black : Color(0xFFCB9935),
+                        side: BorderSide(color: Color(0xFFCB9935)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isExpanded = !isExpanded; // Toggle the state
+                        });
+                      },
+                      child: Text(
+                        isExpanded ? 'Lese weniger' : 'Lese mehr',
+                        style: TextStyle(
+                            color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+                      ),
+                    ),
                   ],
                 ),
-                SizedBox(height: 10),
-                Text(finalCharacterDescription, style: TextStyle(
-                    color: Colors.black, fontFamily: 'Roboto')),
-              ],
-            ),
+              );
+            },
           ),
           actions: [
             TextButton(
@@ -489,7 +502,8 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
                 Navigator.of(context).pop();
               },
               child: Text('Finish',
-                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
+                  style: TextStyle(
+                      color: Colors.white, fontFamily: 'Roboto')),
             ),
             TextButton(
               style: TextButton.styleFrom(
@@ -500,7 +514,7 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
                 ),
               ),
               onPressed: () {
-                String shareText = 'Du bist ein $finalCharacter.\n\nDescription: $finalCharacterDescription';
+                String shareText = 'Du bist ein $finalCharacter.\n\nBeschreibung: $finalCharacterDescription';
                 Share.share(shareText);
               },
               child: Text('Share', style: TextStyle(
@@ -510,6 +524,111 @@ Kreativ und strukturiert erreicht er seine Ziele in einem Leben voller spannende
         );
       },
     );
+  }
 
+
+
+
+}
+
+class FinalResultDialog extends StatefulWidget {
+  final String finalCharacter;
+  final String greetingText;
+  final String finalCharacterDescription;
+
+  FinalResultDialog({
+    required this.finalCharacter,
+    required this.greetingText,
+    required this.finalCharacterDescription,
+  });
+
+  @override
+  _FinalResultDialogState createState() => _FinalResultDialogState();
+}
+
+class _FinalResultDialogState extends State<FinalResultDialog> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: Color(0xFFF7F5EF),
+      title: Text('${widget.greetingText}, deine Persönlichkeitsstufe',
+          style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Dein Finaler Charakter:', style: TextStyle(
+                color: Colors.black, fontFamily: 'Roboto')),
+            SizedBox(height: 10),
+            Wrap(
+              spacing: 10.0,
+              runSpacing: 10.0,
+              alignment: WrapAlignment.center,
+              children: [
+                Image.asset(
+                    'assets/${widget.finalCharacter}', width: 200, height: 200),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Expandable description
+            isExpanded
+                ? Container(
+              height: 150, // Set a fixed height for scrolling
+              child: SingleChildScrollView(
+                child: Text(widget.finalCharacterDescription, style: TextStyle(
+                    color: Colors.black, fontFamily: 'Roboto', fontSize: 18)),
+              ),
+            )
+                : Text(
+              widget.finalCharacterDescription.split('. ').take(2).join('. ') + '...', // Show a preview
+              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+            ),
+            // "Lese mehr" button
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  isExpanded = !isExpanded; // Toggle the state
+                });
+              },
+              child: Text(isExpanded ? 'Lese weniger' : 'Lese mehr',
+                  style: TextStyle(color: Color(0xFFCB9935), fontFamily: 'Roboto')),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: Color(0xFFCB9935),
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('Finish',
+              style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
+          ),
+          onPressed: () {
+            String shareText = 'Du bist ein ${widget.finalCharacter}.\n\nBeschreibung: ${widget.finalCharacterDescription}';
+            Share.share(shareText);
+          },
+          child: Text('Share', style: TextStyle(
+              color: Color(0xFFCB9935), fontFamily: 'Roboto')),
+        ),
+      ],
+    );
   }
 }

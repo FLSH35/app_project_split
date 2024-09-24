@@ -190,11 +190,14 @@ class QuestionnaireScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Colors.black,
               side: BorderSide(color: Color(0xFFCB9935)),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
             ),
             onPressed: () => model.prevPage(),
             child: Text(
               'Zurück',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
         if (end < model.questions.length)
@@ -202,21 +205,28 @@ class QuestionnaireScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
             ),
+
             onPressed: () {
               model.nextPage(context);
               _scrollToFirstQuestion(context);
             },
             child: Text(
               'Weiter',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
-        if (end >= model.questions.length)
+        if (end >= model.questions.length && !model.isFirstTestCompleted)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
             ),
             onPressed: () {
               model.completeFirstTest(context);
@@ -224,7 +234,43 @@ class QuestionnaireScreen extends StatelessWidget {
             },
             child: Text(
               'Fertigstellen',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+            ),
+          ),
+        if (end >= model.questions.length && model.isFirstTestCompleted && !model.isSecondTestCompleted)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
+            ),
+            onPressed: () {
+              model.completeSecondTest(context);
+              _scrollToFirstQuestion(context);
+            },
+            child: Text(
+              'Fertigstellen',
+              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+            ),
+          ),
+        if (end >= model.questions.length && model.isSecondTestCompleted)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder( // Create square corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              ),
+            ),
+            onPressed: () {
+              model.completeFinalTest(context);
+              _scrollToFirstQuestion(context);
+            },
+            child: Text(
+              'Fertigstellen',
+              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
       ],
