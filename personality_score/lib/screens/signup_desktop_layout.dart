@@ -22,6 +22,7 @@ class SignUpDesktopLayout extends StatefulWidget {
 
 class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
   bool _isSignedUp = false; // Flag to track if the user has signed up
+  String? userName; // Store the signed-up user's name
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +90,8 @@ class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
                           });
 
                           setState(() {
-                            _isSignedUp = true; // User successfully signed up
+                            userName = widget.nameController.text; // Store user's name
+                            _isSignedUp = true; // Mark user as signed up
                           });
                         }
                       },
@@ -117,7 +119,15 @@ class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
                       },
                     ),
                   ] else ...[
-                    // Show the "Begin Test" button after sign-up
+                    // Show welcome message and buttons after sign-up
+                    if (userName != null)
+                      Text(
+                        'Hello, $userName!',
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      ),
+                    SizedBox(height: 20),
+
+                    // Button to start the test
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
@@ -135,6 +145,26 @@ class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
                         style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                       ),
                     ),
+                    SizedBox(height: 10),
+
+                    // Button to go to profile
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/profile'); // Navigate to profile
+                      },
+                      child: Text(
+                        'Go to Profile',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -145,5 +175,4 @@ class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
       backgroundColor: Color(0xFFEDE8DB),
     );
   }
-
 }

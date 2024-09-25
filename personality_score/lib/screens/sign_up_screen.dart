@@ -4,7 +4,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'signup_desktop_layout.dart';  // Import the desktop layout
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'custom_app_bar.dart';  // Import the custom app bar
+import 'mobile_sidebar.dart'; // Import the mobile sidebar for Sign Up
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -17,6 +17,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   bool _isSignedUp = false; // Flag to check sign-up status
+  String? userName; // Variable to store the user's name after sign-up
 
   @override
   Widget build(BuildContext context) {
@@ -67,13 +68,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     await authService.user!.updateDisplayName(_nameController.text);
                     await authService.user!.reload();
 
+                    // Save user data to Firestore
                     FirebaseFirestore.instance.collection('users').doc(authService.user!.uid).set({
                       'displayName': _nameController.text,
                       'email': _emailController.text,
                     });
 
                     setState(() {
-                      _isSignedUp = true; // User successfully signed up
+                      userName = _nameController.text; // Store the user's name
+                      _isSignedUp = true; // Mark user as signed up
                     });
                   }
                 },
@@ -97,7 +100,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 },
               ),
             ] else ...[
-              // Show the "Begin Test" button after sign-up
+              // Show welcome message and buttons after sign-up
+              if (userName != null)
+                Text(
+                  'Hello, $userName!',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              SizedBox(height: 20),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFCB9935),
@@ -107,10 +116,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 onPressed: () {
-                  handleTakeTest(context); // Your logic to handle test start
+                  handleTakeTest(context); // Handle starting the test
                 },
                 child: Text(
                   'Beginne den Test',
+                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                ),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/profile'); // Go to profile
+                },
+                child: Text(
+                  'Go to Profile',
                   style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                 ),
               ),
@@ -121,5 +147,4 @@ class _SignUpScreenState extends State<SignUpScreen> {
       backgroundColor: Color(0xFFEDE8DB),
     );
   }
-
 }

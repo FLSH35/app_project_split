@@ -20,7 +20,7 @@ class QuestionnaireModel with ChangeNotifier {
   bool _isSecondTestCompleted = false;
   String _currentSet = 'Kompetenz';
 
-  bool _isLoading = false;  // Track the loading state
+  bool _isLoading = true;  // Track the loading state
 
   String? _finalCharacter;
   String? _finalCharacterDescription;

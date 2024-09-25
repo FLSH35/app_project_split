@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore access
 import 'custom_app_bar.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 
@@ -19,6 +20,7 @@ class SignInDesktopLayout extends StatefulWidget {
 
 class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
   bool _isSignedIn = false; // Flag to check sign-in status
+  String? userName; // Variable to store the user's name
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +70,7 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                           widget.passwordController.text,
                         );
                         if (authService.user != null) {
+                          await fetchUserName(); // Fetch user name after sign-in
                           setState(() {
                             _isSignedIn = true; // User successfully signed in
                           });
@@ -97,6 +100,14 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                       },
                     ),
                   ] else ...[
+                    // Show welcome message after sign-in
+                    if (userName != null)
+                      Text(
+                        'Hello, $userName!',
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      ),
+                    SizedBox(height: 20),
+
                     // Show the "Begin Test" button after sign-in
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -108,10 +119,30 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                         ),
                       ),
                       onPressed: () {
-                        handleTakeTest(context); // Your logic to handle test start
+                        handleTakeTest(context); // Navigate to the test
                       },
                       child: Text(
                         'Beginne den Test',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+
+                    // Show the "Go to Profile" button after sign-in
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/profile'); // Navigate to profile
+                      },
+                      child: Text(
+                        'Go to Profile',
                         style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                       ),
                     ),
@@ -124,6 +155,27 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
       ),
       backgroundColor: Color(0xFFEDE8DB),
     );
+  }
+
+  Future<void> fetchUserName() async {
+    final user = Provider.of<AuthService>(context, listen: false).user;
+    if (user != null) {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get(); // Fetch the user document
+
+      if (snapshot.exists) {
+        // Cast snapshot.data() to a Map<String, dynamic>
+        final userData = snapshot.data() as Map<String, dynamic>?;
+
+        if (userData != null) {
+          setState(() {
+            userName = userData['name']; // Access the user's name safely
+          });
+        }
+      }
+    }
   }
 
 }

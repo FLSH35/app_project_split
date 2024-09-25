@@ -182,7 +182,7 @@ class QuestionnaireScreen extends StatelessWidget {
   }
 
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
-    int questionsPerPage = 3; // Adjusted for mobile layout
+    int questionsPerPage = 7; // Adjusted for mobile layout
     int start = model.currentPage * questionsPerPage;
     int end = start + questionsPerPage;
 
