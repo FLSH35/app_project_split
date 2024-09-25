@@ -285,7 +285,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Finish',
+                      child: Text('Abschließen',
                           style: TextStyle(
                               color: Colors.white, fontFamily: 'Roboto')),
                     ),
@@ -303,7 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             'Du bist ein ${finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${finalCharacterData!['finalCharacterDescription']}';
                         Share.share(shareText);
                       },
-                      child: Text('Share',
+                      child: Text('Teilen',
                           style: TextStyle(
                               color: Color(0xFFCB9935), fontFamily: 'Roboto')),
                     ),

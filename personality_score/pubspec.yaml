@@ -36,3 +36,5 @@ flutter:
 
   assets:
     - assets/
+    - assets/auswertungen/
+    - assets/icons/

@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Mobile AppBar (grey background, button for right drawer)
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('Personality Score'),
+      title: Text('PERSONALITY SCORE'),
       backgroundColor: Colors.grey[300], // Light grey for mobile
       actions: [
         Builder(
@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Text Section
               Text(
-                "PERSONALITY TYPES",
+                "PERSOENLICHKEITSSTUFEN",
                 style: TextStyle(
                   fontSize: screenHeight * 0.021,
                   fontWeight: FontWeight.bold,
@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 20),
               Text(
-                "Understand others",
+                "Verstehe dich selbst und andere ",
                 style: TextStyle(
                   fontSize: screenHeight * 0.056,
                   fontWeight: FontWeight.bold,
@@ -113,8 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 20),
               Text(
-                "In our free type descriptions you’ll learn what really drives, inspires, and worries different personality types, helping you build more meaningful relationships.",
-                style: TextStyle(
+                  "Vom Anonymus zum Life Artist: Die 8 Stufen symbolisieren die wichtigsten Etappen auf dem Weg, dein Potenzial voll auszuschöpfen. Mit einem fundierten Verständnis des Modells wirst du nicht nur dich selbst, sondern auch andere Menschen viel besser verstehen und einordnen können.",
+               style: TextStyle(
                   color: Colors.black,
                   fontFamily: 'Roboto',
                   fontSize: screenHeight * 0.021,
@@ -180,9 +180,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 Text(
-                  "Curious how accurate we are about you?",
+                  "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
-                    fontSize: screenHeight * 0.042,
+                    fontSize: screenHeight * 0.036,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                     fontFamily: 'Roboto',

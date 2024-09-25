@@ -14,7 +14,14 @@ void handleTakeTest(BuildContext context) {
     return;
   }
 
-  // If the user is logged in, show the dialog
+  // If the total score is zero, navigate directly to the questionnaire
+  if (model.totalScore == 0) {
+    model.resetQuestionnaire(); // Start fresh since the score is zero
+    Navigator.of(context).pushNamed('/questionnaire');
+    return;
+  }
+
+  // If the total score is not zero, show the dialog
   showDialog(
     context: context,
     builder: (BuildContext context) {

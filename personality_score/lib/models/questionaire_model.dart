@@ -501,7 +501,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 reset();
                 Navigator.of(context).pop();
               },
-              child: Text('Finish',
+              child: Text('Abschließen',
                   style: TextStyle(
                       color: Colors.white, fontFamily: 'Roboto')),
             ),
@@ -517,7 +517,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 String shareText = 'Du bist ein $finalCharacter.\n\nBeschreibung: $finalCharacterDescription';
                 Share.share(shareText);
               },
-              child: Text('Share', style: TextStyle(
+              child: Text('Teilen', style: TextStyle(
                   color: Color(0xFFCB9935), fontFamily: 'Roboto')),
             ),
           ],
@@ -630,7 +630,7 @@ class _FinalResultDialogState extends State<FinalResultDialog> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Finish',
+          child: Text('Abschließen',
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
         ),
         TextButton(
@@ -645,7 +645,7 @@ class _FinalResultDialogState extends State<FinalResultDialog> {
             String shareText = 'Du bist ein ${widget.finalCharacter}.\n\nBeschreibung: ${widget.finalCharacterDescription}';
             Share.share(shareText);
           },
-          child: Text('Share', style: TextStyle(
+          child: Text('Teilen', style: TextStyle(
               color: Color(0xFFCB9935), fontFamily: 'Roboto')),
         ),
       ],

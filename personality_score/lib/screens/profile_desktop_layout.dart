@@ -204,7 +204,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Finish',
+                  child: Text('Abschließen',
                       style: TextStyle(
                           color: Colors.white, fontFamily: 'Roboto')),
                 ),
@@ -222,7 +222,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                         'Du bist ein ${widget.finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${widget.finalCharacterData!['finalCharacterDescription']}';
                     Share.share(shareText);
                   },
-                  child: Text('Share',
+                  child: Text('Teilen',
                       style: TextStyle(
                           color: Color(0xFFCB9935), fontFamily: 'Roboto')),
                 ),

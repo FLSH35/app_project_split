@@ -119,7 +119,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('Sign In'),
+      title: Text('SIGN IN'),
       backgroundColor: Colors.grey[300],
       actions: [
         Builder(
