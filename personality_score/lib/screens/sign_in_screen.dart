@@ -5,6 +5,7 @@ import 'signin_desktop_layout.dart'; // Import the desktop layout
 import 'package:personality_score/auth/auth_service.dart';
 import 'mobile_sidebar.dart'; // Import the mobile sidebar for Sign In
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Add Firestore for fetching user data
 
 class SignInScreen extends StatefulWidget {
   @override
@@ -15,6 +16,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isSignedIn = false; // Flag to check sign-in status
+  String? userName; // Variable to store the user's name
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +60,13 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFCB9935),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      ),
+                    ),
                     onPressed: () async {
                       final authService = Provider.of<AuthService>(context, listen: false);
                       await authService.signInWithEmail(
@@ -68,6 +77,8 @@ class _SignInScreenState extends State<SignInScreen> {
                         setState(() {
                           _isSignedIn = true;
                         });
+                        // Fetch user name
+                        await fetchUserName();
                       }
                     },
                     child: Text('Sign In'),
@@ -90,7 +101,13 @@ class _SignInScreenState extends State<SignInScreen> {
                     },
                   ),
                 ] else ...[
-                  // Show the "Begin Test" button after sign-in
+                  // Show welcome message and buttons after sign-in
+                  if (userName != null)
+                    Text(
+                      'Hello, $userName!',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFCB9935),
@@ -104,6 +121,23 @@ class _SignInScreenState extends State<SignInScreen> {
                     },
                     child: Text(
                       'Beginne den Test',
+                      style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFCB9935),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/profile');
+                    },
+                    child: Text(
+                      'Go to Profile',
                       style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                     ),
                   ),
@@ -134,5 +168,26 @@ class _SignInScreenState extends State<SignInScreen> {
       automaticallyImplyLeading: false,
     );
   }
-}
 
+  Future<void> fetchUserName() async {
+    final user = Provider.of<AuthService>(context, listen: false).user;
+    if (user != null) {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get(); // Fetch the user document
+
+      if (snapshot.exists) {
+        // Cast snapshot.data() to a Map<String, dynamic>
+        final userData = snapshot.data() as Map<String, dynamic>?;
+
+        if (userData != null) {
+          setState(() {
+            userName = userData['displayName']; // Access the user's name safely
+          });
+        }
+      }
+    }
+  }
+
+}

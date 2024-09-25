@@ -32,6 +32,7 @@ class QuestionnaireScreen extends StatelessWidget {
               color: Color(0xFFEDE8DB),
             ),
           ),
+          // Inside your Consumer2 widget
           Consumer2<AuthService, QuestionnaireModel>(
             builder: (context, authService, model, child) {
               if (authService.user == null) {
@@ -50,6 +51,7 @@ class QuestionnaireScreen extends StatelessWidget {
               return _buildQuestionnaire(context, model);
             },
           ),
+
         ],
       ),
     );
@@ -129,7 +131,7 @@ class QuestionnaireScreen extends StatelessWidget {
                 question.text,
                 style: TextStyle(
 
-                    color: Colors.black, fontFamily: 'Roboto', fontSize: 24),
+                    color: Colors.black, fontFamily: 'Roboto', fontSize: 20),
                 textAlign: TextAlign.center,
                 maxLines: null,
                 overflow: TextOverflow.visible,
@@ -190,7 +192,7 @@ class QuestionnaireScreen extends StatelessWidget {
         if (model.currentPage > 0)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
               backgroundColor: Colors.black,
               side: BorderSide(color: Color(0xFFCB9935)),
               shape: RoundedRectangleBorder(
@@ -201,13 +203,13 @@ class QuestionnaireScreen extends StatelessWidget {
             child: Text(
               'Zurück',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 12),
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
         if (end < model.questions.length)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
               backgroundColor: Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -220,13 +222,13 @@ class QuestionnaireScreen extends StatelessWidget {
             child: Text(
               'Weiter',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 12),
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
         if (end >= model.questions.length && !model.isFirstTestCompleted)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
               backgroundColor: Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -239,7 +241,7 @@ class QuestionnaireScreen extends StatelessWidget {
             child: Text(
               'Fertigstellen',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 12),
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
         if (end >= model.questions.length &&
@@ -247,7 +249,7 @@ class QuestionnaireScreen extends StatelessWidget {
             !model.isSecondTestCompleted)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
               backgroundColor: Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -260,13 +262,13 @@ class QuestionnaireScreen extends StatelessWidget {
             child: Text(
               'Fertigstellen',
               style: TextStyle(
-                  color: Colors.black, fontFamily: 'Roboto', fontSize: 12),
+                  color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
         if (end >= model.questions.length && model.isSecondTestCompleted)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
               backgroundColor: Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),

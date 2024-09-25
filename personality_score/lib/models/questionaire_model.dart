@@ -20,6 +20,8 @@ class QuestionnaireModel with ChangeNotifier {
   bool _isSecondTestCompleted = false;
   String _currentSet = 'Kompetenz';
 
+  bool _isLoading = false;  // Track the loading state
+
   String? _finalCharacter;
   String? _finalCharacterDescription;
 
@@ -28,47 +30,52 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
   List<Question> get questions => _questions;
-
+  bool get isLoading => _isLoading;  // Expose loading state to the UI
   int get currentQuestionIndex => _currentQuestionIndex;
-
   int get totalScore => _totalScore;
-
   int get currentPage => _currentPage;
-
   List<int?> get answers => _answers;
-
   String? get personalityType => _personalityType;
-
   int get progress => _progress;
-
   bool get isFirstTestCompleted => _isFirstTestCompleted;
-
   bool get isSecondTestCompleted => _isSecondTestCompleted;
-
   String? get finalCharacter => _finalCharacter;
-
   String? get finalCharacterDescription => _finalCharacterDescription;
 
+
+  /// Loading questions from the service
   Future<void> loadQuestions(String set) async {
+    _isLoading = true;  // Set loading to true while fetching data
+    notifyListeners();  // Notify listeners to update the UI
+
     _currentSet = set;
-    // Load questions from the service
-    List<Question> loadedQuestions = await _questionService.loadQuestions(set);
 
-    // Create a Set to store unique questions
-    Set<String> uniqueQuestionTexts = {};
-    List<Question> uniqueQuestions = [];
+    try {
+      // Load questions from the service
+      List<Question> loadedQuestions = await _questionService.loadQuestions(set);
 
-    for (var question in loadedQuestions) {
-      if (uniqueQuestionTexts.add(question
-          .text)) { // Assuming `text` is the unique identifier for the question
-        uniqueQuestions.add(question);
+      // Create a Set to store unique questions
+      Set<String> uniqueQuestionTexts = {};
+      List<Question> uniqueQuestions = [];
+
+      for (var question in loadedQuestions) {
+        if (uniqueQuestionTexts.add(question.text)) {  // Ensure uniqueness by question text
+          uniqueQuestions.add(question);
+        }
       }
-    }
 
-    _questions = uniqueQuestions;
-    _answers = List<int?>.filled(_questions.length, null);
-    notifyListeners();
+      // Set loaded questions and reset answers
+      _questions = uniqueQuestions;
+      _answers = List<int?>.filled(_questions.length, null);
+    } catch (error) {
+      print("Error loading questions: $error");
+    } finally {
+      _isLoading = false;  // Set loading to false after fetching data
+      notifyListeners();  // Notify listeners to update the UI
+    }
   }
+
+
 
   Future<void> saveProgress() async {
     User? user = _auth.currentUser;

@@ -24,6 +24,7 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
               color: Color(0xFFEDE8DB),
             ),
           ),
+          // Inside your Consumer2 widget
           Consumer2<AuthService, QuestionnaireModel>(
             builder: (context, authService, model, child) {
               if (authService.user == null) {
@@ -42,6 +43,7 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
               return _buildQuestionnaire(context, model);
             },
           ),
+
         ],
       ),
     );
