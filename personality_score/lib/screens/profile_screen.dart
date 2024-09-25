@@ -5,6 +5,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'profile_desktop_layout.dart'; // Import the desktop layout
 import 'mobile_sidebar.dart'; // Import the mobile sidebar
 import 'package:personality_score/auth/auth_service.dart';
+import 'package:share_plus/share_plus.dart'; // Import share package
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -15,6 +16,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? finalCharacterData;
   bool _isEditingName = false;
   TextEditingController _nameController = TextEditingController();
+
+  bool isExpanded = false; // Add this line for expansion state
 
   @override
   void initState() {
@@ -91,7 +94,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         body: Center(
           child: Text(
             'Please sign in to see your profile.',
-            style: TextStyle(fontSize: 18, color: Colors.black, fontFamily: 'Roboto'),
+            style: TextStyle(
+                fontSize: 18, color: Colors.black, fontFamily: 'Roboto'),
           ),
         ),
       );
@@ -106,88 +110,208 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Color(0xFFEDE8DB),
       appBar: _buildAppBar(context), // Add AppBar for mobile with menu button
       endDrawer: MobileSidebar(), // Use the mobile sidebar
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/${finalCharacterData?['finalCharacter'] ?? ''}.webp'),
-              backgroundColor: Colors.transparent, // Optional: set to transparent if no image available
-            ),
-            SizedBox(height: 20),
-            _isEditingName
-                ? Row(
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0), // Add padding for better layout
+            child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Display Name',
-                      border: OutlineInputBorder(),
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: AssetImage(
+                      'assets/${finalCharacterData?['finalCharacter'] ?? ''}.webp'),
+                  backgroundColor: Colors.transparent,
+                ),
+                SizedBox(height: 20),
+                _isEditingName
+                    ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Display Name',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
                     ),
+                    IconButton(
+                      icon: Icon(Icons.check),
+                      onPressed: updateUserName,
+                    ),
+                  ],
+                )
+                    : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _nameController.text,
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontFamily: 'Roboto'),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: () {
+                        setState(() {
+                          _isEditingName = true;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                if (finalCharacterData != null)
+                  Card(
+                    color: Color(0xFFF7F5EF),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Du bist ein ${finalCharacterData!['finalCharacter']}',
+                            style: TextStyle(
+                                color: Colors.black, fontFamily: 'Roboto'),
+                          ),
+                          SizedBox(height: 10),
+                          Image.asset(
+                            'assets/${finalCharacterData!['finalCharacter']}.webp',
+                            width: 100,
+                            height: 100,
+                          ),
+                          SizedBox(height: 10),
+                          isExpanded
+                              ? Column(
+                            children: [
+                              Text(
+                                finalCharacterData![
+                                'finalCharacterDescription'] ??
+                                    'No description available.',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Roboto',
+                                    fontSize: 18),
+                              ),
+                              SizedBox(height: 10),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Color(0xFFCB9935),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    isExpanded = false;
+                                  });
+                                },
+                                child: Text(
+                                  'Lese weniger',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Roboto'),
+                                ),
+                              ),
+                            ],
+                          )
+                              : Column(
+                            children: [
+                              Text(
+                                finalCharacterData![
+                                'finalCharacterDescription']
+                                    ?.split('. ')
+                                    .take(2)
+                                    .join('. ') +
+                                    '...',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Roboto',
+                                    fontSize: 18),
+                              ),
+                              SizedBox(height: 10),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Color(0xFFCB9935),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    isExpanded = true;
+                                  });
+                                },
+                                child: Text(
+                                  'Lese mehr',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Roboto'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    'No final character found.',
+                    style: TextStyle(
+                        color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.check),
-                  onPressed: updateUserName,
-                ),
-              ],
-            )
-                : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _nameController.text,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black, fontFamily: 'Roboto'),
-                ),
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    setState(() {
-                      _isEditingName = true;
-                    });
-                  },
+                SizedBox(height: 20),
+                // Finish and Share buttons
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Color(0xFFCB9935),
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Finish',
+                          style: TextStyle(
+                              color: Colors.white, fontFamily: 'Roboto')),
+                    ),
+                    SizedBox(width: 10),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: () {
+                        String shareText =
+                            'Du bist ein ${finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${finalCharacterData!['finalCharacterDescription']}';
+                        Share.share(shareText);
+                      },
+                      child: Text('Share',
+                          style: TextStyle(
+                              color: Color(0xFFCB9935), fontFamily: 'Roboto')),
+                    ),
+                  ],
                 ),
               ],
             ),
-            SizedBox(height: 20),
-            if (finalCharacterData != null)
-              Card(
-                color: Color(0xFFF7F5EF),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Final Character',
-                        style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
-                      ),
-                      SizedBox(height: 10),
-                      Image.asset(
-                        'assets/${finalCharacterData!['finalCharacter']}.webp',
-                        width: 100,
-                        height: 100,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        finalCharacterData!['finalCharacterDescription'] ?? 'No description available.',
-                        style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              Text(
-                'No final character found.',
-                style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
-              ),
-          ],
+          ),
         ),
       ),
     );
@@ -203,7 +327,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (context) => IconButton(
             icon: Icon(Icons.menu), // Menu icon to open the sidebar
             onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // Open the sidebar for mobile
+              Scaffold.of(context)
+                  .openEndDrawer(); // Open the sidebar for mobile
             },
           ),
         ),
@@ -211,5 +336,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
       automaticallyImplyLeading: false, // Remove back button for mobile
     );
   }
-
 }

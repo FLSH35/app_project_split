@@ -559,7 +559,7 @@ class _FinalResultDialogState extends State<FinalResultDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Dein Finaler Charakter:', style: TextStyle(
+            Text('Dein Finaler Charakter: ${widget.finalCharacter}', style: TextStyle(
                 color: Colors.black, fontFamily: 'Roboto')),
             SizedBox(height: 10),
             Wrap(
@@ -587,13 +587,33 @@ class _FinalResultDialogState extends State<FinalResultDialog> {
             ),
             // "Lese mehr" button
             TextButton(
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                backgroundColor: isExpanded ? Colors.black : Color(0xFFCB9935),
+                side: BorderSide(color: Color(0xFFCB9935)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   isExpanded = !isExpanded; // Toggle the state
                 });
               },
-              child: Text(isExpanded ? 'Lese weniger' : 'Lese mehr',
-                  style: TextStyle(color: Color(0xFFCB9935), fontFamily: 'Roboto')),
+              child: isExpanded ? Text(
+                'Lese weniger',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Roboto',
+                  fontSize: 18,
+                ),) : Text(
+                'Lese weniger',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Roboto',
+                  fontSize: 18,
+                ),
+              ),
             ),
           ],
         ),
