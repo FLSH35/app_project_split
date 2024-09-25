@@ -1,5 +1,6 @@
 // mobile_sidebar.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 
@@ -18,7 +19,15 @@ class MobileSidebar extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min, // Only take up space required by content
               children: [
-                SizedBox(height: 50),
+
+            Padding(
+            padding: const EdgeInsets.symmetric(vertical: 36.0),
+            child: SvgPicture.asset(
+                    'assets/logo.svg', // Your logo file
+                    height: 40, // Adjust logo size if needed
+                  ),
+
+            ),
                 ListTile(
                   title: Text('ALLGEMEIN'),
                   onTap: () {
@@ -26,6 +35,8 @@ class MobileSidebar extends StatelessWidget {
                     Navigator.of(context).pushNamed('/home');
                   },
                 ),
+
+
                 ListTile(
                   title: Text('STUFEN'),
                   onTap: () {

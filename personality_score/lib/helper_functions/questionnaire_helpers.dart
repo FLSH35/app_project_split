@@ -1,12 +1,20 @@
-// lib/questionnaire_helpers.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:personality_score/models/questionaire_model.dart'; // Make sure to adjust the path accordingly
+import 'package:personality_score/models/questionaire_model.dart'; // Adjust the path accordingly
+import 'package:personality_score/auth/auth_service.dart'; // Import AuthService to check authentication
 
 void handleTakeTest(BuildContext context) {
+  final authService = Provider.of<AuthService>(context, listen: false);
   final model = Provider.of<QuestionnaireModel>(context, listen: false);
 
+  // Check if the user is logged in
+  if (authService.user == null) {
+    // Redirect to sign-in page
+    Navigator.of(context).pushNamed('/signin');
+    return;
+  }
+
+  // If the user is logged in, show the dialog
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -33,7 +41,7 @@ void handleTakeTest(BuildContext context) {
               backgroundColor: Color(0xFFCB9935), // Gold background for button
               padding: EdgeInsets.symmetric(horizontal: 20),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
             onPressed: () {
@@ -51,7 +59,7 @@ void handleTakeTest(BuildContext context) {
               backgroundColor: Colors.transparent, // Transparent background
               padding: EdgeInsets.symmetric(horizontal: 20),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
             onPressed: () {
@@ -69,4 +77,3 @@ void handleTakeTest(BuildContext context) {
     },
   );
 }
-

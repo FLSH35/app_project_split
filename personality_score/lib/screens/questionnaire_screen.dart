@@ -76,66 +76,47 @@ class QuestionnaireScreen extends StatelessWidget {
 
   // Build the questionnaire for mobile layout
   Widget _buildQuestionnaire(BuildContext context, QuestionnaireModel model) {
-    int totalSteps = (model.questions.length / 7).ceil();
+    int totalSteps = (model.questions.length / 3).ceil(); // 3 questions per page
     int currentStep = model.currentPage;
 
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 40),
-          _buildTestDescription(context),
-          CustomProgressBar(totalSteps: totalSteps, currentStep: currentStep),
-          _buildQuestionsList(context, model),
-          _buildNavigationButtons(context, model),
-          SizedBox(height: 40),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTestDescription(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.0), // No margins for mobile
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Persönlichkeitsstufen-Test: Wo stehst du?',
-            style: TextStyle(
-              fontSize: 22, // Reduced font size
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontFamily: 'Roboto',
+    return Column(
+      children: [
+        // Progress bar stays on top and does not scroll
+        CustomProgressBar(totalSteps: totalSteps, currentStep: currentStep),
+        // Scrollable content
+        Expanded(
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 40),
+                _buildQuestionsList(context, model),
+                _buildNavigationButtons(context, model),
+                SizedBox(height: 40),
+              ],
             ),
-            textAlign: TextAlign.center,
           ),
-          SizedBox(height: 16),
-          Text(
-            'Bitte beantworte die Fragen so ehrlich und selbstreflektiert wie möglich, um ein aussagekräftiges Ergebnis zu erhalten.',
-            style: TextStyle(
-              fontSize: 16, // Reduced font size for mobile
-              color: Colors.grey,
-              fontFamily: 'Roboto',
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildQuestionsList(BuildContext context, QuestionnaireModel model) {
-    int start = model.currentPage * 7;
-    int end = start + 7;
-    List<Question> currentQuestions = model.questions.sublist(start, end > model.questions.length ? model.questions.length : end);
+    int questionsPerPage = 7; // Only show 3 questions per page
+    int start = model.currentPage * questionsPerPage;
+    int end = start + questionsPerPage;
+
+    // Ensure end does not go beyond the number of questions
+    List<Question> currentQuestions = model.questions.sublist(
+        start, end > model.questions.length ? model.questions.length : end);
 
     return Column(
       children: currentQuestions.map((question) {
         int questionIndex = start + currentQuestions.indexOf(question);
         return Container(
-          margin: EdgeInsets.only(bottom: 40.0), // Increased margin between questions
+          margin: EdgeInsets.only(bottom: 40.0), // Margin between questions
+          height: MediaQuery.of(context).size.height / 4,
           padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
           decoration: BoxDecoration(
             color: Colors.transparent,
@@ -146,10 +127,12 @@ class QuestionnaireScreen extends StatelessWidget {
             children: [
               Text(
                 question.text,
-                style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18), // Reduced font size
+                style: TextStyle(
+
+                    color: Colors.black, fontFamily: 'Roboto', fontSize: 24),
                 textAlign: TextAlign.center,
-                maxLines: null, // Allow unlimited lines
-                overflow: TextOverflow.visible, // Ensure text isn't cut off
+                maxLines: null,
+                overflow: TextOverflow.visible,
               ),
               SizedBox(height: 8.0),
               Slider(
@@ -165,10 +148,29 @@ class QuestionnaireScreen extends StatelessWidget {
                 inactiveColor: Colors.grey,
                 thumbColor: Color(0xFFCB9935),
               ),
-              SizedBox(height: 4),
-              Text(
-                model.answers[questionIndex]?.toString() ?? '0',
-                style: TextStyle(color: Colors.grey[400], fontSize: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'NEIN',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                  ),
+                  Text(
+                    'EHER NEIN',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                  ),
+                  Text(
+                    model.answers[questionIndex]?.toString() ?? '0',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 16),
+                  ),Text(
+                    'EHER JA',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                  ),
+                  Text(
+                    'JA',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                  ),
+                ],
               ),
             ],
           ),
@@ -178,8 +180,9 @@ class QuestionnaireScreen extends StatelessWidget {
   }
 
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
-    int start = model.currentPage * 7;
-    int end = start + 7;
+    int questionsPerPage = 3; // Adjusted for mobile layout
+    int start = model.currentPage * questionsPerPage;
+    int end = start + questionsPerPage;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -190,14 +193,15 @@ class QuestionnaireScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Colors.black,
               side: BorderSide(color: Color(0xFFCB9935)),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
             onPressed: () => model.prevPage(),
             child: Text(
               'Zurück',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 20),
             ),
           ),
         if (end < model.questions.length)
@@ -205,18 +209,18 @@ class QuestionnaireScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
-
             onPressed: () {
               model.nextPage(context);
               _scrollToFirstQuestion(context);
             },
             child: Text(
               'Weiter',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 24),
             ),
           ),
         if (end >= model.questions.length && !model.isFirstTestCompleted)
@@ -224,8 +228,8 @@ class QuestionnaireScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
             onPressed: () {
@@ -234,16 +238,19 @@ class QuestionnaireScreen extends StatelessWidget {
             },
             child: Text(
               'Fertigstellen',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
-        if (end >= model.questions.length && model.isFirstTestCompleted && !model.isSecondTestCompleted)
+        if (end >= model.questions.length &&
+            model.isFirstTestCompleted &&
+            !model.isSecondTestCompleted)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
             onPressed: () {
@@ -252,7 +259,8 @@ class QuestionnaireScreen extends StatelessWidget {
             },
             child: Text(
               'Fertigstellen',
-              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+              style: TextStyle(
+                  color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
         if (end >= model.questions.length && model.isSecondTestCompleted)
@@ -260,8 +268,8 @@ class QuestionnaireScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
             onPressed: () {
@@ -270,7 +278,8 @@ class QuestionnaireScreen extends StatelessWidget {
             },
             child: Text(
               'Fertigstellen',
-              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+              style: TextStyle(
+                  color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
       ],
@@ -296,7 +305,8 @@ class CustomProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      padding: const EdgeInsets.symmetric(
+          vertical: 20.0, horizontal: 16.0), // Adjusted padding for mobile
       child: Row(
         children: List.generate(totalSteps, (index) {
           return Expanded(
@@ -305,11 +315,13 @@ class CustomProgressBar extends StatelessWidget {
               children: [
                 Container(
                   height: 8,
-                  color: index <= currentStep ? Color(0xFFCB9935) : Colors.grey,
+                  color:
+                  index <= currentStep ? Color(0xFFCB9935) : Colors.grey,
                 ),
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: index < currentStep ? Color(0xFFCB9935) : Colors.grey,
+                  backgroundColor:
+                  index < currentStep ? Color(0xFFCB9935) : Colors.grey,
                   child: index < currentStep
                       ? Icon(
                     Icons.check,

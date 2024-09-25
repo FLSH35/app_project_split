@@ -435,7 +435,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Dein Finaler Charakter:', style: TextStyle(
+                    Text('Dein Finaler Charakter: $finalCharacter', style: TextStyle(
                         color: Colors.black, fontFamily: 'Roboto')),
                     SizedBox(height: 10),
                     if (!isExpanded)

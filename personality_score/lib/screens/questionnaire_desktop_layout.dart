@@ -64,6 +64,7 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  SizedBox(height: 40),
                   _buildQuestionsList(context, model),
                   _buildNavigationButtons(context, model),
                   SizedBox(height: 40),
@@ -84,9 +85,9 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
       children: currentQuestions.map((question) {
         int questionIndex = start + currentQuestions.indexOf(question);
         return Container(
-          height: MediaQuery.of(context).size.height / 6, // Each question takes 1/6 of the screen height
+          height: MediaQuery.of(context).size.height / 4, // Each question takes 1/6 of the screen height
           margin: EdgeInsets.only(bottom: 10.0), // Reduced bottom margin
-          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: MediaQuery.of(context).size.width / 8),
+          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: MediaQuery.of(context).size.width / 5),
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(12.0),

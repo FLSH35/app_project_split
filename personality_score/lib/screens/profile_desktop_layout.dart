@@ -50,7 +50,7 @@ class ProfileDesktopLayout extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 250,
-              backgroundImage: AssetImage('assets/${finalCharacterData?['finalCharacter'] ?? ''}'),
+              backgroundImage: AssetImage('assets/${finalCharacterData?['finalCharacter']}.webp'),
               backgroundColor: Colors.transparent, // Optional: set to transparent if no image available
             ),
             SizedBox(height: 20),
@@ -102,7 +102,7 @@ class ProfileDesktopLayout extends StatelessWidget {
                       ),
                       SizedBox(height: 10),
                       Image.asset(
-                        'assets/${finalCharacterData!['finalCharacter']}',
+                        'assets/${finalCharacterData!['finalCharacter']}.webp',
                         width: 100,
                         height: 100,
                       ),
