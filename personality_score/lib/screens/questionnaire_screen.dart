@@ -76,7 +76,7 @@ class QuestionnaireScreen extends StatelessWidget {
 
   // Build the questionnaire for mobile layout
   Widget _buildQuestionnaire(BuildContext context, QuestionnaireModel model) {
-    int totalSteps = (model.questions.length / 3).ceil(); // 3 questions per page
+    int totalSteps = (model.questions.length / 7).ceil(); // 3 questions per page
     int currentStep = model.currentPage;
 
     return Column(
@@ -103,7 +103,7 @@ class QuestionnaireScreen extends StatelessWidget {
   }
 
   Widget _buildQuestionsList(BuildContext context, QuestionnaireModel model) {
-    int questionsPerPage = 7; // Only show 3 questions per page
+    int questionsPerPage = 7; // Only show 7 questions per page
     int start = model.currentPage * questionsPerPage;
     int end = start + questionsPerPage;
 
@@ -190,7 +190,7 @@ class QuestionnaireScreen extends StatelessWidget {
         if (model.currentPage > 0)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               backgroundColor: Colors.black,
               side: BorderSide(color: Color(0xFFCB9935)),
               shape: RoundedRectangleBorder(
@@ -201,13 +201,13 @@ class QuestionnaireScreen extends StatelessWidget {
             child: Text(
               'Zurück',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 20),
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 12),
             ),
           ),
         if (end < model.questions.length)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               backgroundColor: Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -220,13 +220,13 @@ class QuestionnaireScreen extends StatelessWidget {
             child: Text(
               'Weiter',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 24),
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 12),
             ),
           ),
         if (end >= model.questions.length && !model.isFirstTestCompleted)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               backgroundColor: Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -239,7 +239,7 @@ class QuestionnaireScreen extends StatelessWidget {
             child: Text(
               'Fertigstellen',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 12),
             ),
           ),
         if (end >= model.questions.length &&
@@ -247,7 +247,7 @@ class QuestionnaireScreen extends StatelessWidget {
             !model.isSecondTestCompleted)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               backgroundColor: Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -260,7 +260,7 @@ class QuestionnaireScreen extends StatelessWidget {
             child: Text(
               'Fertigstellen',
               style: TextStyle(
-                  color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+                  color: Colors.black, fontFamily: 'Roboto', fontSize: 12),
             ),
           ),
         if (end >= model.questions.length && model.isSecondTestCompleted)
