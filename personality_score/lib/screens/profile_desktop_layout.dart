@@ -57,7 +57,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CircleAvatar(
-              radius: 250,
+              radius: 125,
               backgroundImage: AssetImage(
                   'assets/${widget.finalCharacterData?['finalCharacter']}.webp'),
               backgroundColor: Colors.transparent,

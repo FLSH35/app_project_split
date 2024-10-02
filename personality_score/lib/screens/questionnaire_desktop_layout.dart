@@ -6,10 +6,35 @@ import '../models/question.dart';
 import 'package:lottie/lottie.dart';
 import 'custom_app_bar.dart';
 
-class QuestionnaireDesktopLayout extends StatelessWidget {
+class QuestionnaireDesktopLayout extends StatefulWidget {
   final ScrollController scrollController;
 
   QuestionnaireDesktopLayout({required this.scrollController});
+
+  @override
+  _QuestionnaireDesktopLayoutState createState() => _QuestionnaireDesktopLayoutState();
+}
+
+class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout> {
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuestions();
+  }
+
+  Future<void> _loadQuestions() async {
+    final model = Provider.of<QuestionnaireModel>(context, listen: false);
+
+    if (model.questions.isEmpty) {
+      await model.loadQuestions('Kompetenz');
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +42,9 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
       appBar: CustomAppBar(
         title: 'Personality Score',
       ),
-      body: Stack(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Stack(
         children: [
           Positioned.fill(
             child: Container(
@@ -33,17 +60,9 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
                 return SizedBox.shrink();
               }
 
-              if (model.questions.isEmpty) {
-                model.loadQuestions('Kompetenz');
-                model.loadProgress();
-                return Center(child: CircularProgressIndicator());
-              }
-
               return _buildQuestionnaire(context, model);
             },
           ),
-
-
         ],
       ),
     );
@@ -60,7 +79,7 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
         // Scrollable content
         Expanded(
           child: SingleChildScrollView(
-            controller: scrollController,
+            controller: widget.scrollController,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 80.0),
               child: Column(
@@ -78,18 +97,21 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
       ],
     );
   }
+
   Widget _buildQuestionsList(BuildContext context, QuestionnaireModel model) {
     int start = model.currentPage * 7;
     int end = start + 7;
-    List<Question> currentQuestions = model.questions.sublist(start, end > model.questions.length ? model.questions.length : end);
+    List<Question> currentQuestions = model.questions.sublist(
+        start, end > model.questions.length ? model.questions.length : end);
 
     return Column(
       children: currentQuestions.map((question) {
         int questionIndex = start + currentQuestions.indexOf(question);
         return Container(
-          height: MediaQuery.of(context).size.height / 4, // Each question takes 1/6 of the screen height
-          margin: EdgeInsets.only(bottom: 10.0), // Reduced bottom margin
-          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: MediaQuery.of(context).size.width / 5),
+          height: MediaQuery.of(context).size.height / 4, // Each question takes 1/4 of the screen height
+          margin: EdgeInsets.only(bottom: 10.0),
+          padding: EdgeInsets.symmetric(
+              vertical: 10.0, horizontal: MediaQuery.of(context).size.width / 5),
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(12.0),
@@ -102,11 +124,11 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
                   question.text,
                   style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 22),
                   textAlign: TextAlign.center,
-                  maxLines: 3, // Limit to a maximum of 3 lines
-                  overflow: TextOverflow.ellipsis, // Show ellipsis if the text is too long
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              SizedBox(height: 8.0), // Reduced height
+              SizedBox(height: 8.0),
               Slider(
                 value: (model.answers[questionIndex] ?? 0).toDouble(),
                 onChanged: (val) {
@@ -120,7 +142,6 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
                 inactiveColor: Colors.grey,
                 thumbColor: Color(0xFFCB9935),
               ),
-              // Description under the slider
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -135,7 +156,8 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
                   Text(
                     model.answers[questionIndex]?.toString() ?? '0',
                     style: TextStyle(color: Colors.grey[900], fontSize: 16),
-                  ),Text(
+                  ),
+                  Text(
                     'EHER JA',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
@@ -145,14 +167,12 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
                   ),
                 ],
               ),
-
             ],
           ),
         );
       }).toList(),
     );
   }
-
 
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
     int end = (model.currentPage + 1) * 7;
@@ -166,8 +186,8 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Colors.black,
               side: BorderSide(color: Color(0xFFCB9935)),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
             onPressed: () => model.prevPage(),
@@ -181,11 +201,10 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
-
             onPressed: () {
               model.nextPage(context);
               _scrollToFirstQuestion(context);
@@ -195,72 +214,20 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
-        if (end >= model.questions.length && !model.isFirstTestCompleted)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-              backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
-              ),
-            ),
-            onPressed: () {
-              model.completeFirstTest(context);
-              _scrollToFirstQuestion(context);
-            },
-            child: Text(
-              'Fertigstellen',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
-            ),
-          ),
-        if (end >= model.questions.length && model.isFirstTestCompleted && !model.isSecondTestCompleted)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-              backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
-              ),
-            ),
-            onPressed: () {
-              model.completeSecondTest(context);
-              _scrollToFirstQuestion(context);
-            },
-            child: Text(
-              'Fertigstellen',
-              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
-            ),
-          ),
-        if (end >= model.questions.length && model.isSecondTestCompleted)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-              backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder( // Create square corners
-                borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
-              ),
-            ),
-            onPressed: () {
-              model.completeFinalTest(context);
-              _scrollToFirstQuestion(context);
-            },
-            child: Text(
-              'Fertigstellen',
-              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
-            ),
-          ),
       ],
     );
   }
 
   void _scrollToFirstQuestion(BuildContext context) {
     final double questionPosition = MediaQuery.of(context).size.height / 3;
-    scrollController.animateTo(
+    widget.scrollController.animateTo(
       questionPosition,
       duration: Duration(seconds: 1),
       curve: Curves.easeInOut,
     );
   }
+}
+
 
   void _showRewardAnimation(BuildContext context, String animationAsset) {
     showDialog(
@@ -288,7 +255,7 @@ class QuestionnaireDesktopLayout extends StatelessWidget {
       },
     );
   }
-}
+
 
 class CustomProgressBar extends StatelessWidget {
   final int totalSteps;

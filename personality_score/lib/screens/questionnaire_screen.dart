@@ -44,7 +44,6 @@ class QuestionnaireScreen extends StatelessWidget {
 
               if (model.questions.isEmpty) {
                 model.loadQuestions('Kompetenz');
-                model.loadProgress();
                 return Center(child: CircularProgressIndicator());
               }
 

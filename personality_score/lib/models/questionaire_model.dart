@@ -97,6 +97,12 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
   Future<void> loadProgress() async {
+    // Ensure that the questions have been loaded first
+    if (_questions.isEmpty) {
+      print("Questions have not been loaded yet.");
+      return;
+    }
+
     User? user = _auth.currentUser;
     if (user != null) {
       final doc = await FirebaseFirestore.instance
@@ -118,6 +124,7 @@ class QuestionnaireModel with ChangeNotifier {
       }
     }
   }
+
 
   void answerQuestion(int index, int value) {
     _answers[index] = value;

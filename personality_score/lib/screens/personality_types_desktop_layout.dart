@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For rootBundle
 import 'package:flutter_svg/flutter_svg.dart';
+import '../helper_functions/questionnaire_helpers.dart';
 import 'custom_app_bar.dart';
 
 class PersonalityTypesDesktopLayout extends StatefulWidget {
@@ -218,10 +219,6 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
     );
   }
 
-  // Implement your handleTakeTest method
-  void handleTakeTest(BuildContext context) {
-    // Navigate to the test page or implement the desired functionality
-  }
 }
 
 class PersonalityTypeCard extends StatefulWidget {
