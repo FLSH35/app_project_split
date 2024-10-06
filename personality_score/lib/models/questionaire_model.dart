@@ -295,7 +295,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
         3; // Calculate possible score for the current set
 
     if (_totalScore > (possibleScore *
-        0.7)) { // Check if total score is more than 50% of possible score
+        0.65)) { // Check if total score is more than 50% of possible score
       if (_questions.first.set == 'BewussteKompetenz') {
         message ="""Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 7 und Stufe 8. 
 Falls du nicht geschummelt hast 😉, müssen wir dir an dieser Stelle aufrichtige Anerkennung zollen: Diesen Bereich der „unbewussten Kompetenz“ erreichen unter 1% aller Menschen.
