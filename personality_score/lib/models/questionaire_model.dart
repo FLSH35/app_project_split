@@ -411,9 +411,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
     // Determine final character based on score
     if (_questions.first.set == 'Individual') {
-      finalCharacter = _totalScore > (possibleScore * 0.5) ? "Individual" : "Traveller";
+      finalCharacter = _totalScore > (possibleScore * 0.65) ? "Individual" : "Traveller";
     } else if (_questions.first.set == 'Reacher') {
-      finalCharacter = _totalScore > (possibleScore * 0.5) ? "Reacher" : "Explorer";
+      finalCharacter = _totalScore > (possibleScore * 0.65) ? "Reacher" : "Explorer";
     } else if (_questions.first.set == 'Resident') {
       finalCharacter = _totalScore > (possibleScore * 0.5) ? "resident" : "Anonymous";
     } else {
