@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MobileSidebar extends StatelessWidget {
   @override
@@ -22,10 +23,20 @@ class MobileSidebar extends StatelessWidget {
 
             Padding(
             padding: const EdgeInsets.symmetric(vertical: 36.0),
-            child: SvgPicture.asset(
-                    'assets/logo.svg', // Your logo file
-                    height: 40, // Adjust logo size if needed
-                  ),
+            child: GestureDetector(
+              onTap: () async {
+                const url = 'https://ifyouchange.com/';
+                if (await canLaunch(url)) {
+                  await launch(url);
+                } else {
+                  throw 'Could not launch $url';
+                }
+              },
+              child: Image.asset(
+                'assets/Logo-IYC-gross.png',
+                height: 40,
+              ),
+            ),
 
             ),
                 ListTile(
