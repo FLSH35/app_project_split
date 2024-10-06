@@ -171,104 +171,88 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: Color(0xFFF7F5EF),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Du bist ein ${finalCharacterData!['finalCharacter']}',
-                            style: TextStyle(
-                                color: Colors.black, fontFamily: 'Roboto'),
-                          ),
-                          SizedBox(height: 10),
-                          Image.asset(
-                            'assets/${finalCharacterData!['finalCharacter']}.webp',
-                            width: 100,
-                            height: 100,
-                          ),
-                          SizedBox(height: 10),
-                          isExpanded
-                              ? Column(
-                            children: [
-                              Text(
-                                finalCharacterData![
-                                'finalCharacterDescription'] ??
-                                    'No description available.',
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                                '${finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${finalCharacterData?['finalCharacter']}!',
                                 style: TextStyle(
                                     color: Colors.black,
-                                    fontFamily: 'Roboto',
-                                    fontSize: 18),
-                              ),
-                              SizedBox(height: 10),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  backgroundColor: Color(0xFFCB9935),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    isExpanded = false;
-                                  });
-                                },
+                                    fontFamily: 'Roboto')),
+                            SizedBox(height: 10),
+                            isExpanded
+                                ? Container(
+                              height: 350, // Set a fixed height for scrolling
+                              child: SingleChildScrollView(
                                 child: Text(
-                                  'Lese weniger',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Roboto'),
+                                    finalCharacterData![
+                                    'finalCharacterDescription'],
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Roboto',
+                                        fontSize: 18)),
+                              ),
+                            )
+                                : Container(
+                              height: 350,
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: SingleChildScrollView(
+                                  child:
+                                    Text(
+                                      finalCharacterData![
+                                      'finalCharacterDescription']
+                                          .split('. ')
+                                          .take(4)
+                                          .join('. ') +
+                                          '...',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Roboto',
+                                          fontSize: 18),
+                                    ),
+
                                 ),
                               ),
-                            ],
-                          )
-                              : Column(
-                            children: [
-                              Text(
-                                finalCharacterData![
-                                'finalCharacterDescription']
-                                    ?.split('. ')
-                                    .take(2)
-                                    .join('. ') +
-                                    '...',
+                            ),
+                            // "Lese mehr" or "Lese weniger" button
+                            TextButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(horizontal: 32.0),
+                                backgroundColor: isExpanded
+                                    ? Colors.black
+                                    : Color(0xFFCB9935),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(8.0)),
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isExpanded = !isExpanded;
+                                });
+                              },
+                              child: Text(
+                                isExpanded ? 'Lese weniger' : 'Lese mehr',
                                 style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Roboto',
-                                    fontSize: 18),
-                              ),
-                              SizedBox(height: 10),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  backgroundColor: Color(0xFFCB9935),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    isExpanded = true;
-                                  });
-                                },
-                                child: Text(
-                                  'Lese mehr',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Roboto'),
+                                  color: Colors.white,
+                                  fontFamily: 'Roboto',
+                                  fontSize: 18,
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   )
                 else
                   Text(
                     'No final character found.',
-                    style: TextStyle(
-                        color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+                    style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
                   ),
-                SizedBox(height: 20),
+                SizedBox(height: 20), // Add spacing before buttons
                 // Finish and Share buttons
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -299,8 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       onPressed: () {
-                        String shareText =
-                            'Du bist ein ${finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${finalCharacterData!['finalCharacterDescription']}';
+                        String shareText = '${finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${finalCharacterData!['finalCharacterDescription']}';
                         Share.share(shareText);
                       },
                       child: Text('Teilen',
@@ -320,8 +303,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Mobile AppBar with a menu button to open the sidebar
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('Questionnaire'),
-      backgroundColor: Colors.grey[300], // Light grey for mobile
+      title: Text('PROFIL'),
+      backgroundColor: Color(0xFFF7F5EF), // Light grey for mobile
       actions: [
         Builder(
           builder: (context) => IconButton(

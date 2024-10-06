@@ -8,7 +8,7 @@ class MobileSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Colors.white.withOpacity(0.8), // Half-transparent background
+      backgroundColor: Color(0xFFF7F5EF).withOpacity(0.8), // Half-transparent background
       child: Container(
         child: Align(
           alignment: Alignment.topLeft, // Align content to the top

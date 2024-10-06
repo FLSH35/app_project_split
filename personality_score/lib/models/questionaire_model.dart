@@ -11,7 +11,16 @@ class QuestionnaireModel with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Question> _questions = [];
   int _currentQuestionIndex = 0;
-  int _totalScore = 0;
+
+  int score_factor= 0;
+
+
+  int _totalScore = 0;  // Store total score across all sets
+  int _firstTestScore = 0;  // Track score for the first test
+  int _secondTestScore = 0;  // Track score for the second test
+  int _finalTestScore = 0;  // Track score for the final test
+
+
   int _currentPage = 0;
   List<int?> _answers = [];
   String? _personalityType;
@@ -20,7 +29,7 @@ class QuestionnaireModel with ChangeNotifier {
   bool _isSecondTestCompleted = false;
   String _currentSet = 'Kompetenz';
 
-  bool _isLoading = true;  // Track the loading state
+  bool _isLoading = false;  // Track the loading state
 
   String? _finalCharacter;
   String? _finalCharacterDescription;
@@ -97,12 +106,6 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
   Future<void> loadProgress() async {
-    // Ensure that the questions have been loaded first
-    if (_questions.isEmpty) {
-      print("Questions have not been loaded yet.");
-      return;
-    }
-
     User? user = _auth.currentUser;
     if (user != null) {
       final doc = await FirebaseFirestore.instance
@@ -124,7 +127,6 @@ class QuestionnaireModel with ChangeNotifier {
       }
     }
   }
-
 
   void answerQuestion(int index, int value) {
     _answers[index] = value;
@@ -192,6 +194,11 @@ class QuestionnaireModel with ChangeNotifier {
 
   void completeFirstTest(BuildContext context) {
     _isFirstTestCompleted = true;
+    score_factor += _questions.length;
+
+    _firstTestScore = _totalScore;  // Save the first test score
+
+
     String message;
     List<String> teamCharacters;
     String nextSet;
@@ -201,11 +208,10 @@ class QuestionnaireModel with ChangeNotifier {
 
     if (_totalScore > (possibleScore *
         0.5)) { // Check if total score is more than 50% of possible score
-      message =
-      """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
-      Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 1 und Stufe 4. Noch hast du wahre „Lebenskompetenz“ (diese beginnt ab Stufe 5) nicht erreicht, sondern befindest dich auf dem Weg dahin. Das ist aber überhaupt nicht schlimm, sondern völlig normal. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 zu verorten sind.
-    Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
-    """;
+      message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
+Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 8. Damit hast du bereits echte „Lebenskompetenz“ erreicht und gehörst damit bereits zu einer kleinen Minderheit. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 im Bereich der „Inkompetenz“ zu verorten sind. Für deine bisherige Entwicklung also schonmal ein dickes Lob.
+Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
+""";
       teamCharacters = [
         "Life Artist.webp",
         "Individual.webp",
@@ -214,11 +220,12 @@ class QuestionnaireModel with ChangeNotifier {
       ];
       nextSet = 'BewussteKompetenz';
     } else {
-      message ="""Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
-Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 8. Damit hast du bereits echte „Lebenskompetenz“ erreicht und gehörst damit bereits zu einer kleinen Minderheit. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 im Bereich der „Inkompetenz“ zu verorten sind. Für deine bisherige Entwicklung also schonmal ein dickes Lob.
-Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
-""";
-    teamCharacters =
+      message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
+      Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 1 und Stufe 4. Noch hast du wahre „Lebenskompetenz“ (diese beginnt ab Stufe 5) nicht erreicht, sondern befindest dich auf dem Weg dahin. Das ist aber überhaupt nicht schlimm, sondern völlig normal. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 zu verorten sind.
+    Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
+    """;
+
+      teamCharacters =
       ["resident.webp", "Explorer.webp", "Reacher.webp", "Anonymous.webp"];
       nextSet = 'BewussteInkompetenz';
     }
@@ -227,15 +234,15 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Color(0xFFF7F5EF), // Soft background
+          backgroundColor: Color(0xFFC7C7C7), // Soft background
           title: Text('$_totalScore Punkte erreicht', style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(message + '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n'
-                , style: TextStyle(color: Colors.black, fontFamily: 'Roboto',
-        fontSize: 18)),
+                    , style: TextStyle(color: Colors.black, fontFamily: 'Roboto',
+                        fontSize: 18)),
                 SizedBox(height: 10),
                 Wrap(
                   spacing: 10.0,
@@ -276,6 +283,10 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
 
   void completeSecondTest(BuildContext context) {
     _isSecondTestCompleted = true;
+    score_factor += _questions.length;
+
+    _secondTestScore = _totalScore;  // Save the second test score
+
     String message;
     List<String> teamCharacters;
     String nextSet;
@@ -298,7 +309,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Adventurer�
 Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 3 und Stufe 4. Dies ist der Bereich der „bewussten Inkompetenz“. Das hört sich zwar nicht schön an, damit bist du aber schon weiter als schätzungsweise drei Viertel aller Menschen. Zwar hast du noch einen langen Weg vor dir, bist aber bereits dabei, dein volles Potenzial zu erkennen. Wie nur wenige Menschen blickst du über deinen eigenen Tellerrand hinaus.
 Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Explorer“ oder „Reacher“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
 """;
-            teamCharacters = ["Reacher.webp", "Explorer.webp"];
+        teamCharacters = ["Reacher.webp", "Explorer.webp"];
         nextSet = 'Reacher';
       }
     } else {
@@ -323,7 +334,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Color(0xFFF7F5EF),
+          backgroundColor: Color(0xFFC7C7C7),
           title: Text(
             '$_totalScore Punkte erreicht',
             style: TextStyle(fontFamily: 'Roboto'),
@@ -333,9 +344,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-            message + '\n\nWinston Churchill: "Erfolg ist nicht endgültig, Misserfolg ist nicht fatal: Es ist der Mut, weiterzumachen, der zählt."\n',
-                      style: TextStyle(fontFamily: 'Roboto',
-                          fontSize: 18),
+                  message + '\n\nWinston Churchill: "Erfolg ist nicht endgültig, Misserfolg ist nicht fatal: Es ist der Mut, weiterzumachen, der zählt."\n',
+                  style: TextStyle(fontFamily: 'Roboto',
+                      fontSize: 18),
                 ),
                 SizedBox(height: 10),
                 SingleChildScrollView(
@@ -390,6 +401,10 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
   }
 
   void completeFinalTest(BuildContext context) async {
+    _finalTestScore = _totalScore;  // Save the final test score
+    score_factor += _questions.length;
+    // Calculate the combined total score
+    int combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
     String finalCharacter;
 
     int possibleScore = _questions.length * 3; // Calculate possible score for the final set
@@ -424,6 +439,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
           .set({
         'finalCharacter': _finalCharacter,
         'finalCharacterDescription': _finalCharacterDescription,
+        'combinedTotalScore': combinedTotalScore,  // Add the combined total score here
         'completionDate': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     }
@@ -431,16 +447,16 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     // Show final result dialog
     String? name = user?.displayName;
     String greetingText = 'Lieber $name';
-    showFinalResultDialog(context, finalCharacter, finalCharacterDescription, greetingText);
+    showFinalResultDialog(context, finalCharacter, finalCharacterDescription, greetingText, combinedTotalScore);
   }
 
-  void showFinalResultDialog(BuildContext context, String finalCharacter, String finalCharacterDescription, String greetingText) {
+  void showFinalResultDialog(BuildContext context, String finalCharacter, String finalCharacterDescription, String greetingText, int combinedTotalScore) {
     bool isExpanded = false; // State variable for description expansion
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Color(0xFFF7F5EF),
+          backgroundColor: Color(0xFFC7C7C7),
           title: Text('$greetingText, deine Persönlichkeitsstufe',
               style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
           content: StatefulBuilder(
@@ -449,7 +465,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Dein Finaler Charakter: $finalCharacter', style: TextStyle(
+                    Text("Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\n Damit bist du ein $finalCharacter.", style: TextStyle(
                         color: Colors.black, fontFamily: 'Roboto')),
                     SizedBox(height: 10),
                     if (!isExpanded)
@@ -514,6 +530,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
               onPressed: () {
                 reset();
                 Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/home');
               },
               child: Text('Abschließen',
                   style: TextStyle(
@@ -528,7 +545,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 ),
               ),
               onPressed: () {
-                String shareText = 'Du bist ein $finalCharacter.\n\nBeschreibung: $finalCharacterDescription';
+                String shareText = 'Du hast ${combinedTotalScore} Punkte. Damit bist du ein $finalCharacter.\n\nBeschreibung: $finalCharacterDescription';
                 Share.share(shareText);
               },
               child: Text('Teilen', style: TextStyle(
@@ -537,132 +554,6 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
           ],
         );
       },
-    );
-  }
-
-
-
-
-}
-
-class FinalResultDialog extends StatefulWidget {
-  final String finalCharacter;
-  final String greetingText;
-  final String finalCharacterDescription;
-
-  FinalResultDialog({
-    required this.finalCharacter,
-    required this.greetingText,
-    required this.finalCharacterDescription,
-  });
-
-  @override
-  _FinalResultDialogState createState() => _FinalResultDialogState();
-}
-
-class _FinalResultDialogState extends State<FinalResultDialog> {
-  bool isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: Color(0xFFF7F5EF),
-      title: Text('${widget.greetingText}, deine Persönlichkeitsstufe',
-          style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Dein Finaler Charakter: ${widget.finalCharacter}', style: TextStyle(
-                color: Colors.black, fontFamily: 'Roboto')),
-            SizedBox(height: 10),
-            Wrap(
-              spacing: 10.0,
-              runSpacing: 10.0,
-              alignment: WrapAlignment.center,
-              children: [
-                Image.asset(
-                    'assets/${widget.finalCharacter}', width: 200, height: 200),
-              ],
-            ),
-            SizedBox(height: 10),
-            // Expandable description
-            isExpanded
-                ? Container(
-              height: 150, // Set a fixed height for scrolling
-              child: SingleChildScrollView(
-                child: Text(widget.finalCharacterDescription, style: TextStyle(
-                    color: Colors.black, fontFamily: 'Roboto', fontSize: 18)),
-              ),
-            )
-                : Text(
-              widget.finalCharacterDescription.split('. ').take(2).join('. ') + '...', // Show a preview
-              style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
-            ),
-            // "Lese mehr" button
-            TextButton(
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-                backgroundColor: isExpanded ? Colors.black : Color(0xFFCB9935),
-                side: BorderSide(color: Color(0xFFCB9935)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  isExpanded = !isExpanded; // Toggle the state
-                });
-              },
-              child: isExpanded ? Text(
-                'Lese weniger',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Roboto',
-                  fontSize: 18,
-                ),) : Text(
-                'Lese weniger',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Roboto',
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          style: TextButton.styleFrom(
-            backgroundColor: Color(0xFFCB9935),
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text('Abschließen',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
-        ),
-        TextButton(
-          style: TextButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-            ),
-          ),
-          onPressed: () {
-            String shareText = 'Du bist ein ${widget.finalCharacter}.\n\nBeschreibung: ${widget.finalCharacterDescription}';
-            Share.share(shareText);
-          },
-          child: Text('Teilen', style: TextStyle(
-              color: Color(0xFFCB9935), fontFamily: 'Roboto')),
-        ),
-      ],
     );
   }
 }

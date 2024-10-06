@@ -154,10 +154,6 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
                   Text(
-                    model.answers[questionIndex]?.toString() ?? '0',
-                    style: TextStyle(color: Colors.grey[900], fontSize: 16),
-                  ),
-                  Text(
                     'EHER JA',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
@@ -175,15 +171,18 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
   }
 
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
-    int end = (model.currentPage + 1) * 7;
+    int questionsPerPage = 7; // Number of questions per page
+    int start = model.currentPage * questionsPerPage;
+    int end = start + questionsPerPage;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
+        // Previous page button
         if (model.currentPage > 0)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
               backgroundColor: Colors.black,
               side: BorderSide(color: Color(0xFFCB9935)),
               shape: RoundedRectangleBorder(
@@ -193,13 +192,16 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
             onPressed: () => model.prevPage(),
             child: Text(
               'Zurück',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
+
+        // Next page button
         if (end < model.questions.length)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
               backgroundColor: Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -211,7 +213,73 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
             },
             child: Text(
               'Weiter',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+            ),
+          ),
+
+        // "Fertigstellen" button for the first test
+        if (end >= model.questions.length && !model.isFirstTestCompleted)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
+              backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+            ),
+            onPressed: () {
+              model.completeFirstTest(context);
+              _scrollToFirstQuestion(context);
+            },
+            child: Text(
+              'Fertigstellen',
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+            ),
+          ),
+
+        // "Fertigstellen" button for the second test
+        if (end >= model.questions.length &&
+            model.isFirstTestCompleted &&
+            !model.isSecondTestCompleted)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
+              backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+            ),
+            onPressed: () {
+              model.completeSecondTest(context);
+              _scrollToFirstQuestion(context);
+            },
+            child: Text(
+              'Fertigstellen',
+              style: TextStyle(
+                  color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+            ),
+          ),
+
+        // Final "Fertigstellen" button for the last test
+        if (end >= model.questions.length && model.isSecondTestCompleted)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
+              backgroundColor: Color(0xFFCB9935),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+            ),
+            onPressed: () {
+              model.completeFinalTest(context);
+              _scrollToFirstQuestion(context);
+            },
+            child: Text(
+              'Fertigstellen',
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
       ],
@@ -219,42 +287,13 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
   }
 
   void _scrollToFirstQuestion(BuildContext context) {
-    final double questionPosition = MediaQuery.of(context).size.height / 3;
     widget.scrollController.animateTo(
-      questionPosition,
-      duration: Duration(seconds: 1),
+      0.0, // Scroll to the very top
+      duration: Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
   }
 }
-
-
-  void _showRewardAnimation(BuildContext context, String animationAsset) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        Future.delayed(Duration(seconds: 2), () {
-          Navigator.of(context).pop();
-        });
-
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              color: Colors.transparent,
-            ),
-            Lottie.asset(
-              'assets/$animationAsset',
-              width: 150,
-              height: 150,
-              fit: BoxFit.contain,
-            ),
-          ],
-        );
-      },
-    );
-  }
 
 
 class CustomProgressBar extends StatelessWidget {

@@ -49,19 +49,75 @@ class _SignInScreenState extends State<SignInScreen> {
             child: Column(
               children: [
                 if (!_isSignedIn) ...[
+                  // Email Input
                   TextField(
                     controller: _emailController,
-                    decoration: InputDecoration(labelText: 'Email'),
-                  ),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(labelText: 'Password'),
-                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                    style: TextStyle(color: Colors.black), // Set email text color to white
                   ),
                   SizedBox(height: 20),
+
+                  // Password Input
+                  TextField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                    obscureText: true,
+                    style: TextStyle(color: Colors.black), // Set password text color to white
+                  ),
+                  SizedBox(height: 20),
+
+                  // Forgot Password Button
+                  TextButton(
+                    onPressed: () async {
+                      if (_emailController.text.isNotEmpty) {
+                        final authService = Provider.of<AuthService>(context, listen: false);
+                        await authService.sendPasswordResetEmail(_emailController.text);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text("Password reset link sent to ${_emailController.text}"),
+                          backgroundColor: Colors.green,
+                        ));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text("Please enter your email address to reset password."),
+                          backgroundColor: Colors.red,
+                        ));
+                      }
+                    },
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(color: Colors.lightBlue),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacementNamed('/signup');
+                    },
+                    child: Text('Don\'t have an account? Sign Up',
+    style: TextStyle(color: Colors.lightBlue)),
+                  ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFCB9935),
+                      backgroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -83,12 +139,6 @@ class _SignInScreenState extends State<SignInScreen> {
                     },
                     child: Text('Sign In'),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacementNamed('/signup');
-                    },
-                    child: Text('Don\'t have an account? Sign Up'),
-                  ),
                   Consumer<AuthService>(
                     builder: (context, authService, child) {
                       if (authService.errorMessage != null) {
@@ -104,7 +154,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   // Show welcome message and buttons after sign-in
                   if (userName != null)
                     Text(
-                      'Hello, $userName!',
+                      'Hallo, $userName!',
                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   SizedBox(height: 20),
@@ -154,7 +204,7 @@ class _SignInScreenState extends State<SignInScreen> {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text('SIGN IN'),
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Color(0xFFF7F5EF),
       actions: [
         Builder(
           builder: (context) => IconButton(

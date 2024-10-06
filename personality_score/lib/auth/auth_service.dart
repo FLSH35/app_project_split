@@ -54,4 +54,16 @@ class AuthService with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // Method to send a password reset email
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      _errorMessage = null;  // Clear any previous error
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
 }

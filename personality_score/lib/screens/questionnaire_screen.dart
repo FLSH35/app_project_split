@@ -59,8 +59,8 @@ class QuestionnaireScreen extends StatelessWidget {
   // Mobile AppBar with a menu button to open the sidebar
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('Questionnaire'),
-      backgroundColor: Colors.grey[300], // Light grey for mobile
+      title: Text('FRAGEN'),
+      backgroundColor: Color(0xFFF7F5EF), // Light grey for mobile
       actions: [
         Builder(
           builder: (context) => IconButton(
@@ -126,14 +126,20 @@ class QuestionnaireScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                question.text,
-                style: TextStyle(
-
-                    color: Colors.black, fontFamily: 'Roboto', fontSize: 20),
-                textAlign: TextAlign.center,
-                maxLines: null,
-                overflow: TextOverflow.visible,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Text(
+                    question.text,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'Roboto',
+                      fontSize: 20,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: null,
+                    overflow: TextOverflow.visible,
+                  ),
+                ),
               ),
               SizedBox(height: 8.0),
               Slider(
@@ -161,9 +167,6 @@ class QuestionnaireScreen extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
                   Text(
-                    model.answers[questionIndex]?.toString() ?? '0',
-                    style: TextStyle(color: Colors.grey[900], fontSize: 16),
-                  ),Text(
                     'EHER JA',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
@@ -288,9 +291,8 @@ class QuestionnaireScreen extends StatelessWidget {
   }
 
   void _scrollToFirstQuestion(BuildContext context) {
-    final double questionPosition = MediaQuery.of(context).size.height / 4;
     _scrollController.animateTo(
-      questionPosition,
+      0.0,
       duration: Duration(seconds: 1),
       curve: Curves.easeInOut,
     );

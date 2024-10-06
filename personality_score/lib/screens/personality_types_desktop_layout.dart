@@ -19,7 +19,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
     },
     {
       "name": "Stufe 2: Resident",
-      "image": "assets/Resident.webp",
+      "image": "assets/Resident_woman.jpg",
       "descriptionPath": "assets/auswertungen/Resident.txt",
     },
     {
@@ -29,7 +29,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
     },
     {
       "name": "Stufe 4: Reacher",
-      "image": "assets/Reacher.webp",
+      "image": "assets/Reacher_woman.jpg",
       "descriptionPath": "assets/auswertungen/Reacher.txt",
     },
     {
@@ -50,7 +50,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
     {
       "name": "Stufe 8: Life Artist",
       "image": "assets/Life Artist.webp",
-      "descriptionPath": "assets/auswertungen/LifeArtist.txt",
+      "descriptionPath": "assets/auswertungen/Life Artist.txt",
     },
   ];
 

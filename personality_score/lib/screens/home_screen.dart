@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text('PERSONALITY SCORE'),
-      backgroundColor: Colors.grey[300], // Light grey for mobile
+      backgroundColor: Color(0xFFF7F5EF), // Light grey for mobile
       actions: [
         Builder(
           builder: (context) => IconButton(

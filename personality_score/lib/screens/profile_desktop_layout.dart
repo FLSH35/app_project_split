@@ -110,7 +110,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                            'Du bist ein ${widget.finalCharacterData?['finalCharacter']}',
+                            '${widget.finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${widget.finalCharacterData?['finalCharacter']}!',
                             style: TextStyle(
                                 color: Colors.black,
                                 fontFamily: 'Roboto')),
@@ -129,16 +129,15 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                           ),
                         )
                             : Container(
-                          height: 350,
+                          height: 250,
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
-                            child: Column(
-                              children: [
-                                Text(
+                            child: SingleChildScrollView(
+                              child: Text(
                                   widget.finalCharacterData![
                                   'finalCharacterDescription']
                                       .split('. ')
-                                      .take(7)
+                                      .take(4)
                                       .join('. ') +
                                       '...',
                                   style: TextStyle(
@@ -146,17 +145,16 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                       fontFamily: 'Roboto',
                                       fontSize: 18),
                                 ),
-                              ],
+
                             ),
                           ),
                         ),
                         // "Lese mehr" or "Lese weniger" button
                         TextButton(
                           style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 16.0, horizontal: 32.0),
+                            padding: EdgeInsets.symmetric(horizontal: 32.0),
                             backgroundColor: isExpanded
-                                ? Color(0xFFCB9935)
+                                ? Colors.black
                                 : Color(0xFFCB9935),
                             shape: RoundedRectangleBorder(
                               borderRadius:
@@ -218,8 +216,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                     ),
                   ),
                   onPressed: () {
-                    String shareText =
-                        'Du bist ein ${widget.finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${widget.finalCharacterData!['finalCharacterDescription']}';
+                    String shareText = '${widget.finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${widget.finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${widget.finalCharacterData!['finalCharacterDescription']}';
                     Share.share(shareText);
                   },
                   child: Text('Teilen',

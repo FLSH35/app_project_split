@@ -20,7 +20,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
     },
     {
       "name": "Stufe 2: Resident",
-      "image": "assets/Resident.webp",
+      "image": "assets/Resident_woman.jpg",
       "descriptionPath": "assets/auswertungen/Resident.txt",
     },
     {
@@ -30,7 +30,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
     },
     {
       "name": "Stufe 4: Reacher",
-      "image": "assets/Reacher.webp",
+      "image": "assets/Reacher_woman.jpg",
       "descriptionPath": "assets/auswertungen/Reacher.txt",
     },
     {
@@ -51,7 +51,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
     {
       "name": "Stufe 8: Life Artist",
       "image": "assets/Life Artist.webp",
-      "descriptionPath": "assets/auswertungen/LifeArtist.txt",
+      "descriptionPath": "assets/auswertungen/Life Artist.txt",
     },
   ];
 
@@ -230,10 +230,10 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text(
-        'Personality Types',
+        'STUFEN',
         style: TextStyle(color: Colors.black),
       ),
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Color(0xFFF7F5EF),
       iconTheme: IconThemeData(color: Colors.black),
       actions: [
         Builder(
@@ -290,7 +290,6 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
 
     // Definiere den Button-Stil
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
-      padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
       backgroundColor: isExpanded ? Colors.black : Color(0xFFCB9935),
       side: BorderSide(color: Color(0xFFCB9935)),
       shape: RoundedRectangleBorder(
@@ -359,7 +358,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                   style: TextStyle(
                     color: Colors.white,
                     fontFamily: 'Roboto',
-                    fontSize: 18,
+                    fontSize: 16,
                   ),
                 ),
               ),
