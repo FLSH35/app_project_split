@@ -204,7 +204,7 @@ class QuestionnaireModel with ChangeNotifier {
     String nextSet;
 
     int possibleScore = _questions.length *
-        3; // Calculate possible score for the current set
+        10; // Calculate possible score for the current set
 
     if (_totalScore > (possibleScore *
         0.65)) { // Check if total score is more than 50% of possible score
@@ -313,7 +313,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Explorer“ 
         nextSet = 'Reacher';
       }
     } else {
-      if (_questions.first.set == 'BewussteKompetenz') {
+      if (_questions.first.set == 'BewussteInkompetenz') {
         message = """Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. 
 Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 6. Dies ist der Bereich der „bewussten Kompetenz“. Zwar bist du schon ungewöhnlich erfolgreich in deinem Leben, allerdings erreichst du deine Ziele noch meist nicht „wie von selbst“ (unbewusste Kompetenz) sondern teilweise unter großer Anstrengung. 
 Du bist schon auf einem sehr hohen Level der Persönlichkeitsentwicklung, dass nur die wenigsten Menschen in ihrem Leben erreichen. Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Traveller“ oder „Individual“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
@@ -407,7 +407,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     int combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
     String finalCharacter;
 
-    int possibleScore = _questions.length * 3; // Calculate possible score for the final set
+    int possibleScore = _questions.length * 10; // Calculate possible score for the final set
 
     // Determine final character based on score
     if (_questions.first.set == 'Individual') {
