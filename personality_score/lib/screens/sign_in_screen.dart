@@ -154,7 +154,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   // Show welcome message and buttons after sign-in
                   if (userName != null)
                     Text(
-                      'Hallo, $userName!',
+                      'Hallo $userName!',
                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   SizedBox(height: 20),

@@ -207,7 +207,7 @@ class QuestionnaireModel with ChangeNotifier {
         3; // Calculate possible score for the current set
 
     if (_totalScore > (possibleScore *
-        0.5)) { // Check if total score is more than 50% of possible score
+        0.65)) { // Check if total score is more than 50% of possible score
       message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
 Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 8. Damit hast du bereits echte „Lebenskompetenz“ erreicht und gehörst damit bereits zu einer kleinen Minderheit. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 im Bereich der „Inkompetenz“ zu verorten sind. Für deine bisherige Entwicklung also schonmal ein dickes Lob.
 Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
@@ -295,7 +295,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
         3; // Calculate possible score for the current set
 
     if (_totalScore > (possibleScore *
-        0.5)) { // Check if total score is more than 50% of possible score
+        0.7)) { // Check if total score is more than 50% of possible score
       if (_questions.first.set == 'BewussteKompetenz') {
         message ="""Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 7 und Stufe 8. 
 Falls du nicht geschummelt hast 😉, müssen wir dir an dieser Stelle aufrichtige Anerkennung zollen: Diesen Bereich der „unbewussten Kompetenz“ erreichen unter 1% aller Menschen.
@@ -417,7 +417,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     } else if (_questions.first.set == 'Resident') {
       finalCharacter = _totalScore > (possibleScore * 0.5) ? "resident" : "Anonymous";
     } else {
-      finalCharacter = _totalScore > (possibleScore * 0.5) ? "Life Artist" : "Adventurer";
+      finalCharacter = _totalScore > (possibleScore * 0.85) ? "Life Artist" : "Adventurer";
     }
 
     // Load the final character's description
