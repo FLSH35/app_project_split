@@ -192,7 +192,7 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
   void completeFirstTest(BuildContext context) {
-    _isFirstTestCompleted = true;
+
     score_factor += _questions.length;
     combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
     _firstTestScore = _totalScore;  // Save the first test score
@@ -265,6 +265,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
               ),
               onPressed: () {
                 loadQuestions(nextSet);
+                _isFirstTestCompleted = true;
                 _currentPage = 0;
                 _totalScore = 0;
                 _answers = List<int?>.filled(_questions.length, 5);
@@ -281,7 +282,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
 
 
   void completeSecondTest(BuildContext context) {
-    _isSecondTestCompleted = true;
+
     score_factor += _questions.length;
     combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
     _secondTestScore = _totalScore;  // Save the second test score
@@ -371,6 +372,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 ),
               ),
               onPressed: () {
+                _isSecondTestCompleted = true;
                 loadQuestions(nextSet);
                 _currentPage = 0;
                 _totalScore = 0;
