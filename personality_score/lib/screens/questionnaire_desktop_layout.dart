@@ -132,7 +132,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               Slider(
                 value: (model.answers[questionIndex] ?? 0).toDouble(),
                 onChanged: (val) {
-                  model.answerQuestion(questionIndex, val.toInt());
+                  model.answerQuestion( questionIndex, question.value < 0? 10 - val.toInt(): val.toInt());
                 },
                 min: 0,
                 max: 10,
