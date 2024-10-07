@@ -75,7 +75,7 @@ class QuestionnaireModel with ChangeNotifier {
 
       // Set loaded questions and reset answers
       _questions = uniqueQuestions;
-      _answers = List<int?>.filled(_questions.length, null);
+      _answers = List<int?>.filled(_questions.length, 5);
     } catch (error) {
       print("Error loading questions: $error");
     } finally {
