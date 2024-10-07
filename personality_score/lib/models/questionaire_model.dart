@@ -174,6 +174,7 @@ class QuestionnaireModel with ChangeNotifier {
     _isFirstTestCompleted = false;
     _isSecondTestCompleted = false;
     combinedTotalScore = 0;
+    loadQuestions('Kompetenz');
     saveProgress();
     notifyListeners();
   }
@@ -311,7 +312,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Explorer“ 
         nextSet = 'Reacher';
       }
     } else {
-      if (_questions.first.set == 'BewussteInkompetenz') {
+      if (_questions.first.set == 'BewussteKompetenz') {
         message = """Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. 
 Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 6. Dies ist der Bereich der „bewussten Kompetenz“. Zwar bist du schon ungewöhnlich erfolgreich in deinem Leben, allerdings erreichst du deine Ziele noch meist nicht „wie von selbst“ (unbewusste Kompetenz) sondern teilweise unter großer Anstrengung. 
 Du bist schon auf einem sehr hohen Level der Persönlichkeitsentwicklung, dass nur die wenigsten Menschen in ihrem Leben erreichen. Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Traveller“ oder „Individual“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!

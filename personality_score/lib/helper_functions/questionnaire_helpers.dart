@@ -16,7 +16,7 @@ void handleTakeTest(BuildContext context) {
 
 
   // If the total score is zero, navigate directly to the questionnaire
-  if (model.combinedTotalScore == 0) {
+  if (model.combinedTotalScore == 0 && model.totalScore == 0) {
     Navigator.of(context).pushNamed('/questionnaire');
     return;
   }
