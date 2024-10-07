@@ -20,6 +20,7 @@ class QuestionnaireModel with ChangeNotifier {
   int _secondTestScore = 0;  // Track score for the second test
   int _finalTestScore = 0;  // Track score for the final test
 
+  int combinedTotalScore = 0;
 
   int _currentPage = 0;
   List<int?> _answers = [];
@@ -101,6 +102,7 @@ class QuestionnaireModel with ChangeNotifier {
         'completionDate': FieldValue.serverTimestamp(),
         'currentPage': _currentPage,
         'answers': _answers,
+        'combinedTotalScore': combinedTotalScore,
       }, SetOptions(merge: true));
     }
   }
@@ -120,9 +122,10 @@ class QuestionnaireModel with ChangeNotifier {
         _isFirstTestCompleted = data['isCompleted'];
         _currentPage = data['currentPage'] ?? 0;
         _answers = List<int?>.from(
-            data['answers'] ?? List<int?>.filled(_questions.length, null));
+            data['answers'] ?? List<int?>.filled(_questions.length, 5));
         _finalCharacter = data['finalCharacter'];
         _finalCharacterDescription = data['finalCharacterDescription'];
+        combinedTotalScore = data['_combinedTotalScore'];
         notifyListeners();
       }
     }
@@ -144,15 +147,6 @@ class QuestionnaireModel with ChangeNotifier {
     }
   }
 
-  void resetQuestionnaire() {
-    _answers = List<int?>.filled(_questions.length, null);
-    _currentPage = 0;
-    _totalScore = 0;
-    _isFirstTestCompleted = false;
-    _isSecondTestCompleted = false;
-    saveProgress();
-    notifyListeners();
-  }
 
   void continueFromLastPage() {
     // This function just notifies listeners since the currentPage is already loaded
@@ -169,17 +163,21 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
   void reset() {
+
+
     _totalScore = 0;
     _currentQuestionIndex = 0;
     _currentPage = 0;
     _progress = 0;
-    _answers = List<int?>.filled(_questions.length, null);
+    _answers = List<int?>.filled(_questions.length, 5);
     _personalityType = null;
     _isFirstTestCompleted = false;
     _isSecondTestCompleted = false;
+    combinedTotalScore = 0;
     saveProgress();
     notifyListeners();
   }
+
 
   double getProgress() {
     if (_questions.isEmpty) return 0.0;
@@ -195,7 +193,7 @@ class QuestionnaireModel with ChangeNotifier {
   void completeFirstTest(BuildContext context) {
     _isFirstTestCompleted = true;
     score_factor += _questions.length;
-
+    combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
     _firstTestScore = _totalScore;  // Save the first test score
 
 
@@ -268,7 +266,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                 loadQuestions(nextSet);
                 _currentPage = 0;
                 _totalScore = 0;
-                _answers = List<int?>.filled(_questions.length, null);
+                _answers = List<int?>.filled(_questions.length, 5);
                 notifyListeners();
                 Navigator.of(context).pop();
               },
@@ -284,7 +282,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
   void completeSecondTest(BuildContext context) {
     _isSecondTestCompleted = true;
     score_factor += _questions.length;
-
+    combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
     _secondTestScore = _totalScore;  // Save the second test score
 
     String message;
@@ -375,7 +373,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 loadQuestions(nextSet);
                 _currentPage = 0;
                 _totalScore = 0;
-                _answers = List<int?>.filled(_questions.length, null);
+                _answers = List<int?>.filled(_questions.length, 5);
                 notifyListeners();
                 Navigator.of(context).pop();
               },
@@ -404,7 +402,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     _finalTestScore = _totalScore;  // Save the final test score
     score_factor += _questions.length;
     // Calculate the combined total score
-    int combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
+    combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
     String finalCharacter;
 
     int possibleScore = _questions.length * 10; // Calculate possible score for the final set

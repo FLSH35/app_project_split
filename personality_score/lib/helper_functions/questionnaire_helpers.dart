@@ -14,13 +14,12 @@ void handleTakeTest(BuildContext context) {
     return;
   }
 
+
   // If the total score is zero, navigate directly to the questionnaire
-  if (model.totalScore == 0) {
-    model.resetQuestionnaire(); // Start fresh since the score is zero
+  if (model.combinedTotalScore == 0) {
     Navigator.of(context).pushNamed('/questionnaire');
     return;
   }
-
   // If the total score is not zero, show the dialog
   showDialog(
     context: context,
@@ -52,7 +51,7 @@ void handleTakeTest(BuildContext context) {
               ),
             ),
             onPressed: () {
-              model.resetQuestionnaire();
+              model.reset();
               Navigator.of(context).pop();
               Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
             },
