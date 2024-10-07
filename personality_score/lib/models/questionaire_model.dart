@@ -225,7 +225,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
     """;
 
       teamCharacters =
-      ["resident.webp", "Explorer.webp", "Reacher.webp", "Anonymous.webp"];
+      ["Resident.webp", "Explorer.webp", "Reacher.webp", "Anonymous.webp"];
       nextSet = 'BewussteInkompetenz';
     }
 
@@ -291,8 +291,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
     List<String> teamCharacters;
     String nextSet;
 
-    int possibleScore = _questions.length *
-        3; // Calculate possible score for the current set
+    int possibleScore = _questions.length * 10; // Calculate possible score for the current set
 
     if (_totalScore > (possibleScore *
         0.65)) { // Check if total score is more than 50% of possible score
@@ -326,7 +325,7 @@ Du bist schon auf einem sehr hohen Level der Persönlichkeitsentwicklung, dass n
 Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 1 und Stufe 2. Du befindest dich damit (wie über drei Viertel aller Menschen) im Bereich der „unbewussten Inkompetenz“. Das hört sich zwar nicht schön an, bedeutet aber eigentlich nur, dass du dein volles Potenzial noch nicht erkannt hast. Es gibt also noch viel zu entdecken.
 Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“ oder „Resident“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
 """;
-        teamCharacters = ["resident.webp", "Anonymous.webp"];
+        teamCharacters = ["Resident.webp", "Anonymous.webp"];
         nextSet = 'Resident';
       }
     }
@@ -416,7 +415,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     } else if (_questions.first.set == 'Reacher') {
       finalCharacter = _totalScore > (possibleScore * 0.65) ? "Reacher" : "Explorer";
     } else if (_questions.first.set == 'Resident') {
-      finalCharacter = _totalScore > (possibleScore * 0.5) ? "resident" : "Anonymous";
+      finalCharacter = _totalScore > (possibleScore * 0.5) ? "Resident" : "Anonymous";
     } else {
       finalCharacter = _totalScore > (possibleScore * 0.85) ? "Life Artist" : "Adventurer";
     }
