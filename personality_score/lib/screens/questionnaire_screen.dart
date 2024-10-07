@@ -143,7 +143,7 @@ class QuestionnaireScreen extends StatelessWidget {
               ),
               SizedBox(height: 8.0),
               Slider(
-                value: (model.answers[questionIndex] ?? 0).toDouble(),
+                value: question.value < 0? 10 - (model.answers[questionIndex] ?? 0).toDouble():(model.answers[questionIndex] ?? 0).toDouble(),
                 onChanged: (val) {
                   model.answerQuestion( questionIndex, question.value < 0? 10 - val.toInt(): val.toInt());
                 },
