@@ -88,24 +88,35 @@ class QuestionnaireModel with ChangeNotifier {
 
 
   Future<void> saveProgress() async {
+    _isLoading = true;  // Start loading
+    notifyListeners();  // Notify listeners to show loading spinner
+
     User? user = _auth.currentUser;
     if (user != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('results')
-          .doc(_currentSet)
-          .set({
-        'set': _currentSet,
-        'totalScore': _totalScore,
-        'isCompleted': _isFirstTestCompleted || _isSecondTestCompleted,
-        'completionDate': FieldValue.serverTimestamp(),
-        'currentPage': _currentPage,
-        'answers': _answers,
-        'combinedTotalScore': combinedTotalScore,
-      }, SetOptions(merge: true));
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('results')
+            .doc(_currentSet)
+            .set({
+          'set': _currentSet,
+          'totalScore': _totalScore,
+          'isCompleted': _isFirstTestCompleted || _isSecondTestCompleted,
+          'completionDate': FieldValue.serverTimestamp(),
+          'currentPage': _currentPage,
+          'answers': _answers,
+          'combinedTotalScore': combinedTotalScore,
+        }, SetOptions(merge: true));
+      } catch (error) {
+        print("Error saving progress: $error");
+      } finally {
+        _isLoading = false;  // Stop loading after the save operation completes
+        notifyListeners();  // Notify listeners to hide loading spinner
+      }
     }
   }
+
 
   Future<void> loadProgress() async {
     User? user = _auth.currentUser;
@@ -139,10 +150,10 @@ class QuestionnaireModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void nextPage(BuildContext context) {
+  Future<void> nextPage(BuildContext context) async {
     if ((_currentPage + 1) * 7 < _questions.length) {
       _currentPage++;
-      saveProgress();
+      await saveProgress();  // Ensure saving is completed before proceeding
       notifyListeners();
     }
   }
@@ -154,10 +165,10 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
 
-  void prevPage() {
+  Future<void> prevPage() async {
     if (_currentPage > 0) {
       _currentPage--;
-      saveProgress();
+      await saveProgress();  // Ensure saving is completed before proceeding
       notifyListeners();
     }
   }
@@ -185,9 +196,9 @@ class QuestionnaireModel with ChangeNotifier {
     return (_currentPage + 1) / (_questions.length / 7).ceil();
   }
 
-  void setPersonalityType(String type) {
+  Future<void>  setPersonalityType(String type) async {
     _personalityType = type;
-    saveProgress();
+    await saveProgress();
     notifyListeners();
   }
 
@@ -371,8 +382,8 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 ),
               ),
               onPressed: () {
-                _isSecondTestCompleted = true;
                 loadQuestions(nextSet);
+                _isSecondTestCompleted = true;
                 _currentPage = 0;
                 _totalScore = 0;
                 _answers = List<int?>.filled(_questions.length, 5);
