@@ -233,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   isExpanded = !isExpanded;
                                 });
                               },
-                              child: SelectableText(
+                              child: Text(
                                 isExpanded ? 'Lese weniger' : 'Lese mehr',
                                 style: TextStyle(
                                   color: Colors.white,

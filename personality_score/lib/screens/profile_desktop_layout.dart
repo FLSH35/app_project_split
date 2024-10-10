@@ -166,7 +166,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                               isExpanded = !isExpanded;
                             });
                           },
-                          child: SelectableText(
+                          child: Text(
                             isExpanded ? 'Lese weniger' : 'Lese mehr',
                             style: TextStyle(
                               color: Colors.white,
