@@ -50,7 +50,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
     },
     {
       "name": "Stufe 8: Life Artist",
-      "image": "assets/Life Artist.webp",
+      "image": "assets/LifeArtist.webp",
       "descriptionPath": "assets/auswertungen/Life Artist.txt",
     },
   ];

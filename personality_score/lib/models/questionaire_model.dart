@@ -223,7 +223,7 @@ Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen A
 Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
 """;
       teamCharacters = [
-        "Life Artist.webp",
+        "LifeArtist.webp",
         "Individual.webp",
         "Adventurer.webp",
         "Traveller.webp"
@@ -312,7 +312,7 @@ Falls du nicht geschummelt hast 😉, müssen wir dir an dieser Stelle aufrichti
 Hier musst du gar nicht mehr groß drüber nachdenken, um Erfolg im Leben zu realisieren. Was dich einst massive Anstrengung gekostet hat, passiert heute fast wie von selbst. 
 Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Adventurer“ oder „Life Artist“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
 """;
-        teamCharacters = ["Life Artist.webp", "Adventurer.webp"];
+        teamCharacters = ["LifeArtist.webp", "Adventurer.webp"];
         nextSet = 'LifeArtist';
       } else {
         message = """Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. 
@@ -518,7 +518,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                           isExpanded = !isExpanded; // Toggle the state
                         });
                       },
-                      child: SelectableText(
+                      child: Text(
                         isExpanded ? 'Lese weniger' : 'Lese mehr',
                         style: TextStyle(
                             color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
