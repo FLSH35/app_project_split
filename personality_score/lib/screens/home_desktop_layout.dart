@@ -161,7 +161,7 @@ class DesktopLayout extends StatelessWidget {
                         Navigator.of(context).pushNamed('/personality_types');
                       },
                       child: Text(
-                        'Learn More',
+                        'Erfahre mehr',
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'Roboto',
