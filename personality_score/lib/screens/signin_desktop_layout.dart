@@ -80,12 +80,12 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                           final authService = Provider.of<AuthService>(context, listen: false);
                           await authService.sendPasswordResetEmail(widget.emailController.text);
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("Password reset link sent to ${widget.emailController.text}"),
+                            content: SelectableText("Password reset link sent to ${widget.emailController.text}"),
                             backgroundColor: Colors.green,
                           ));
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("Please enter your email address to reset password."),
+                            content: SelectableText("Please enter your email address to reset password."),
                             backgroundColor: Colors.red,
                           ));
                         }
@@ -140,7 +140,7 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                     Consumer<AuthService>(
                       builder: (context, authService, child) {
                         if (authService.errorMessage != null) {
-                          return Text(
+                          return SelectableText(
                             authService.errorMessage!,
                             style: TextStyle(color: Colors.red),
                           );

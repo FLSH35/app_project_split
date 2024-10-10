@@ -14,69 +14,77 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       color: Color(0xFFF7F5EF),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Stack(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Consumer<AuthService>(
-                builder: (context, authService, child) {
-                  return IconButton(
-                    icon: Icon(Icons.person, color: _getIconColor(context, '/profile')),
-                    onPressed: () {
-                      if (authService.user == null) {
-                        Navigator.of(context).pushNamed('/signin');
-                      } else {
-                        Navigator.of(context).pushNamed('/profile');
-                      }
-                    },
-                  );
-                },
-              ),
-              SizedBox(width: 10),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFCB9935),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          // Overlaying the first row
+          Positioned(
+            right: 0,
+            top: 8,
+            child: Row(
+              children: [
+                Consumer<AuthService>(
+                  builder: (context, authService, child) {
+                    return IconButton(
+                      icon: Icon(Icons.person, color: _getIconColor(context, '/profile')),
+                      onPressed: () {
+                        if (authService.user == null) {
+                          Navigator.of(context).pushNamed('/signin');
+                        } else {
+                          Navigator.of(context).pushNamed('/profile');
+                        }
+                      },
+                    );
+                  },
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFCB9935),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    ),
+                  ),
+                  onPressed: () {
+                    handleTakeTest(context); // Your button action
+                  },
+                  child: Text(
+                    'Beginne den Test',
+                    style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                   ),
                 ),
-                onPressed: () {
-                  handleTakeTest(context); // Your button action
-                },
-                child: Text(
-                  'Beginne den Test',
-                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-                ),
-              ),
-              SizedBox(width: 20),
-            ],
+                SizedBox(width: 20),
+              ],
+            ),
           ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildNavButton(context, 'ALLGEMEIN', '/home'),
-              SizedBox(width: 10),
-              GestureDetector(
-                onTap: () async {
-                  const url = 'https://ifyouchange.com/';
-                  if (await canLaunch(url)) {
-                    await launch(url);
-                  } else {
-                    throw 'Could not launch $url';
-                  }
-                },
-                child: Image.asset(
-                  'assets/Logo-IYC-gross.png',
-                  height: 40,
+          // Second row: Logo and navigation buttons
+          Align(
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildNavButton(context, 'ALLGEMEIN', '/home'),
+                SizedBox(width: 10),
+                Flexible( // This allows the logo to scale within the available space
+                  child: GestureDetector(
+                    onTap: () async {
+                      const url = 'https://ifyouchange.com/';
+                      if (await canLaunch(url)) {
+                        await launch(url);
+                      } else {
+                        throw 'Could not launch $url';
+                      }
+                    },
+                    child: Image.asset(
+                      'assets/Logo-IYC-gross.png',
+                      height: 80, // Your desired height
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(width: 10),
-              _buildNavButton(context, 'STUFEN', '/personality_types'),
-            ],
+                SizedBox(width: 10),
+                _buildNavButton(context, 'STUFEN', '/personality_types'),
+              ],
+            ),
           ),
         ],
       ),
@@ -84,7 +92,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight + 60);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + 30);
 
   Widget _buildNavButton(BuildContext context, String label, String route) {
     bool isSelected = ModalRoute.of(context)?.settings.name == route;

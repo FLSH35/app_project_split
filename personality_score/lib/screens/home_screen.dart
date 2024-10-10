@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Text Section
-              Text(
+              SelectableText(
                 "PERSOENLICHKEITSSTUFEN",
                 style: TextStyle(
                   fontSize: screenHeight * 0.021,
@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              Text(
+              SelectableText(
                 "Verstehe dich selbst und andere ",
                 style: TextStyle(
                   fontSize: screenHeight * 0.056,
@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
-              Text(
+              SelectableText(
                   "Vom Anonymus zum Life Artist: Die 8 Stufen symbolisieren die wichtigsten Etappen auf dem Weg, dein Potenzial voll auszuschöpfen. Mit einem fundierten Verständnis des Modells wirst du nicht nur dich selbst, sondern auch andere Menschen viel besser verstehen und einordnen können.",
                style: TextStyle(
                   color: Colors.black,
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   Navigator.of(context).pushNamed('/personality_types');
                 },
-                child: Text(
+                child: SelectableText(
                   'Learn More',
                   style: TextStyle(
                     color: Colors.white,
@@ -179,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Center(
             child: Column(
               children: [
-                Text(
+                SelectableText(
                   "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
                     fontSize: screenHeight * 0.036,

@@ -110,7 +110,7 @@ class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
                     Consumer<AuthService>(
                       builder: (context, authService, child) {
                         if (authService.errorMessage != null) {
-                          return Text(
+                          return SelectableText(
                             authService.errorMessage!,
                             style: TextStyle(color: Colors.red),
                           );

@@ -91,12 +91,12 @@ class _SignInScreenState extends State<SignInScreen> {
                         final authService = Provider.of<AuthService>(context, listen: false);
                         await authService.sendPasswordResetEmail(_emailController.text);
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text("Password reset link sent to ${_emailController.text}"),
+                          content: SelectableText("Password reset link sent to ${_emailController.text}"),
                           backgroundColor: Colors.green,
                         ));
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text("Please enter your email address to reset password."),
+                          content: SelectableText("Please enter your email address to reset password."),
                           backgroundColor: Colors.red,
                         ));
                       }
@@ -142,7 +142,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   Consumer<AuthService>(
                     builder: (context, authService, child) {
                       if (authService.errorMessage != null) {
-                        return Text(
+                        return SelectableText(
                           authService.errorMessage!,
                           style: TextStyle(color: Colors.red),
                         );
@@ -153,7 +153,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 ] else ...[
                   // Show welcome message and buttons after sign-in
                   if (userName != null)
-                    Text(
+                    SelectableText(
                       'Hallo $userName!',
                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),

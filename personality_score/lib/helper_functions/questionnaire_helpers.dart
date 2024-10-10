@@ -26,7 +26,7 @@ void handleTakeTest(BuildContext context) {
     builder: (BuildContext context) {
       return AlertDialog(
         backgroundColor: Color(0xFFF7F5EF), // Matching background color
-        title: Text(
+        title: SelectableText(
           'Fortfahren oder neu beginnen?',
           style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
         ),
@@ -34,7 +34,7 @@ void handleTakeTest(BuildContext context) {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              SelectableText(
                 'Möchtest du fortfahren, wo du aufgehört hast, oder von vorne beginnen?',
                 style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
               ),
@@ -55,7 +55,7 @@ void handleTakeTest(BuildContext context) {
               Navigator.of(context).pop();
               Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
             },
-            child: Text(
+            child: SelectableText(
               'Neu beginnen',
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
             ),
@@ -73,7 +73,7 @@ void handleTakeTest(BuildContext context) {
               Navigator.of(context).pop();
               Navigator.of(context).pushNamed('/questionnaire'); // Continue from where left off
             },
-            child: Text(
+            child: SelectableText(
               'Fortfahren',
               style: TextStyle(color: Color(0xFFCB9935), fontFamily: 'Roboto'),
             ),

@@ -112,7 +112,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  SelectableText(
                     "Die 8 Persönlichkeitsstufen",
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -124,7 +124,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
+                    child: SelectableText(
                       "Lerne das Modell kennen.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -178,7 +178,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                   child: Center(
                     child: Column(
                       children: [
-                        Text(
+                        SelectableText(
                           "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                           style: TextStyle(
                             fontSize: screenHeight * 0.035, // Angepasst für Mobile
@@ -229,7 +229,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
   // AppBar für Mobile mit Menü-Button
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text(
+      title: SelectableText(
         'STUFEN',
         style: TextStyle(color: Colors.black),
       ),
@@ -313,7 +313,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                 fit: BoxFit.contain,
               ),
               SizedBox(height: 20),
-              Text(
+              SelectableText(
                 widget.name,
                 style: TextStyle(
                   fontSize: 30, // Angepasste Schriftgröße für Mobile
@@ -327,7 +327,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                   ? Container(
                 height: 200, // Festgelegte Höhe für den scrollbaren Bereich
                 child: SingleChildScrollView(
-                  child: Text(
+                  child: SelectableText(
                     displayDescription,
                     style: TextStyle(
                       fontSize: 18, // Angepasste Schriftgröße für Mobile
@@ -337,7 +337,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                   ),
                 ),
               )
-                  : Text(
+                  : SelectableText(
                 displayDescription,
                 style: TextStyle(
                   fontSize: 18, // Angepasste Schriftgröße für Mobile
@@ -353,7 +353,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                     isExpanded = !isExpanded;
                   });
                 },
-                child: Text(
+                child: SelectableText(
                   isExpanded ? 'Lese weniger' : 'Lese weiter',
                   style: TextStyle(
                     color: Colors.white,

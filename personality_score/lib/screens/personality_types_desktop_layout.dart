@@ -104,7 +104,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  SelectableText(
                     "Die 8 Persönlichkeitsstufen",
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -116,7 +116,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
+                    child: SelectableText(
                       "Lerne das Modell kennen.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -172,7 +172,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
                   child: Center(
                     child: Column(
                       children: [
-                        Text(
+                        SelectableText(
                           "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                           style: TextStyle(
                             fontSize: screenHeight * 0.042,
@@ -282,7 +282,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                 ? Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
+                SelectableText(
                   widget.name,
                   style: TextStyle(
                     fontSize: 60,
@@ -293,7 +293,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                 SizedBox(height: 20),
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Text(
+                    child: SelectableText(
                       displayDescription,
                       style: TextStyle(
                         fontSize: 22,
@@ -311,7 +311,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                       isExpanded = false;
                     });
                   },
-                  child: Text(
+                  child: SelectableText(
                     'Lese weniger',
                     style: TextStyle(
                       color: Colors.white,
@@ -342,7 +342,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
+                      SelectableText(
                         widget.name,
                         style: TextStyle(
                           fontSize: 60,
@@ -354,7 +354,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                       Expanded(
                         child: Align(
                           alignment: Alignment.topLeft,
-                          child: Text(
+                          child: SelectableText(
                             displayDescription,
                             style: TextStyle(
                               fontSize: 22,
@@ -372,7 +372,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                             isExpanded = true;
                           });
                         },
-                        child: Text(
+                        child: SelectableText(
                           'Lese weiter',
                           style: TextStyle(
                             color: Colors.white,

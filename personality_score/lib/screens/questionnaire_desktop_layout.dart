@@ -120,12 +120,11 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Flexible(
-                child: Text(
+                child: SelectableText(
                   question.text,
                   style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 22),
                   textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3
                 ),
               ),
               SizedBox(height: 8.0),
@@ -145,19 +144,19 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  SelectableText(
                     'NEIN',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
-                  Text(
+                  SelectableText(
                     'EHER NEIN',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
-                  Text(
+                  SelectableText(
                     'EHER JA',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
-                  Text(
+                  SelectableText(
                     'JA',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
@@ -190,7 +189,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               ),
             ),
             onPressed: () => model.prevPage(),
-            child: Text(
+            child: SelectableText(
               'Zurück',
               style: TextStyle(
                   color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
@@ -211,7 +210,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               model.nextPage(context);
               _scrollToFirstQuestion(context);
             },
-            child: Text(
+            child: SelectableText(
               'Weiter',
               style: TextStyle(
                   color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
@@ -232,7 +231,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               model.completeFirstTest(context);
               _scrollToFirstQuestion(context);
             },
-            child: Text(
+            child: SelectableText(
               'Fertigstellen',
               style: TextStyle(
                   color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
@@ -255,7 +254,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               model.completeSecondTest(context);
               _scrollToFirstQuestion(context);
             },
-            child: Text(
+            child: SelectableText(
               'Fertigstellen',
               style: TextStyle(
                   color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
@@ -276,7 +275,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               model.completeFinalTest(context);
               _scrollToFirstQuestion(context);
             },
-            child: Text(
+            child: SelectableText(
               'Fertigstellen',
               style: TextStyle(
                   color: Colors.white, fontFamily: 'Roboto', fontSize: 18),

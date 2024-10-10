@@ -92,7 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         appBar: _buildAppBar(context), // Add AppBar for mobile with menu button
         endDrawer: MobileSidebar(), // Use the mobile sidebar
         body: Center(
-          child: Text(
+          child: SelectableText(
             'Please sign in to see your profile.',
             style: TextStyle(
                 fontSize: 18, color: Colors.black, fontFamily: 'Roboto'),
@@ -147,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+                    SelectableText(
                       _nameController.text,
                       style: TextStyle(
                           fontSize: 24,
@@ -175,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
+                            SelectableText(
                                 '${finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${finalCharacterData?['finalCharacter']}!',
                                 style: TextStyle(
                                     color: Colors.black,
@@ -185,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ? Container(
                               height: 350, // Set a fixed height for scrolling
                               child: SingleChildScrollView(
-                                child: Text(
+                                child: SelectableText(
                                     finalCharacterData![
                                     'finalCharacterDescription'],
                                     style: TextStyle(
@@ -200,7 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 padding: const EdgeInsets.all(20.0),
                                 child: SingleChildScrollView(
                                   child:
-                                    Text(
+                                    SelectableText(
                                       finalCharacterData![
                                       'finalCharacterDescription']
                                           .split('. ')
@@ -233,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   isExpanded = !isExpanded;
                                 });
                               },
-                              child: Text(
+                              child: SelectableText(
                                 isExpanded ? 'Lese weniger' : 'Lese mehr',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -248,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   )
                 else
-                  Text(
+                  SelectableText(
                     'No final character found.',
                     style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
                   ),

@@ -128,7 +128,7 @@ class QuestionnaireScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  child: Text(
+                  child: SelectableText(
                     question.text,
                     style: TextStyle(
                       color: Colors.black,
@@ -136,8 +136,7 @@ class QuestionnaireScreen extends StatelessWidget {
                       fontSize: 20,
                     ),
                     textAlign: TextAlign.center,
-                    maxLines: null,
-                    overflow: TextOverflow.visible,
+                    maxLines: null
                   ),
                 ),
               ),
@@ -158,19 +157,19 @@ class QuestionnaireScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  SelectableText(
                     'NEIN',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
-                  Text(
+                  SelectableText(
                     'EHER NEIN',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
-                  Text(
+                  SelectableText(
                     'EHER JA',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
-                  Text(
+                  SelectableText(
                     'JA',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),

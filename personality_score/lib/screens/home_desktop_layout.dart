@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'custom_app_bar.dart'; // Import your custom app bar
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:personality_score/models/questionaire_model.dart';
-
+import 'custom_app_bar.dart'; // Import your custom app bar
 import 'custom_footer.dart'; // Import your QuestionnaireModel
+import 'dart:math'; // For 3D transformations
 
 class DesktopLayout extends StatelessWidget {
   @override
@@ -36,12 +36,11 @@ class DesktopLayout extends StatelessWidget {
   Widget _buildHeaderSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
       children: [
-        // SVG background for the personality types section
         Positioned.fill(
           child: SvgPicture.asset(
             'assets/background_personality_type.svg',
             fit: BoxFit.cover,
-            width: screenWidth, // Size adjusted to screen width
+            width: screenWidth,
           ),
         ),
         Padding(
@@ -49,7 +48,7 @@ class DesktopLayout extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
-                Text(
+                SelectableText(
                   "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
                     fontSize: screenHeight * 0.042,
@@ -57,7 +56,7 @@ class DesktopLayout extends StatelessWidget {
                     color: Colors.black,
                   ),
                 ),
-                Text(
+                SelectableText(
                   "Erhalte messerscharfe Klarheit über deinen Entwicklungsstand und erfahre, wie du das nächste Level erreichen kannst.",
                   style: TextStyle(
                     fontSize: screenHeight * 0.02,
@@ -69,8 +68,8 @@ class DesktopLayout extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFCB9935),
-                    shape: RoundedRectangleBorder( // Create square corners
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
                     ),
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.07,
@@ -99,12 +98,11 @@ class DesktopLayout extends StatelessWidget {
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
       children: [
-        // SVG background for the personality types section
         Positioned.fill(
           child: SvgPicture.asset(
             'assets/background_personality_type.svg',
             fit: BoxFit.cover,
-            width: screenWidth, // Size adjusted to screen width
+            width: screenWidth,
           ),
         ),
         Padding(
@@ -118,7 +116,7 @@ class DesktopLayout extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
+                    SelectableText(
                       "PERSOENLICHKEITSSTUFEN",
                       style: TextStyle(
                         fontSize: screenHeight * 0.021,
@@ -128,7 +126,7 @@ class DesktopLayout extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text(
+                    SelectableText(
                       "Verstehe dich selbst und andere ",
                       style: TextStyle(
                         fontSize: screenHeight * 0.056,
@@ -138,7 +136,7 @@ class DesktopLayout extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text(
+                    SelectableText(
                       "Vom Anonymus zum Life Artist: Die 8 Stufen symbolisieren die wichtigsten Etappen auf dem Weg, dein Potenzial voll auszuschöpfen. Mit einem fundierten Verständnis des Modells wirst du nicht nur dich selbst, sondern auch andere Menschen viel besser verstehen und einordnen können.",
                       style: TextStyle(
                         color: Colors.black,
@@ -155,8 +153,8 @@ class DesktopLayout extends StatelessWidget {
                           horizontal: screenWidth * 0.07,
                           vertical: screenHeight * 0.021,
                         ),
-                        shape: RoundedRectangleBorder( // Create square corners
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
                         ),
                       ),
                       onPressed: () {
@@ -179,11 +177,7 @@ class DesktopLayout extends StatelessWidget {
                 flex: 1,
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: SizedBox(
-                    width: screenWidth * 0.35,
-                    height: screenHeight * 0.35,
-                    child: Image.asset('assets/adventurer_front.png'),
-                  ),
+                  child: AdventurerImage(screenWidth: screenWidth, screenHeight: screenHeight),
                 ),
               ),
             ],
@@ -192,6 +186,7 @@ class DesktopLayout extends StatelessWidget {
       ],
     );
   }
+
   // New function added to build the "Curious" section
   Widget _buildCuriousSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
@@ -200,7 +195,7 @@ class DesktopLayout extends StatelessWidget {
           child: SvgPicture.asset(
             'assets/left_background_personality_type.svg',
             fit: BoxFit.fitWidth,
-            width: screenWidth * 0.5, // customize size here with width relative to screen width
+            width: screenWidth * 0.5,
           ),
         ),
         Padding(
@@ -208,7 +203,7 @@ class DesktopLayout extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
-                Text(
+                SelectableText(
                   "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
                     fontSize: screenHeight * 0.042,
@@ -221,8 +216,8 @@ class DesktopLayout extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFCB9935),
-                    shape: RoundedRectangleBorder( // Create square corners
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
                     ),
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.07,
@@ -230,7 +225,7 @@ class DesktopLayout extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    handleTakeTest(context); // Call to the test function
+                    handleTakeTest(context);
                   },
                   child: Text(
                     'Beginne den Test',
@@ -248,5 +243,51 @@ class DesktopLayout extends StatelessWidget {
       ],
     );
   }
+}
 
+// Widget for the tilted Adventurer Image with hover effect
+class AdventurerImage extends StatefulWidget {
+  final double screenWidth;
+  final double screenHeight;
+
+  AdventurerImage({required this.screenWidth, required this.screenHeight});
+
+  @override
+  _AdventurerImageState createState() => _AdventurerImageState();
+}
+
+class _AdventurerImageState extends State<AdventurerImage> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          isHovered = true;
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          isHovered = false;
+        });
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        // No transformation for the container itself
+        child: Transform(
+          transform: !isHovered ? Matrix4.identity() : Matrix4.identity()
+            ..setEntry(3, 2, 0.000) // For 3D perspective
+            ..rotateY(pi / 1), // Tilt image to the right
+          alignment: FractionalOffset.center, // Pivot at the center
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            width: !isHovered ? widget.screenWidth * 0.4 : widget.screenWidth * 0.5,
+            height: !isHovered ? widget.screenHeight * 0.4 : widget.screenHeight * 0.5,
+            child: Image.asset('assets/adventurer_front.png'),
+          ),
+        ),
+      ),
+    );
+  }
 }

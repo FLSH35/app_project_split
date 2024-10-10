@@ -250,7 +250,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(message + '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n'
+                SelectableText(message + '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n'
                     , style: TextStyle(color: Colors.black, fontFamily: 'Roboto',
                         fontSize: 18)),
                 SizedBox(height: 10),
@@ -345,7 +345,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Color(0xFFC7C7C7),
-          title: Text(
+          title: SelectableText(
             '$_totalScore Punkte erreicht',
             style: TextStyle(fontFamily: 'Roboto'),
           ),
@@ -353,7 +353,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                SelectableText(
                   message + '\n\nWinston Churchill: "Erfolg ist nicht endgültig, Misserfolg ist nicht fatal: Es ist der Mut, weiterzumachen, der zählt."\n',
                   style: TextStyle(fontFamily: 'Roboto',
                       fontSize: 18),
@@ -390,7 +390,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 notifyListeners();
                 Navigator.of(context).pop();
               },
-              child: Text(
+              child: SelectableText(
                 'Next',
                 style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
               ),
@@ -476,7 +476,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\n Damit bist du ein $finalCharacter.", style: TextStyle(
+                    SelectableText("Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\n Damit bist du ein $finalCharacter.", style: TextStyle(
                         color: Colors.black, fontFamily: 'Roboto')),
                     SizedBox(height: 10),
                     if (!isExpanded)
@@ -488,14 +488,14 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                         ? Container(
                       height: 150,
                       child: SingleChildScrollView(
-                        child: Text(finalCharacterDescription,
+                        child: SelectableText(finalCharacterDescription,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontFamily: 'Roboto',
                                 fontSize: 18)),
                       ),
                     )
-                        : Text(
+                        : SelectableText(
                       finalCharacterDescription.split(' ').take(15).join(' ') + '...',
                       style: TextStyle(
                           color: Colors.black,
@@ -518,7 +518,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                           isExpanded = !isExpanded; // Toggle the state
                         });
                       },
-                      child: Text(
+                      child: SelectableText(
                         isExpanded ? 'Lese weniger' : 'Lese mehr',
                         style: TextStyle(
                             color: Colors.white, fontFamily: 'Roboto', fontSize: 18),

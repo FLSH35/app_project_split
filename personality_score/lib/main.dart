@@ -58,7 +58,7 @@ class ImpressumPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Text(
+        child: SelectableText(
           'This is the Impressum page where the legal information goes...',
           style: TextStyle(fontFamily: 'Roboto'),
         ),
@@ -77,7 +77,7 @@ class DatenschutzPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Text(
+        child: SelectableText(
           'This is the Datenschutz page where privacy policies go...',
           style: TextStyle(fontFamily: 'Roboto'),
         ),

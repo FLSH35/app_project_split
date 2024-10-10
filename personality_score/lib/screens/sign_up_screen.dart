@@ -91,7 +91,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Consumer<AuthService>(
                 builder: (context, authService, child) {
                   if (authService.errorMessage != null) {
-                    return Text(
+                    return SelectableText(
                       authService.errorMessage!,
                       style: TextStyle(color: Colors.red),
                     );
@@ -102,7 +102,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ] else ...[
               // Show welcome message and buttons after sign-up
               if (userName != null)
-                Text(
+                SelectableText(
                   'Hello, $userName!',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
@@ -135,7 +135,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 onPressed: () {
                   Navigator.of(context).pushNamed('/profile'); // Go to profile
                 },
-                child: Text(
+                child: SelectableText(
                   'Go to Profile',
                   style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                 ),

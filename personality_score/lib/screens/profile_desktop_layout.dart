@@ -37,7 +37,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
           title: 'Profile',
         ),
         body: Center(
-          child: Text(
+          child: SelectableText(
             'Please sign in to see your profile.',
             style: TextStyle(
                 fontSize: 18, color: Colors.white, fontFamily: 'Roboto'),
@@ -85,7 +85,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                 : Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                SelectableText(
                   widget.nameController.text,
                   style: TextStyle(
                       fontSize: 24,
@@ -109,7 +109,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
+                        SelectableText(
                             '${widget.finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${widget.finalCharacterData?['finalCharacter']}!',
                             style: TextStyle(
                                 color: Colors.black,
@@ -119,7 +119,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                             ? Container(
                           height: 350, // Set a fixed height for scrolling
                           child: SingleChildScrollView(
-                            child: Text(
+                            child: SelectableText(
                                 widget.finalCharacterData![
                                 'finalCharacterDescription'],
                                 style: TextStyle(
@@ -133,7 +133,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
                             child: SingleChildScrollView(
-                              child: Text(
+                              child: SelectableText(
                                   widget.finalCharacterData![
                                   'finalCharacterDescription']
                                       .split('. ')
@@ -166,7 +166,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                               isExpanded = !isExpanded;
                             });
                           },
-                          child: Text(
+                          child: SelectableText(
                             isExpanded ? 'Lese weniger' : 'Lese mehr',
                             style: TextStyle(
                               color: Colors.white,
@@ -181,7 +181,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                 ),
               )
             else
-              Text(
+              SelectableText(
                 'No final character found.',
                 style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
               ),
