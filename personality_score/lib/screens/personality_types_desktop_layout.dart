@@ -311,7 +311,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                       isExpanded = false;
                     });
                   },
-                  child: SelectableText(
+                  child: Text(
                     'Lese weniger',
                     style: TextStyle(
                       color: Colors.white,
@@ -372,7 +372,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                             isExpanded = true;
                           });
                         },
-                        child: SelectableText(
+                        child: Text(
                           'Lese weiter',
                           style: TextStyle(
                             color: Colors.white,
