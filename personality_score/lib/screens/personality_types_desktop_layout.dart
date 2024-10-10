@@ -48,9 +48,9 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
       "descriptionPath": "assets/auswertungen/Adventurer.txt",
     },
     {
-      "name": "Stufe 8: Life Artist",
+      "name": "Stufe 8: LifeArtist",
       "image": "assets/LifeArtist.webp",
-      "descriptionPath": "assets/auswertungen/Life Artist.txt",
+      "descriptionPath": "assets/auswertungen/LifeArtist.txt",
     },
   ];
 

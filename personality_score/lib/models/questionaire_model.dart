@@ -310,7 +310,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
         message ="""Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 7 und Stufe 8. 
 Falls du nicht geschummelt hast 😉, müssen wir dir an dieser Stelle aufrichtige Anerkennung zollen: Diesen Bereich der „unbewussten Kompetenz“ erreichen unter 1% aller Menschen.
 Hier musst du gar nicht mehr groß drüber nachdenken, um Erfolg im Leben zu realisieren. Was dich einst massive Anstrengung gekostet hat, passiert heute fast wie von selbst. 
-Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Adventurer“ oder „Life Artist“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
+Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Adventurer“ oder „LifeArtist“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
 """;
         teamCharacters = ["LifeArtist.webp", "Adventurer.webp"];
         nextSet = 'LifeArtist';
@@ -428,7 +428,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     } else if (_questions.first.set == 'Resident') {
       finalCharacter = _totalScore > (possibleScore * 0.5) ? "Resident" : "Anonymous";
     } else {
-      finalCharacter = _totalScore > (possibleScore * 0.85) ? "Life Artist" : "Adventurer";
+      finalCharacter = _totalScore > (possibleScore * 0.85) ? "LifeArtist" : "Adventurer";
     }
 
     // Load the final character's description
