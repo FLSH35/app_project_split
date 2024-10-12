@@ -91,7 +91,7 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                         }
                       },
                       child: Text(
-                        'Forgot Password?',
+                        'Passwort vergessen?',
                         style: TextStyle(color: Colors.lightBlue),
                       ),
                     ),
@@ -103,7 +103,7 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                         Navigator.of(context).pushReplacementNamed('/signup');
                       },
                       child: Text(
-                        'Don\'t have an account? Sign Up',
+                        'Du hast noch keinen Account? Registriere dich hier!',
                         style: TextStyle(color: Colors.lightBlue),
                       ),
                     ),
@@ -133,7 +133,7 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                           });
                         }
                       },
-                      child: Text('Sign In'),
+                      child: Text('Anmelden'),
                     ),
 
                     // Error Message

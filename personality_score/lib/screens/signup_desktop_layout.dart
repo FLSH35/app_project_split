@@ -95,7 +95,7 @@ class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
                           });
                         }
                       },
-                      child: Text('Sign Up'),
+                      child: Text('Registrieren'),
                     ),
 
                     // Link to Sign In

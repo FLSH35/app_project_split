@@ -102,7 +102,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       }
                     },
                     child: Text(
-                      'Forgot Password?',
+                      'Passwort vergessen?',
                       style: TextStyle(color: Colors.lightBlue),
                     ),
                   ),
@@ -112,7 +112,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     onPressed: () {
                       Navigator.of(context).pushReplacementNamed('/signup');
                     },
-                    child: Text('Don\'t have an account? Sign Up',
+                    child: Text('Du hast noch keinen Account? Registriere dich hier!',
     style: TextStyle(color: Colors.lightBlue)),
                   ),
                   ElevatedButton(
@@ -137,7 +137,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         await fetchUserName();
                       }
                     },
-                    child: Text('Sign In'),
+                    child: Text('Anmelden'),
                   ),
                   Consumer<AuthService>(
                     builder: (context, authService, child) {
@@ -203,7 +203,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('SIGN IN'),
+      title: Text('Anmelden'),
       backgroundColor: Color(0xFFF7F5EF),
       actions: [
         Builder(

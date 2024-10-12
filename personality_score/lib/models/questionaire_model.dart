@@ -390,7 +390,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 notifyListeners();
                 Navigator.of(context).pop();
               },
-              child: SelectableText(
+              child: Text(
                 'Next',
                 style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
               ),
