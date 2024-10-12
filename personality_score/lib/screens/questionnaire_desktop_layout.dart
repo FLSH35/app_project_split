@@ -189,7 +189,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               ),
             ),
             onPressed: () => model.prevPage(),
-            child: SelectableText(
+            child: Text(
               'Zurück',
               style: TextStyle(
                   color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
@@ -210,7 +210,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               model.nextPage(context);
               _scrollToFirstQuestion(context);
             },
-            child: SelectableText(
+            child: Text(
               'Weiter',
               style: TextStyle(
                   color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
@@ -231,7 +231,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               model.completeFirstTest(context);
               _scrollToFirstQuestion(context);
             },
-            child: SelectableText(
+            child: Text(
               'Fertigstellen',
               style: TextStyle(
                   color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
@@ -254,7 +254,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               model.completeSecondTest(context);
               _scrollToFirstQuestion(context);
             },
-            child: SelectableText(
+            child: Text(
               'Fertigstellen',
               style: TextStyle(
                   color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
@@ -275,7 +275,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               model.completeFinalTest(context);
               _scrollToFirstQuestion(context);
             },
-            child: SelectableText(
+            child: Text(
               'Fertigstellen',
               style: TextStyle(
                   color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
