@@ -184,7 +184,6 @@ class QuestionnaireModel with ChangeNotifier {
     _personalityType = null;
     _isFirstTestCompleted = false;
     _isSecondTestCompleted = false;
-    combinedTotalScore = 0;
     loadQuestions('Kompetenz');
     saveProgress();
     notifyListeners();
@@ -414,8 +413,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
   void completeFinalTest(BuildContext context) async {
     _finalTestScore = _totalScore;  // Save the final test score
     score_factor += _questions.length;
-    // Calculate the combined total score
-    combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
+
     String finalCharacter;
 
     int possibleScore = _questions.length * 10; // Calculate possible score for the final set
@@ -539,9 +537,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 ),
               ),
               onPressed: () {
-                reset();
                 Navigator.of(context).pop();
                 Navigator.of(context).pushNamed('/home');
+                reset();
               },
               child: Text('Abschließen',
                   style: TextStyle(
@@ -567,4 +565,76 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       },
     );
   }
+
+  Future<void> calculateCombinedTotalScore() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        // Abrufen der Total-Scores vom ersten Test (Kompetenz)
+        final firstTestDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('results')
+            .doc('Kompetenz')
+            .get();
+
+
+        // Abrufen der Total-Scores vom ersten Test (Kompetenz)
+        int firstTestScore = firstTestDoc.exists && firstTestDoc.data() != null
+            ? firstTestDoc.data()!['totalScore'] ?? 0
+            : 0;
+
+// Abrufen der Total-Scores vom zweiten Test (abhängig vom finalCharacter)
+        String secondTestSet = (_finalCharacter == 'LifeArtist' || _finalCharacter == 'Adventurer' ||
+            _finalCharacter == 'Individual' || _finalCharacter == 'Traveller')
+            ? 'BewussteKompetenz'
+            : 'BewussteInkompetenz';
+
+        final secondTestDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('results')
+            .doc(secondTestSet)
+            .get();
+
+        int secondTestScore = secondTestDoc.exists && secondTestDoc.data() != null
+            ? secondTestDoc.data()!['totalScore'] ?? 0
+            : 0;
+
+// Abrufen der Total-Scores vom finalen Test
+        final finalTestDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('results')
+            .doc(_finalCharacter ?? 'FinalTest')
+            .get();
+
+        int finalTestScore = finalTestDoc.exists && finalTestDoc.data() != null
+            ? finalTestDoc.data()!['totalScore'] ?? 0
+            : 0;
+
+        // Berechnung der kombinierten Total-Scores
+        combinedTotalScore = firstTestScore + secondTestScore + finalTestScore;
+
+        // Speichern des kombinierten Total-Scores in Firebase
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('results')
+            .doc('combinedScore')
+            .set({
+          'combinedTotalScore': combinedTotalScore,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+
+        // Benachrichtige die Listener, dass sich der combinedTotalScore geändert hat
+        notifyListeners();
+      } catch (error) {
+        print("Fehler beim Abrufen der Scores: $error");
+      }
+    }
+  }
+
 }
+
+
