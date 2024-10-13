@@ -13,14 +13,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Color(0xFFF7F5EF),
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
       child: Stack(
         children: [
-          // Overlaying the first row
+          // First row with the buttons
           Positioned(
             right: 0,
-            top: 8,
-            child: Row(
+            top: 0, // Adjusted position to be at the top
+            child: Column(
               children: [
                 Consumer<AuthService>(
                   builder: (context, authService, child) {
@@ -36,7 +36,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     );
                   },
                 ),
-                SizedBox(width: 10),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFCB9935),
@@ -53,7 +52,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                   ),
                 ),
-                SizedBox(width: 20),
               ],
             ),
           ),
@@ -65,7 +63,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 _buildNavButton(context, 'ALLGEMEIN', '/home'),
                 SizedBox(width: 10),
-                Flexible( // This allows the logo to scale within the available space
+                Flexible(
                   child: GestureDetector(
                     onTap: () async {
                       const url = 'https://ifyouchange.com/';
