@@ -674,7 +674,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             .collection('users')
             .doc(user.uid)
             .collection('results')
-            .doc('combinedScore')
+            .doc('finalCharacter')
             .set({
           'combinedTotalScore': combinedTotalScore,
           'lastUpdated': FieldValue.serverTimestamp(),
