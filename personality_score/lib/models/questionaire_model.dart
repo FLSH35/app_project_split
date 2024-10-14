@@ -12,13 +12,10 @@ class QuestionnaireModel with ChangeNotifier {
   List<Question> _questions = [];
   int _currentQuestionIndex = 0;
 
-  int score_factor= 0;
+  int score_factor = 0;
 
 
-  int _totalScore = 0;  // Store total score across all sets
-  int _firstTestScore = 0;  // Track score for the first test
-  int _secondTestScore = 0;  // Track score for the second test
-  int _finalTestScore = 0;  // Track score for the final test
+  int _totalScore = 0; // Store total score across all sets
 
   int combinedTotalScore = 0;
 
@@ -30,7 +27,7 @@ class QuestionnaireModel with ChangeNotifier {
   bool _isSecondTestCompleted = false;
   String _currentSet = 'Kompetenz';
 
-  bool _isLoading = false;  // Track the loading state
+  bool _isLoading = false; // Track the loading state
 
   String? _finalCharacter;
   String? _finalCharacterDescription;
@@ -40,36 +37,48 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
   List<Question> get questions => _questions;
-  bool get isLoading => _isLoading;  // Expose loading state to the UI
+
+  bool get isLoading => _isLoading; // Expose loading state to the UI
   int get currentQuestionIndex => _currentQuestionIndex;
+
   int get totalScore => _totalScore;
+
   int get currentPage => _currentPage;
+
   List<int?> get answers => _answers;
+
   String? get personalityType => _personalityType;
+
   int get progress => _progress;
+
   bool get isFirstTestCompleted => _isFirstTestCompleted;
+
   bool get isSecondTestCompleted => _isSecondTestCompleted;
+
   String? get finalCharacter => _finalCharacter;
+
   String? get finalCharacterDescription => _finalCharacterDescription;
 
 
   /// Loading questions from the service
   Future<void> loadQuestions(String set) async {
-    _isLoading = true;  // Set loading to true while fetching data
-    notifyListeners();  // Notify listeners to update the UI
+    _isLoading = true; // Set loading to true while fetching data
+    notifyListeners(); // Notify listeners to update the UI
 
     _currentSet = set;
 
     try {
       // Load questions from the service
-      List<Question> loadedQuestions = await _questionService.loadQuestions(set);
+      List<Question> loadedQuestions = await _questionService.loadQuestions(
+          set);
 
       // Create a Set to store unique questions
       Set<String> uniqueQuestionTexts = {};
       List<Question> uniqueQuestions = [];
 
       for (var question in loadedQuestions) {
-        if (uniqueQuestionTexts.add(question.text)) {  // Ensure uniqueness by question text
+        if (uniqueQuestionTexts.add(
+            question.text)) { // Ensure uniqueness by question text
           uniqueQuestions.add(question);
         }
       }
@@ -80,16 +89,15 @@ class QuestionnaireModel with ChangeNotifier {
     } catch (error) {
       print("Error loading questions: $error");
     } finally {
-      _isLoading = false;  // Set loading to false after fetching data
-      notifyListeners();  // Notify listeners to update the UI
+      _isLoading = false; // Set loading to false after fetching data
+      notifyListeners(); // Notify listeners to update the UI
     }
   }
 
 
-
   Future<void> saveProgress() async {
-    _isLoading = true;  // Start loading
-    notifyListeners();  // Notify listeners to show loading spinner
+    _isLoading = true; // Start loading
+    notifyListeners(); // Notify listeners to show loading spinner
 
     User? user = _auth.currentUser;
     if (user != null) {
@@ -111,8 +119,8 @@ class QuestionnaireModel with ChangeNotifier {
       } catch (error) {
         print("Error saving progress: $error");
       } finally {
-        _isLoading = false;  // Stop loading after the save operation completes
-        notifyListeners();  // Notify listeners to hide loading spinner
+        _isLoading = false; // Stop loading after the save operation completes
+        notifyListeners(); // Notify listeners to hide loading spinner
       }
     }
   }
@@ -153,7 +161,7 @@ class QuestionnaireModel with ChangeNotifier {
   Future<void> nextPage(BuildContext context) async {
     if ((_currentPage + 1) * 7 < _questions.length) {
       _currentPage++;
-      await saveProgress();  // Ensure saving is completed before proceeding
+      await saveProgress(); // Ensure saving is completed before proceeding
       notifyListeners();
     }
   }
@@ -168,14 +176,12 @@ class QuestionnaireModel with ChangeNotifier {
   Future<void> prevPage() async {
     if (_currentPage > 0) {
       _currentPage--;
-      await saveProgress();  // Ensure saving is completed before proceeding
+      await saveProgress(); // Ensure saving is completed before proceeding
       notifyListeners();
     }
   }
 
   void reset() {
-
-
     _totalScore = 0;
     _currentQuestionIndex = 0;
     _currentPage = 0;
@@ -184,6 +190,7 @@ class QuestionnaireModel with ChangeNotifier {
     _personalityType = null;
     _isFirstTestCompleted = false;
     _isSecondTestCompleted = false;
+    combinedTotalScore = 0;
     loadQuestions('Kompetenz');
     saveProgress();
     notifyListeners();
@@ -195,17 +202,14 @@ class QuestionnaireModel with ChangeNotifier {
     return (_currentPage + 1) / (_questions.length / 7).ceil();
   }
 
-  Future<void>  setPersonalityType(String type) async {
+  Future<void> setPersonalityType(String type) async {
     _personalityType = type;
     await saveProgress();
     notifyListeners();
   }
 
   void completeFirstTest(BuildContext context) {
-
     score_factor += _questions.length;
-    combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
-    _firstTestScore = _totalScore;  // Save the first test score
 
 
     String message;
@@ -244,13 +248,16 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Color(0xFFC7C7C7), // Soft background
-          title: Text('$_totalScore Punkte erreicht', style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
+          title: Text('$_totalScore Punkte erreicht',
+              style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SelectableText(message + '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n'
-                    , style: TextStyle(color: Colors.black, fontFamily: 'Roboto',
+                SelectableText(message +
+                    '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n'
+                    ,
+                    style: TextStyle(color: Colors.black, fontFamily: 'Roboto',
                         fontSize: 18)),
                 SizedBox(height: 10),
                 Wrap(
@@ -258,7 +265,8 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                   runSpacing: 10.0,
                   alignment: WrapAlignment.center,
                   children: teamCharacters
-                      .map((character) => Image.asset('assets/$character', width: 100, height: 100))
+                      .map((character) =>
+                      Image.asset('assets/$character', width: 100, height: 100))
                       .toList(),
                 ),
               ],
@@ -267,22 +275,24 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
           actions: [
             TextButton(
               style: TextButton.styleFrom(
-                backgroundColor: Color(0xFFCB9935), // Gold background for the button
+                backgroundColor: Color(0xFFCB9935),
+                // Gold background for the button
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 shape: RoundedRectangleBorder( // Create square corners
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                  borderRadius: BorderRadius.all(
+                      Radius.circular(8.0)), // No rounded corners
                 ),
               ),
               onPressed: () {
                 loadQuestions(nextSet);
                 _isFirstTestCompleted = true;
                 _currentPage = 0;
-                _totalScore = 0;
                 _answers = List<int?>.filled(_questions.length, 5);
                 notifyListeners();
                 Navigator.of(context).pop();
               },
-              child: Text('Next', style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
+              child: Text('Next',
+                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
             ),
           ],
         );
@@ -292,21 +302,19 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
 
 
   void completeSecondTest(BuildContext context) {
-
     score_factor += _questions.length;
-    combinedTotalScore = ((_firstTestScore + _secondTestScore + _finalTestScore)/score_factor*10).round();
-    _secondTestScore = _totalScore;  // Save the second test score
 
     String message;
     List<String> teamCharacters;
     String nextSet;
 
-    int possibleScore = _questions.length * 10; // Calculate possible score for the current set
+    int possibleScore = _questions.length *
+        10; // Calculate possible score for the current set
 
     if (_totalScore > (possibleScore *
         0.65)) { // Check if total score is more than 50% of possible score
       if (_questions.first.set == 'BewussteKompetenz') {
-        message ="""Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 7 und Stufe 8. 
+        message = """Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 7 und Stufe 8. 
 Falls du nicht geschummelt hast 😉, müssen wir dir an dieser Stelle aufrichtige Anerkennung zollen: Diesen Bereich der „unbewussten Kompetenz“ erreichen unter 1% aller Menschen.
 Hier musst du gar nicht mehr groß drüber nachdenken, um Erfolg im Leben zu realisieren. Was dich einst massive Anstrengung gekostet hat, passiert heute fast wie von selbst. 
 Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Adventurer“ oder „LifeArtist“ zugehörig bist. Das ist ein großer Unterschied! Viel Spaß!
@@ -353,7 +361,8 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
               mainAxisSize: MainAxisSize.min,
               children: [
                 SelectableText(
-                  message + '\n\nWinston Churchill: "Erfolg ist nicht endgültig, Misserfolg ist nicht fatal: Es ist der Mut, weiterzumachen, der zählt."\n',
+                  message +
+                      '\n\nWinston Churchill: "Erfolg ist nicht endgültig, Misserfolg ist nicht fatal: Es ist der Mut, weiterzumachen, der zählt."\n',
                   style: TextStyle(fontFamily: 'Roboto',
                       fontSize: 18),
                 ),
@@ -363,8 +372,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: teamCharacters
-                        .map((character) => Image.asset('assets/$character',
-                        width: 150, height: 150))
+                        .map((character) =>
+                        Image.asset('assets/$character',
+                            width: 150, height: 150))
                         .toList(),
                   ),
                 ),
@@ -377,14 +387,14 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 backgroundColor: Color(0xFFCB9935),
                 elevation: 0,
                 shape: RoundedRectangleBorder( // Create square corners
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                  borderRadius: BorderRadius.all(
+                      Radius.circular(8.0)), // No rounded corners
                 ),
               ),
               onPressed: () {
                 loadQuestions(nextSet);
                 _isSecondTestCompleted = true;
                 _currentPage = 0;
-                _totalScore = 0;
                 _answers = List<int?>.filled(_questions.length, 5);
                 notifyListeners();
                 Navigator.of(context).pop();
@@ -399,6 +409,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       },
     );
   }
+
   Future<String> loadFinalCharacterDescription(String characterName) async {
     String path = 'assets/auswertungen/$characterName.txt'; // Path to your description file
     try {
@@ -411,26 +422,29 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
   }
 
   void completeFinalTest(BuildContext context) async {
-    _finalTestScore = _totalScore;  // Save the final test score
-    score_factor += _questions.length;
-
     String finalCharacter;
 
-    int possibleScore = _questions.length * 10; // Calculate possible score for the final set
+    int possibleScore = _questions.length *
+        10; // Calculate possible score for the final set
 
     // Determine final character based on score
     if (_questions.first.set == 'Individual') {
-      finalCharacter = _totalScore > (possibleScore * 0.65) ? "Individual" : "Traveller";
+      finalCharacter =
+      _totalScore > (possibleScore * 0.65) ? "Individual" : "Traveller";
     } else if (_questions.first.set == 'Reacher') {
-      finalCharacter = _totalScore > (possibleScore * 0.65) ? "Reacher" : "Explorer";
+      finalCharacter =
+      _totalScore > (possibleScore * 0.65) ? "Reacher" : "Explorer";
     } else if (_questions.first.set == 'Resident') {
-      finalCharacter = _totalScore > (possibleScore * 0.5) ? "Resident" : "Anonymous";
+      finalCharacter =
+      _totalScore > (possibleScore * 0.5) ? "Resident" : "Anonymous";
     } else {
-      finalCharacter = _totalScore > (possibleScore * 0.85) ? "LifeArtist" : "Adventurer";
+      finalCharacter =
+      _totalScore > (possibleScore * 0.85) ? "LifeArtist" : "Adventurer";
     }
 
     // Load the final character's description
-    String finalCharacterDescription = await loadFinalCharacterDescription(finalCharacter);
+    String finalCharacterDescription = await loadFinalCharacterDescription(
+        finalCharacter);
 
     // Update final character and description in the model
     _finalCharacter = finalCharacter;
@@ -448,18 +462,24 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
           .set({
         'finalCharacter': _finalCharacter,
         'finalCharacterDescription': _finalCharacterDescription,
-        'combinedTotalScore': combinedTotalScore,  // Add the combined total score here
+        // Add the combined total score here
         'completionDate': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     }
 
+    await calculateCombinedTotalScore();
+
     // Show final result dialog
     String? name = user?.displayName;
     String greetingText = 'Lieber $name';
-    showFinalResultDialog(context, finalCharacter, finalCharacterDescription, greetingText, combinedTotalScore);
+    showFinalResultDialog(
+        context, finalCharacter, finalCharacterDescription, greetingText,
+        combinedTotalScore);
   }
 
-  void showFinalResultDialog(BuildContext context, String finalCharacter, String finalCharacterDescription, String greetingText, int combinedTotalScore) {
+  void showFinalResultDialog(BuildContext context, String finalCharacter,
+      String finalCharacterDescription, String greetingText,
+      int combinedTotalScore) {
     bool isExpanded = false; // State variable for description expansion
     showDialog(
       context: context,
@@ -474,12 +494,15 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SelectableText("Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\n Damit bist du ein $finalCharacter.", style: TextStyle(
-                        color: Colors.black, fontFamily: 'Roboto')),
+                    SelectableText(
+                        "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\n Damit bist du ein $finalCharacter.",
+                        style: TextStyle(
+                            color: Colors.black, fontFamily: 'Roboto')),
                     SizedBox(height: 10),
                     if (!isExpanded)
                       Image.asset(
-                          'assets/$finalCharacter.webp', width: 200, height: 200),
+                          'assets/$finalCharacter.webp', width: 200,
+                          height: 200),
                     SizedBox(height: 10),
                     // Expandable description
                     isExpanded
@@ -494,7 +517,8 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                       ),
                     )
                         : SelectableText(
-                      finalCharacterDescription.split(' ').take(15).join(' ') + '...',
+                      finalCharacterDescription.split(' ').take(15).join(' ') +
+                          '...',
                       style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'Roboto',
@@ -504,8 +528,10 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                     // "Lese mehr" button with updated style
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-                        backgroundColor: isExpanded ? Colors.black : Color(0xFFCB9935),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 16.0, horizontal: 32.0),
+                        backgroundColor: isExpanded ? Colors.black : Color(
+                            0xFFCB9935),
                         side: BorderSide(color: Color(0xFFCB9935)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -519,7 +545,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                       child: Text(
                         isExpanded ? 'Lese weniger' : 'Lese mehr',
                         style: TextStyle(
-                            color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+                            color: Colors.white,
+                            fontFamily: 'Roboto',
+                            fontSize: 18),
                       ),
                     ),
                   ],
@@ -578,14 +606,19 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             .doc('Kompetenz')
             .get();
 
-
-        // Abrufen der Total-Scores vom ersten Test (Kompetenz)
         int firstTestScore = firstTestDoc.exists && firstTestDoc.data() != null
             ? firstTestDoc.data()!['totalScore'] ?? 0
             : 0;
 
-// Abrufen der Total-Scores vom zweiten Test (abhängig vom finalCharacter)
-        String secondTestSet = (_finalCharacter == 'LifeArtist' || _finalCharacter == 'Adventurer' ||
+        // Anzahl der Fragen im ersten Test (Kompetenz)
+        int firstTestQuestionsCount = firstTestDoc.exists &&
+            firstTestDoc.data() != null
+            ? firstTestDoc.data()!['answers']?.length ?? 0
+            : 0;
+
+        // Abrufen der Total-Scores vom zweiten Test (abhängig vom finalCharacter)
+        String secondTestSet = (_finalCharacter == 'LifeArtist' ||
+            _finalCharacter == 'Adventurer' ||
             _finalCharacter == 'Individual' || _finalCharacter == 'Traveller')
             ? 'BewussteKompetenz'
             : 'BewussteInkompetenz';
@@ -597,11 +630,18 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             .doc(secondTestSet)
             .get();
 
-        int secondTestScore = secondTestDoc.exists && secondTestDoc.data() != null
+        int secondTestScore = secondTestDoc.exists &&
+            secondTestDoc.data() != null
             ? secondTestDoc.data()!['totalScore'] ?? 0
             : 0;
 
-// Abrufen der Total-Scores vom finalen Test
+        // Anzahl der Fragen im zweiten Test
+        int secondTestQuestionsCount = secondTestDoc.exists &&
+            secondTestDoc.data() != null
+            ? secondTestDoc.data()!['answers']?.length ?? 0
+            : 0;
+
+        // Abrufen der Total-Scores vom finalen Test
         final finalTestDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -613,8 +653,21 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             ? finalTestDoc.data()!['totalScore'] ?? 0
             : 0;
 
+        // Anzahl der Fragen im finalen Test
+        int finalTestQuestionsCount = finalTestDoc.exists &&
+            finalTestDoc.data() != null
+            ? finalTestDoc.data()!['answers']?.length ?? 0
+            : 0;
+
         // Berechnung der kombinierten Total-Scores
-        combinedTotalScore = firstTestScore + secondTestScore + finalTestScore;
+        int totalQuestions = firstTestQuestionsCount +
+            secondTestQuestionsCount + finalTestQuestionsCount;
+        if (totalQuestions > 0) {
+          combinedTotalScore = ((firstTestScore + secondTestScore + finalTestScore) / totalQuestions *10).round();
+        } else {
+          combinedTotalScore =
+          0; // Setze auf 0, wenn keine Fragen vorhanden sind
+        }
 
         // Speichern des kombinierten Total-Scores in Firebase
         await FirebaseFirestore.instance
@@ -634,7 +687,5 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       }
     }
   }
-
 }
-
 

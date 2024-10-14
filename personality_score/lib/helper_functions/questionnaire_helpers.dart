@@ -16,7 +16,7 @@ void handleTakeTest(BuildContext context) {
 
 
   // If the total score is zero, navigate directly to the questionnaire
-  if (model.combinedTotalScore == 0 && model.totalScore == 0) {
+  if (model.totalScore == 0) {
     Navigator.of(context).pushNamed('/questionnaire');
     return;
   }
@@ -55,7 +55,7 @@ void handleTakeTest(BuildContext context) {
               Navigator.of(context).pop();
               Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
             },
-            child: SelectableText(
+            child: Text(
               'Neu beginnen',
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
             ),
@@ -73,7 +73,7 @@ void handleTakeTest(BuildContext context) {
               Navigator.of(context).pop();
               Navigator.of(context).pushNamed('/questionnaire'); // Continue from where left off
             },
-            child: SelectableText(
+            child: Text(
               'Fortfahren',
               style: TextStyle(color: Color(0xFFCB9935), fontFamily: 'Roboto'),
             ),
