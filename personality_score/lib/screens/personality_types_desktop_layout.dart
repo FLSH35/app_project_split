@@ -373,7 +373,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                           });
                         },
                         child: Text(
-                          'Lese weiter',
+                          'Lese mehr',
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'Roboto',
