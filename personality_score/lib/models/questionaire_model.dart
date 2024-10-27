@@ -220,7 +220,7 @@ class QuestionnaireModel with ChangeNotifier {
         10; // Calculate possible score for the current set
 
     if (_totalScore > (possibleScore *
-        0.65)) { // Check if total score is more than 50% of possible score
+        0.55)) { // Check if total score is more than 50% of possible score
       message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
 Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 8. Damit hast du bereits echte „Lebenskompetenz“ erreicht und gehörst damit bereits zu einer kleinen Minderheit. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 im Bereich der „Inkompetenz“ zu verorten sind. Für deine bisherige Entwicklung also schonmal ein dickes Lob.
 Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
