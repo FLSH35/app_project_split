@@ -131,16 +131,32 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Row of vertical lines for each of the 10 points
+                  // Row of vertical lines with margin to align with slider divisions
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(11, (index) {
-                      return Container(
-                        width: 1,
-                        height: 20, // Height of the tick mark
-                        color: Colors.grey, // Color of the tick mark
-                      );
-                    }),
+                    children: [
+                      // Left margin
+                      SizedBox(width: 12.0), // Adjust width to match desired margin
+                      // Tick marks row
+                      Expanded(
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 12.0), // Adjust for desired spacing
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: List.generate(11, (index) {
+                                return Container(
+                                  width: 1,
+                                  height: 20, // Height of the tick mark
+                                  color: Colors.grey, // Color of the tick mark
+                                );
+                              }),
+                            ),
+                          )
+
+                      ),
+                      // Right margin
+                      SizedBox(width: 12.0), // Adjust width to match desired margin
+                    ],
                   ),
                   // The slider itself
                   Slider(
@@ -171,6 +187,10 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
                   ),
                   SelectableText(
                     'EHER NEIN',
+                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                  ),
+                  SelectableText(
+                    'NEUTRAL',
                     style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
                   ),
                   SelectableText(
