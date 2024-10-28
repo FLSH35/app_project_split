@@ -168,7 +168,6 @@ class QuestionnaireScreen extends StatelessWidget {
                     min: 0,
                     max: 10,
                     divisions: 10, // Indicates 10 steps on the slider
-                    label: model.answers[questionIndex]?.toString() ?? '0',
                     activeColor: Color(0xFFCB9935),
                     inactiveColor: Colors.grey,
                     thumbColor: Color(0xFFCB9935),
