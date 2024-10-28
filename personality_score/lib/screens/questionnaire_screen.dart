@@ -141,19 +141,42 @@ class QuestionnaireScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 8.0),
-              Slider(
-                value: question.value < 0? 10 - (model.answers[questionIndex] ?? 0).toDouble():(model.answers[questionIndex] ?? 0).toDouble(),
-                onChanged: (val) {
-                  model.answerQuestion( questionIndex, question.value < 0? 10 - val.toInt(): val.toInt());
-                },
-                min: 0,
-                max: 10,
-                divisions: 10,
-                label: model.answers[questionIndex]?.toString() ?? '0',
-                activeColor: Color(0xFFCB9935),
-                inactiveColor: Colors.grey,
-                thumbColor: Color(0xFFCB9935),
-              ),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Row of vertical lines for each of the 10 points
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(11, (index) {
+                      return Container(
+                        width: 1,
+                        height: 20, // Height of the tick mark
+                        color: Colors.grey, // Color of the tick mark
+                      );
+                    }),
+                  ),
+                  // The slider itself
+                  Slider(
+                    value: question.value < 0
+                        ? 10 - (model.answers[questionIndex] ?? 0).toDouble()
+                        : (model.answers[questionIndex] ?? 0).toDouble(),
+                    onChanged: (val) {
+                      model.answerQuestion(
+                          questionIndex,
+                          question.value < 0 ? 10 - val.toInt() : val.toInt());
+                    },
+                    min: 0,
+                    max: 10,
+                    divisions: 10, // Indicates 10 steps on the slider
+                    label: model.answers[questionIndex]?.toString() ?? '0',
+                    activeColor: Color(0xFFCB9935),
+                    inactiveColor: Colors.grey,
+                    thumbColor: Color(0xFFCB9935),
+                  ),
+                ],
+              )
+              ,
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
