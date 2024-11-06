@@ -60,7 +60,7 @@ class DesktopLayout extends StatelessWidget {
           SizedBox(height: 20),
           LayoutBuilder(
             builder: (context, constraints) {
-              double playerWidth = constraints.maxWidth * 0.6; // 60% of the available width
+              double playerWidth = constraints.maxWidth * 0.75; // 60% of the available width
               return Center(
                 child: Container(
                   width: playerWidth,

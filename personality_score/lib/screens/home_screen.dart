@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height: 20),
           Center(
             child: Container(
-              width: screenWidth * 0.6, // 60% of screen width
+              width: screenWidth * 1, // 60% of screen width
               child: YoutubePlayerIFrame(
                 controller: _youtubeController,
                 aspectRatio: 16 / 9,
