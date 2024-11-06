@@ -8,6 +8,7 @@ import 'mobile_sidebar.dart'; // Import the new MobileSidebar
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'custom_footer.dart'; // Import for the custom footer
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -15,25 +16,53 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late YoutubePlayerController _youtubeController;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFEDE8DB),
-      endDrawer: MobileSidebar(), // Use MobileSidebar for mobile
-      appBar: getValueForScreenType<bool>(
-        context: context,
-        mobile: false, // No app bar for mobile
-        desktop: true,  // App bar only for desktop
-      )
-          ? null  // Build desktop app bar
-          : _buildAppBar(context), // No app bar for mobile
-      body: ScreenTypeLayout(
-        mobile: _buildMobileLayout(),
-        desktop: DesktopLayout(), // Desktop uses the layout from desktop_layout.dart
+  void initState() {
+    super.initState();
+    _youtubeController = YoutubePlayerController(
+      initialVideoId: 'MgzGtB8E6us',
+      params: YoutubePlayerParams(
+        autoPlay: false,
+        showControls: true,
+        showFullscreenButton: true,
       ),
     );
   }
 
+  @override
+  void dispose() {
+    _youtubeController.close();
+    super.dispose();
+  }
+
+  Widget _buildYouTubeSection(double screenWidth) {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            "Learn More",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 20),
+          Center(
+            child: Container(
+              width: screenWidth * 0.6, // 60% of screen width
+              child: YoutubePlayerIFrame(
+                controller: _youtubeController,
+                aspectRatio: 16 / 9,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   // Mobile AppBar (grey background, button for right drawer)
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
@@ -53,25 +82,46 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Mobile Layout
-  Widget _buildMobileLayout() {
+  @override
+  Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      backgroundColor: Color(0xFFEDE8DB),
+      endDrawer: MobileSidebar(),
+      appBar: getValueForScreenType<bool>(
+        context: context,
+        mobile: false,
+        desktop: true,
+      )
+          ? null
+          : _buildAppBar(context),
+      body: ScreenTypeLayout(
+        mobile: _buildMobileLayout(screenHeight, screenWidth),
+        desktop: DesktopLayout(),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(double screenHeight, double screenWidth) {
     return SingleChildScrollView(
       child: Column(
         children: [
           SizedBox(height: 350),
           _buildCuriousSection(context, MediaQuery.of(context).size.height, MediaQuery.of(context).size.width),
           SizedBox(height: 350),
-          _buildPersonalityTypesSection(context,
-              MediaQuery.of(context).size.height, MediaQuery.of(context).size.width),
+          _buildYouTubeSection(screenWidth), // YouTube section for mobile
           SizedBox(height: 350),
-          _buildCuriousSection(context, MediaQuery.of(context).size.height, MediaQuery.of(context).size.width),
+          _buildPersonalityTypesSection(context, screenHeight, screenWidth),
           SizedBox(height: 350),
-          CustomFooter(), // Added CustomFooter at the bottom
+          _buildCuriousSection(context, screenHeight, screenWidth),
+          SizedBox(height: 350),
+          CustomFooter(),
         ],
       ),
     );
   }
-
 
   // Personality types section for both mobile and desktop
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {

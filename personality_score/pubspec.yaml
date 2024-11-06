@@ -22,6 +22,8 @@ dependencies:
   firebase_auth: ^5.1.1
   cloud_firestore: ^5.0.2
   mailer: ^5.0.0
+  youtube_player_iframe: ^2.2.0 # Check for the latest version on pub.dev
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
-import 'package:personality_score/models/questionaire_model.dart';
 import 'custom_app_bar.dart'; // Import your custom app bar
 import 'custom_footer.dart'; // Import your QuestionnaireModel
 import 'dart:math'; // For 3D transformations
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+
+
 
 class DesktopLayout extends StatelessWidget {
   @override
@@ -22,6 +23,8 @@ class DesktopLayout extends StatelessWidget {
             SizedBox(height: 350),
             _buildHeaderSection(context, screenHeight, screenWidth),
             SizedBox(height: 350),
+            _buildYouTubeSection(), // Add the YouTube section here
+            SizedBox(height: 350),
             _buildPersonalityTypesSection(context, screenHeight, screenWidth),
             SizedBox(height: 350),
             _buildCuriousSection(context, screenHeight, screenWidth), // New Section Added
@@ -32,6 +35,48 @@ class DesktopLayout extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildYouTubeSection() {
+    final YoutubePlayerController _controller = YoutubePlayerController(
+      initialVideoId: 'MgzGtB8E6us',
+      params: YoutubePlayerParams(
+        autoPlay: false,
+        showControls: true,
+        showFullscreenButton: true,
+      ),
+    );
+
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            "Learn More",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 20),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              double playerWidth = constraints.maxWidth * 0.6; // 60% of the available width
+              return Center(
+                child: Container(
+                  width: playerWidth,
+                  child: YoutubePlayerIFrame(
+                    controller: _controller,
+                    aspectRatio: 16 / 9,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildHeaderSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
@@ -186,7 +231,6 @@ class DesktopLayout extends StatelessWidget {
       ],
     );
   }
-
   // New function added to build the "Curious" section
   Widget _buildCuriousSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
@@ -290,4 +334,6 @@ class _AdventurerImageState extends State<AdventurerImage> {
       ),
     );
   }
+
+
 }
