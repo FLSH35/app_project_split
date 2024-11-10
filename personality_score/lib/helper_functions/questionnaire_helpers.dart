@@ -53,7 +53,7 @@ void handleTakeTest(BuildContext context) {
             onPressed: () {
               model.reset();
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
+              Navigator.of(context).pushNamed('/question'); // Start fresh
             },
             child: Text(
               'Neu beginnen',

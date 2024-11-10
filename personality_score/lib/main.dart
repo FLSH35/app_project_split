@@ -10,6 +10,7 @@ import 'firebase_options.dart'; // Ensure you have this file generated
 import 'package:personality_score/screens/profile_screen.dart';
 import 'package:personality_score/models/questionaire_model.dart';
 import 'package:personality_score/screens/personality_type_screen.dart'; // Import the new screen
+import 'package:personality_score/screens/questionnaire_tutorial_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,10 +40,11 @@ class MyApp extends StatelessWidget {
           '/signup': (context) => SignUpScreen(),
           '/home': (context) => HomeScreen(),
           '/questionnaire': (context) => QuestionnaireScreen(),
+          '/questionnaire_tutorial': (context) => QuestionnaireTutorialScreen(), // New route
           '/profile': (context) => ProfileScreen(),
           '/personality_types': (context) => PersonalityTypesPage(),
-          '/impressum': (context) => ImpressumPage(), // Add this route
-          '/datenschutz': (context) => DatenschutzPage(), // Add this route
+          '/impressum': (context) => ImpressumPage(),
+          '/datenschutz': (context) => DatenschutzPage(),
         },
       ),
     );

@@ -1,33 +1,66 @@
+// desktop_layout.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
-import 'custom_app_bar.dart'; // Import your custom app bar
-import 'custom_footer.dart'; // Import your QuestionnaireModel
-import 'dart:math'; // For 3D transformations
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'custom_app_bar.dart'; // Import your custom app bar
+import 'custom_footer.dart'; // Import your custom footer
+import 'dart:math'; // For 3D transformations
+import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
+class DesktopLayout extends StatefulWidget {
+  @override
+  _DesktopLayoutState createState() => _DesktopLayoutState();
+}
 
+class _DesktopLayoutState extends State<DesktopLayout> {
+  bool isLoading = true;
+  List<String> tutorialQuestions = [
+    'Mit dem Schieberegler kann ich 10 verschiedene Stufen einstellen.',
+    'Die Test-Fragen beantworte ich schnell, ohne lange nachzudenken.',
+    'Ich antworte ehrlich und gewissenhaft.',
+  ];
+  Map<int, int> answers = {};
+  int currentPage = 0;
+  int questionsPerPage = 7;
 
+  // Controllers and Keys
+  ScrollController _scrollController = ScrollController();
+  final GlobalKey _tutorialKey = GlobalKey();
 
-class DesktopLayout extends StatelessWidget {
+  @override
+  void initState() {
+    super.initState();
+    _loadTutorialQuestions();
+  }
+
+  Future<void> _loadTutorialQuestions() async {
+    // Simulate loading delay
+    await Future.delayed(Duration(milliseconds: 500));
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Color(0xFFEDE8DB), // Updated background color for the entire scaffold
-      appBar: CustomAppBar(title: 'Personality Score'), // Use the custom app bar
+      backgroundColor: Color(0xFFEDE8DB),
+      appBar: CustomAppBar(title: 'Personality Score'),
       body: SingleChildScrollView(
+        controller: _scrollController, // Attach the scroll controller
         child: Column(
           children: [
             SizedBox(height: 350),
             _buildHeaderSection(context, screenHeight, screenWidth),
             SizedBox(height: 350),
-            _buildYouTubeSection(), // Add the YouTube section here
+            _buildYouTubeSection(),
             SizedBox(height: 350),
             _buildPersonalityTypesSection(context, screenHeight, screenWidth),
             SizedBox(height: 350),
-            _buildCuriousSection(context, screenHeight, screenWidth), // New Section Added
+            isLoading ? CircularProgressIndicator() : _buildTutorialSection(context),
             SizedBox(height: 350),
             CustomFooter(),
           ],
@@ -36,47 +69,25 @@ class DesktopLayout extends StatelessWidget {
     );
   }
 
-  Widget _buildYouTubeSection() {
-    final YoutubePlayerController _controller = YoutubePlayerController(
-      initialVideoId: 'MgzGtB8E6us',
-      params: YoutubePlayerParams(
-        autoPlay: false,
-        showControls: true,
-        showFullscreenButton: true,
-      ),
-    );
+  Widget _buildTutorialSection(BuildContext context) {
+    int totalSteps = (tutorialQuestions.length / questionsPerPage).ceil();
+    int currentStep = currentPage;
 
     return Container(
-      padding: EdgeInsets.all(16.0),
+      key: _tutorialKey, // Add the key here
       child: Column(
         children: [
-          Text(
-            "Learn More",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              double playerWidth = constraints.maxWidth * 0.75; // 60% of the available width
-              return Center(
-                child: Container(
-                  width: playerWidth,
-                  child: YoutubePlayerIFrame(
-                    controller: _controller,
-                    aspectRatio: 16 / 9,
-                  ),
-                ),
-              );
-            },
-          ),
+          SizedBox(height: 40),
+          _buildYouTubeSection1(),
+          SizedBox(height: 40),
+          _buildQuestionsList(context),
+          SizedBox(height: 40),
+          _buildNavigationButton(context),
+          SizedBox(height: 40),
         ],
       ),
     );
   }
-
 
   Widget _buildHeaderSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
@@ -122,10 +133,10 @@ class DesktopLayout extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    handleTakeTest(context); // Call to the test function
+                    _scrollToTutorialSection(); // Scroll to the tutorial section
                   },
                   child: Text(
-                    'Beginne den Test',
+                    'Zum Test',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: screenHeight * 0.021,
@@ -139,6 +150,257 @@ class DesktopLayout extends StatelessWidget {
       ],
     );
   }
+
+  void _scrollToTutorialSection() {
+    Scrollable.ensureVisible(
+      _tutorialKey.currentContext!,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+  Widget _buildYouTubeSection() {
+    final YoutubePlayerController _controller = YoutubePlayerController(
+      initialVideoId: 'cu_mXjAnTqg',
+      params: YoutubePlayerParams(
+        autoPlay: false,
+        showControls: true,
+        showFullscreenButton: true,
+      ),
+    );
+
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            "Wieso MUSST du den Personality Score ausfüllen?",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 20),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              double playerWidth = constraints.maxWidth * 0.75;
+              return Center(
+                child: Container(
+                  width: playerWidth,
+                  child: YoutubePlayerIFrame(
+                    controller: _controller,
+                    aspectRatio: 16 / 9,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuestionsList(BuildContext context) {
+    int start = currentPage * questionsPerPage;
+    int end = start + questionsPerPage;
+    List<String> currentQuestions = tutorialQuestions.sublist(
+      start,
+      end > tutorialQuestions.length ? tutorialQuestions.length : end,
+    );
+
+    return Column(
+      children: currentQuestions.map((questionText) {
+        int questionIndex = start + currentQuestions.indexOf(questionText);
+        return Container(
+          height: MediaQuery.of(context).size.height / 4,
+          margin: EdgeInsets.only(bottom: 10.0),
+          padding: EdgeInsets.symmetric(
+            vertical: 10.0,
+            horizontal: MediaQuery.of(context).size.width / 5,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: SelectableText(
+                  questionText,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                    fontSize: 22,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                ),
+              ),
+              SizedBox(height: 8.0),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Row of vertical lines with margin to align with slider divisions
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(width: 12.0),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: List.generate(11, (index) {
+                              return Container(
+                                width: 1,
+                                height: 20,
+                                color: Colors.grey,
+                              );
+                            }),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.0),
+                    ],
+                  ),
+                  // The slider itself
+                  Slider(
+                    value: (answers[questionIndex] ?? 5).toDouble(),
+                    onChanged: (val) {
+                      setState(() {
+                        answers[questionIndex] = val.toInt();
+                      });
+                    },
+                    min: 0,
+                    max: 10,
+                    divisions: 10,
+                    activeColor: Color(0xFFCB9935),
+                    inactiveColor: Colors.grey,
+                    thumbColor: Color(0xFFCB9935),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SelectableText(
+                    'NEIN',
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  SelectableText(
+                    'EHER NEIN',
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  SelectableText(
+                    'NEUTRAL',
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  SelectableText(
+                    'EHER JA',
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  SelectableText(
+                    'JA',
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildNavigationButton(BuildContext context) {
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
+            backgroundColor: Color(0xFFCB9935),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
+          ),
+          onPressed: () {
+            handleTakeTest(context);
+          },
+          child: Text(
+            'Beginne den Test',
+            style: TextStyle(
+                color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildYouTubeSection1() {
+    final YoutubePlayerController _controller = YoutubePlayerController(
+      initialVideoId: 'fnSFCXFi69M',
+      params: YoutubePlayerParams(
+        autoPlay: false,
+        showControls: true,
+        showFullscreenButton: true,
+      ),
+    );
+
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            "Starte Hier",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 20),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              double playerWidth = constraints.maxWidth * 0.75; // 60% of the available width
+              return Center(
+                child: Container(
+                  width: playerWidth,
+                  child: YoutubePlayerIFrame(
+                    controller: _controller,
+                    aspectRatio: 16 / 9,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
 
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
@@ -231,62 +493,7 @@ class DesktopLayout extends StatelessWidget {
       ],
     );
   }
-  // New function added to build the "Curious" section
-  Widget _buildCuriousSection(BuildContext context, double screenHeight, double screenWidth) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: SvgPicture.asset(
-            'assets/left_background_personality_type.svg',
-            fit: BoxFit.fitWidth,
-            width: screenWidth * 0.5,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Column(
-              children: [
-                SelectableText(
-                  "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
-                  style: TextStyle(
-                    fontSize: screenHeight * 0.042,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontFamily: 'Roboto',
-                  ),
-                ),
-                SizedBox(height: 50),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFCB9935),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.07,
-                      vertical: screenHeight * 0.021,
-                    ),
-                  ),
-                  onPressed: () {
-                    handleTakeTest(context);
-                  },
-                  child: Text(
-                    'Beginne den Test',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Roboto',
-                      fontSize: screenHeight * 0.021,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 }
 
 // Widget for the tilted Adventurer Image with hover effect
