@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'home_desktop_layout.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'mobile_sidebar.dart'; 
+import 'mobile_sidebar.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'custom_footer.dart'; // Import for the custom footer
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';

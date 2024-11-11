@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:personality_score/services/question_service.dart';
 import 'package:personality_score/models/question.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+
 
 class QuestionnaireModel with ChangeNotifier {
   QuestionService _questionService = QuestionService();
@@ -479,10 +481,13 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         combinedTotalScore);
   }
 
+
+
   void showFinalResultDialog(BuildContext context, String finalCharacter,
       String finalCharacterDescription, String greetingText,
       int combinedTotalScore) {
     bool isExpanded = false; // State variable for description expansion
+    double rating = 0.0; // State variable for the rating
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -552,6 +557,36 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                             fontSize: 18),
                       ),
                     ),
+                    SizedBox(height: 20),
+                    // Add the star rating question
+                    Text(
+                      'Wie sehr identifizierst du dich mit diesem Ergebnis?',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Roboto',
+                          fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 10),
+                    // Add the RatingBar
+                    RatingBar.builder(
+                      initialRating: rating,
+                      minRating: 1,
+                      direction: Axis.horizontal,
+                      allowHalfRating: false,
+                      itemCount: 5,
+                      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                      itemBuilder: (context, _) =>
+                          Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          ),
+                      onRatingUpdate: (newRating) {
+                        setState(() {
+                          rating = newRating;
+                        });
+                      },
+                    ),
                   ],
                 ),
               );
@@ -566,11 +601,14 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                   borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
+                // Save the rating value to Firebase
+                await saveUserRating(rating);
                 Navigator.of(context).pop();
                 Navigator.of(context).pushNamed('/home');
                 reset();
               },
+
               child: Text('Abschließen',
                   style: TextStyle(
                       color: Colors.white, fontFamily: 'Roboto')),
@@ -594,6 +632,24 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         );
       },
     );
+  }
+  Future<void> saveUserRating(double rating) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('results')
+            .doc('finalCharacter')
+            .set({
+          'userRating': rating,
+          'ratingDate': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      } catch (e) {
+        print('Error saving user rating: $e');
+      }
+    }
   }
 
   Future<void> calculateCombinedTotalScore() async {

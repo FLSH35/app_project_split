@@ -23,6 +23,7 @@ dependencies:
   cloud_firestore: ^5.0.2
   mailer: ^5.0.0
   youtube_player_iframe: ^2.2.0 # Check for the latest version on pub.dev
+  flutter_rating_bar: ^4.0.0
 
 dev_dependencies:
   flutter_test:
