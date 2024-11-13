@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:personality_score/services/question_service.dart';
 import 'package:personality_score/models/question.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:video_player/video_player.dart';
 
 
 class QuestionnaireModel with ChangeNotifier {
@@ -250,7 +252,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Color(0xFFC7C7C7), // Soft background
-          title: Text('$_totalScore Punkte erreicht',
+          title: Text('$_totalScore von $possibleScore Punkte erreicht',
               style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
           content: SingleChildScrollView(
             child: Column(
@@ -285,6 +287,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                       Radius.circular(8.0)), // No rounded corners
                 ),
               ),
+
               onPressed: () {
                 loadQuestions(nextSet);
                 _isFirstTestCompleted = true;
@@ -357,7 +360,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         return AlertDialog(
           backgroundColor: Color(0xFFC7C7C7),
           title: SelectableText(
-            '$_totalScore Punkte erreicht',
+            '$_totalScore von $possibleScore Punkte erreicht',
             style: TextStyle(fontFamily: 'Roboto'),
           ),
           content: SingleChildScrollView(
@@ -475,117 +478,196 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
     // Show final result dialog
     String? name = user?.displayName;
-    String greetingText = 'Lieber $name';
+    String greetingText = 'Gratulation $name';
+
+    final gsUrl1 = 'gs://personality-score.appspot.com/IYC Acoustic Jingle.mp4';
     showFinalResultDialog(
         context, finalCharacter, finalCharacterDescription, greetingText,
-        combinedTotalScore);
+        combinedTotalScore, gsUrl1);
   }
 
 
-
-  void showFinalResultDialog(BuildContext context, String finalCharacter,
+  Future<void> showFinalResultDialog(BuildContext context, String finalCharacter,
       String finalCharacterDescription, String greetingText,
-      int combinedTotalScore) {
-    bool isExpanded = false; // State variable for description expansion
-    double rating = 0.0; // State variable for the rating
+      int combinedTotalScore, String videoStorageUrl) async {
+    // Zustandsvariablen
+    bool isExpanded = false;
+    double rating = 0.0;
+    VideoPlayerController? _videoController;
+    bool showContent = false; // Steuert die Sichtbarkeit der Inhalte
+
+    // Video-URL vor dem Anzeigen des Dialogs abrufen
+    String videoUrl;
+    try {
+      final storage = FirebaseStorage.instance;
+      videoUrl = await storage.refFromURL(videoStorageUrl).getDownloadURL();
+    } catch (e) {
+      print('Fehler beim Laden der Video-URL: $e');
+      videoUrl = ''; // Fehlerbehandlung
+    }
+
+    // Video-Controller initialisieren
+    _videoController = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
+
+    await _videoController.initialize();
+    _videoController.play();
+
+    // Dialog anzeigen
     showDialog(
       context: context,
+      barrierDismissible: false, // Verhindert Schließen durch Tippen außerhalb
       builder: (BuildContext context) {
+        // Dynamische Größen basierend auf dem Bildschirm
+        double screenHeight = MediaQuery.of(context).size.height;
+        double screenWidth = MediaQuery.of(context).size.width;
+        double dialogWidth = screenWidth * 0.6;
+        double dialogHeight = screenHeight * 0.7;
+
         return AlertDialog(
           backgroundColor: Color(0xFFC7C7C7),
-          title: Text('$greetingText, deine Persönlichkeitsstufe',
-              style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
+          title: SelectableText(
+            '$greetingText, du hast es geschafft!',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold),
+          ),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+              // Timer starten, um die Inhalte nach 14 Sekunden in den Vordergrund zu bringen
+              Future.delayed(Duration(seconds: 14), () {
+                setState(() {
+                  showContent = true;
+                });
+              });
+
+              return Container(
+                width: dialogWidth,
+                height: dialogHeight,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    SelectableText(
-                        "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\n Damit bist du ein $finalCharacter.",
-                        style: TextStyle(
-                            color: Colors.black, fontFamily: 'Roboto')),
-                    SizedBox(height: 10),
-                    if (!isExpanded)
-                      Image.asset(
-                          'assets/$finalCharacter.webp', width: 200,
-                          height: 200),
-                    SizedBox(height: 10),
-                    // Expandable description
-                    isExpanded
-                        ? Container(
-                      height: 150,
-                      child: SingleChildScrollView(
-                        child: SelectableText(finalCharacterDescription,
+                    // Hauptinhalte
+                    AnimatedOpacity(
+                      opacity: showContent ? 1.0 : 0.0,
+                      duration: Duration(milliseconds: 500),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SelectableText(
+                            "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
+                            style: TextStyle(
+                                color: Colors.black, fontFamily: 'Roboto'),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 10),
+                            Image.asset(
+                              'assets/$finalCharacter.webp',
+                              width: 200,
+                              height: 200,
+                            ),
+                          SizedBox(height: 10),
+                          // Expandable description
+                          isExpanded
+                              ? Container(
+                            height: 150,
+                            child: SingleChildScrollView(
+                              child: SelectableText(
+                                finalCharacterDescription,
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Roboto',
+                                    fontSize: 18),
+                              ),
+                            ),
+                          )
+                              : SelectableText(
+                            finalCharacterDescription
+                                .split(' ')
+                                .take(15)
+                                .join(' ') +
+                                '...',
                             style: TextStyle(
                                 color: Colors.black,
                                 fontFamily: 'Roboto',
-                                fontSize: 18)),
+                                fontSize: 18),
+                          ),
+                          SizedBox(height: 10),
+                          // "Lese mehr" button with updated style
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 16.0, horizontal: 32.0),
+                              backgroundColor:
+                              isExpanded ? Colors.black : Color(0xFFCB9935),
+                              side: BorderSide(color: Color(0xFFCB9935)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(8.0)),
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isExpanded = !isExpanded; // Zustand umschalten
+                              });
+                            },
+                            child: Text(
+                              isExpanded ? 'Lese weniger' : 'Lese mehr',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Roboto',
+                                  fontSize: 18),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          // Bewertungsfrage
+                          Text(
+                            'Wie sehr identifizierst du dich mit diesem Ergebnis?',
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Roboto',
+                                fontSize: 18),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 10),
+                          // Bewertungsskala
+                          RatingBar.builder(
+                            initialRating: rating,
+                            minRating: 1,
+                            direction: Axis.horizontal,
+                            allowHalfRating: false,
+                            itemCount: 5,
+                            itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                            itemBuilder: (context, _) => Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                            ),
+                            onRatingUpdate: (newRating) {
+                              setState(() {
+                                rating = newRating;
+                              });
+                            },
+                          ),
+                        ],
                       ),
-                    )
-                        : SelectableText(
-                      finalCharacterDescription.split(' ').take(15).join(' ') +
-                          '...',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'Roboto',
-                          fontSize: 18),
                     ),
-                    SizedBox(height: 10),
-                    // "Lese mehr" button with updated style
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 16.0, horizontal: 32.0),
-                        backgroundColor: isExpanded ? Colors.black : Color(
-                            0xFFCB9935),
-                        side: BorderSide(color: Color(0xFFCB9935)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    // Video-Overlay
+                    IgnorePointer(
+                      ignoring: true, // Verhindert Interaktion mit dem Video
+                      child: AnimatedOpacity(
+                        opacity: showContent ? 0.0 : 1.0,
+                        duration: Duration(milliseconds: 500),
+                        child: Container(
+                          width: dialogWidth,
+                          height: dialogHeight,
+                          color: Colors.transparent, // Kein Hintergrund
+                          child: AspectRatio(
+                            aspectRatio: _videoController!.value.aspectRatio,
+                            child: VideoPlayer(_videoController!),
+                          ),
                         ),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          isExpanded = !isExpanded; // Toggle the state
-                        });
-                      },
-                      child: Text(
-                        isExpanded ? 'Lese weniger' : 'Lese mehr',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Roboto',
-                            fontSize: 18),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    // Add the star rating question
-                    Text(
-                      'Wie sehr identifizierst du dich mit diesem Ergebnis?',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'Roboto',
-                          fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 10),
-                    // Add the RatingBar
-                    RatingBar.builder(
-                      initialRating: rating,
-                      minRating: 1,
-                      direction: Axis.horizontal,
-                      allowHalfRating: false,
-                      itemCount: 5,
-                      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                      itemBuilder: (context, _) =>
-                          Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                          ),
-                      onRatingUpdate: (newRating) {
-                        setState(() {
-                          rating = newRating;
-                        });
-                      },
                     ),
                   ],
                 ),
@@ -593,46 +675,59 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             },
           ),
           actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Color(0xFFCB9935),
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            // Aktionen nur anzeigen, wenn Inhalte sichtbar sind
+            if (showContent) ...[
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Color(0xFFCB9935),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                  ),
+                ),
+                onPressed: () async {
+                  // Bewertung speichern
+                  await saveUserRating(rating);
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushNamed('/home');
+                  reset();
+                  _videoController?.dispose(); // Video-Controller freigeben
+                },
+                child: Text(
+                  'Abschließen',
+                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                 ),
               ),
-              onPressed: () async {
-                // Save the rating value to Firebase
-                await saveUserRating(rating);
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/home');
-                reset();
-              },
-
-              child: Text('Abschließen',
-                  style: TextStyle(
-                      color: Colors.white, fontFamily: 'Roboto')),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                  ),
+                ),
+                onPressed: () {
+                  String shareText =
+                      'Du hast ${combinedTotalScore} Punkte. Damit bist du ein $finalCharacter.\n\nBeschreibung: $finalCharacterDescription';
+                  Share.share(shareText);
+                },
+                child: Text(
+                  'Teilen',
+                  style:
+                  TextStyle(color: Color(0xFFCB9935), fontFamily: 'Roboto'),
                 ),
               ),
-              onPressed: () {
-                String shareText = 'Du hast ${combinedTotalScore} Punkte. Damit bist du ein $finalCharacter.\n\nBeschreibung: $finalCharacterDescription';
-                Share.share(shareText);
-              },
-              child: Text('Teilen', style: TextStyle(
-                  color: Color(0xFFCB9935), fontFamily: 'Roboto')),
-            ),
+            ],
           ],
         );
       },
-    );
+    ).then((_) {
+      _videoController?.dispose(); // Video-Controller freigeben, wenn Dialog geschlossen wird
+    });
   }
+
+
+
   Future<void> saveUserRating(double rating) async {
     User? user = _auth.currentUser;
     if (user != null) {

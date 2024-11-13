@@ -2,11 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'custom_app_bar.dart'; // Import your custom app bar
 import 'custom_footer.dart'; // Import your custom footer
 import 'dart:math'; // For 3D transformations
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
+import 'package:video_player/video_player.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 class DesktopLayout extends StatefulWidget {
   @override
   _DesktopLayoutState createState() => _DesktopLayoutState();
@@ -27,10 +29,50 @@ class _DesktopLayoutState extends State<DesktopLayout> {
   ScrollController _scrollController = ScrollController();
   final GlobalKey _tutorialKey = GlobalKey();
 
+  // Video player controllers
+  VideoPlayerController? _videoController1;
+  VideoPlayerController? _videoController2;
+
   @override
   void initState() {
     super.initState();
+    _initializeVideos();
     _loadTutorialQuestions();
+  }
+
+  @override
+  void dispose() {
+    _videoController1?.dispose();
+    _videoController2?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initializeVideos() async {
+    final storage = FirebaseStorage.instance;
+    final gsUrl1 = 'gs://personality-score.appspot.com/IYC Acoustic Jingle.mp4';
+    final gsUrl2 = 'gs://personality-score.appspot.com/IYC Acoustic Jingle.mp4'; // Replace with the correct URL if different
+
+    try {
+      // Initialize the first video controller
+      String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
+      _videoController1 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
+        ..setLooping(true)
+        ..initialize().then((_) {
+          setState(() {});
+          _videoController1!.play();
+        });
+
+      // Initialize the second video controller
+      String downloadUrl2 = await storage.refFromURL(gsUrl2).getDownloadURL();
+      _videoController2 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl2))
+        ..setLooping(true)
+        ..initialize().then((_) {
+          setState(() {});
+          _videoController2!.play();
+        });
+    } catch (e) {
+      print('Error loading video: $e');
+    }
   }
 
   Future<void> _loadTutorialQuestions() async {
@@ -56,7 +98,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             SizedBox(height: 350),
             _buildHeaderSection(context, screenHeight, screenWidth),
             SizedBox(height: 350),
-            _buildYouTubeSection(),
+            _buildVideoSection1(),
             SizedBox(height: 350),
             _buildPersonalityTypesSection(context, screenHeight, screenWidth),
             SizedBox(height: 350),
@@ -70,15 +112,12 @@ class _DesktopLayoutState extends State<DesktopLayout> {
   }
 
   Widget _buildTutorialSection(BuildContext context) {
-    int totalSteps = (tutorialQuestions.length / questionsPerPage).ceil();
-    int currentStep = currentPage;
-
     return Container(
       key: _tutorialKey, // Add the key here
       child: Column(
         children: [
           SizedBox(height: 40),
-          _buildYouTubeSection1(),
+          _buildVideoSection2(),
           SizedBox(height: 40),
           _buildQuestionsList(context),
           SizedBox(height: 40),
@@ -158,16 +197,8 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       curve: Curves.easeInOut,
     );
   }
-  Widget _buildYouTubeSection() {
-    final YoutubePlayerController _controller = YoutubePlayerController(
-      initialVideoId: 'cu_mXjAnTqg',
-      params: YoutubePlayerParams(
-        autoPlay: false,
-        showControls: true,
-        showFullscreenButton: true,
-      ),
-    );
 
+  Widget _buildVideoSection1() {
     return Container(
       padding: EdgeInsets.all(16.0),
       child: Column(
@@ -180,20 +211,56 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             ),
           ),
           SizedBox(height: 20),
-          LayoutBuilder(
+          _videoController1 != null && _videoController1!.value.isInitialized
+              ? LayoutBuilder(
             builder: (context, constraints) {
-              double playerWidth = constraints.maxWidth * 0.75;
+              double playerWidth = constraints.maxWidth * 0.55;
               return Center(
                 child: Container(
                   width: playerWidth,
-                  child: YoutubePlayerIFrame(
-                    controller: _controller,
-                    aspectRatio: 16 / 9,
+                  child: AspectRatio(
+                    aspectRatio: _videoController1!.value.aspectRatio,
+                    child: VideoPlayer(_videoController1!),
                   ),
                 ),
               );
             },
+          )
+              : CircularProgressIndicator(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVideoSection2() {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            "Starte Hier",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          SizedBox(height: 20),
+          _videoController2 != null && _videoController2!.value.isInitialized
+              ? LayoutBuilder(
+            builder: (context, constraints) {
+              double playerWidth = constraints.maxWidth * 0.55; // 55% of the available width
+              return Center(
+                child: Container(
+                  width: playerWidth,
+                  child: AspectRatio(
+                    aspectRatio: _videoController2!.value.aspectRatio,
+                    child: VideoPlayer(_videoController2!),
+                  ),
+                ),
+              );
+            },
+          )
+              : CircularProgressIndicator(),
         ],
       ),
     );
@@ -333,7 +400,6 @@ class _DesktopLayoutState extends State<DesktopLayout> {
   }
 
   Widget _buildNavigationButton(BuildContext context) {
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -346,7 +412,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             ),
           ),
           onPressed: () {
-            handleTakeTest(context);
+            handleTakeTest(context); // Ensure this function is defined in your helpers
           },
           child: Text(
             'Beginne den Test',
@@ -357,50 +423,6 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       ],
     );
   }
-
-  Widget _buildYouTubeSection1() {
-    final YoutubePlayerController _controller = YoutubePlayerController(
-      initialVideoId: 'fnSFCXFi69M',
-      params: YoutubePlayerParams(
-        autoPlay: false,
-        showControls: true,
-        showFullscreenButton: true,
-      ),
-    );
-
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "Starte Hier",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              double playerWidth = constraints.maxWidth * 0.75; // 60% of the available width
-              return Center(
-                child: Container(
-                  width: playerWidth,
-                  child: YoutubePlayerIFrame(
-                    controller: _controller,
-                    aspectRatio: 16 / 9,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-
-
 
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
@@ -424,7 +446,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SelectableText(
-                      "PERSOENLICHKEITSSTUFEN",
+                      "PERSÖNLICHKEITSSTUFEN",
                       style: TextStyle(
                         fontSize: screenHeight * 0.021,
                         fontWeight: FontWeight.bold,
@@ -493,7 +515,6 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       ],
     );
   }
-
 }
 
 // Widget for the tilted Adventurer Image with hover effect
@@ -525,12 +546,11 @@ class _AdventurerImageState extends State<AdventurerImage> {
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 300),
-        // No transformation for the container itself
         child: Transform(
           transform: !isHovered ? Matrix4.identity() : Matrix4.identity()
-            ..setEntry(3, 2, 0.000) // For 3D perspective
-            ..rotateY(pi / 1), // Tilt image to the right
-          alignment: FractionalOffset.center, // Pivot at the center
+            ..setEntry(3, 2, 0.000)
+            ..rotateY(pi / 1),
+          alignment: FractionalOffset.center,
           child: AnimatedContainer(
             duration: Duration(milliseconds: 300),
             width: !isHovered ? widget.screenWidth * 0.4 : widget.screenWidth * 0.5,
@@ -541,6 +561,4 @@ class _AdventurerImageState extends State<AdventurerImage> {
       ),
     );
   }
-
-
 }

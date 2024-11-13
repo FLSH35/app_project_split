@@ -21,6 +21,8 @@ dependencies:
   firebase_core: ^3.1.1
   firebase_auth: ^5.1.1
   cloud_firestore: ^5.0.2
+  firebase_storage: ^12.1.0
+  video_player: ^2.5.1
   mailer: ^5.0.0
   youtube_player_iframe: ^2.2.0 # Check for the latest version on pub.dev
   flutter_rating_bar: ^4.0.0
