@@ -486,15 +486,19 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         combinedTotalScore, gsUrl1);
   }
 
-
-  Future<void> showFinalResultDialog(BuildContext context, String finalCharacter,
-      String finalCharacterDescription, String greetingText,
-      int combinedTotalScore, String videoStorageUrl) async {
+  Future<void> showFinalResultDialog(
+      BuildContext context,
+      String finalCharacter,
+      String finalCharacterDescription,
+      String greetingText,
+      int combinedTotalScore,
+      String videoStorageUrl) async {
     // Zustandsvariablen
     bool isExpanded = false;
     double rating = 0.0;
     VideoPlayerController? _videoController;
     bool showContent = false; // Steuert die Sichtbarkeit der Inhalte
+    bool isDialogActive = true; // Tracks if the dialog is still open
 
     // Video-URL vor dem Anzeigen des Dialogs abrufen
     String videoUrl;
@@ -513,7 +517,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     _videoController.play();
 
     // Dialog anzeigen
-    showDialog(
+    await showDialog(
       context: context,
       barrierDismissible: false, // Verhindert Schließen durch Tippen außerhalb
       builder: (BuildContext context) {
@@ -537,15 +541,17 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             builder: (BuildContext context, StateSetter setState) {
               // Timer starten, um die Inhalte nach 14 Sekunden in den Vordergrund zu bringen
               Future.delayed(Duration(seconds: 14), () {
-                setState(() {
-                  showContent = true;
-                });
+                if (isDialogActive) {
+                  setState(() {
+                    showContent = true;
+                  });
+                }
               });
 
               return Container(
                 width: dialogWidth,
                 height: dialogHeight,
-                child: SingleChildScrollView( // Wrapping the main content
+                child: SingleChildScrollView(
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -598,7 +604,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 padding: EdgeInsets.symmetric(
-                                      horizontal: 32.0),
+                                    vertical: 12.0, horizontal: 32.0),
                                 backgroundColor:
                                 isExpanded ? Colors.black : Color(0xFFCB9935),
                                 side: BorderSide(color: Color(0xFFCB9935)),
@@ -615,8 +621,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                               child: Text(
                                 isExpanded ? 'Lese weniger' : 'Lese mehr',
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Roboto'),
+                                    color: Colors.white, fontFamily: 'Roboto'),
                               ),
                             ),
                             SizedBox(height: 10),
@@ -633,8 +638,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                               direction: Axis.horizontal,
                               allowHalfRating: false,
                               itemCount: 5,
-                              itemPadding:
-                              EdgeInsets.symmetric(horizontal: 4.0),
+                              itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
                               itemBuilder: (context, _) => Icon(
                                 Icons.star,
                                 color: Colors.amber,
@@ -670,60 +674,56 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
               );
             },
           ),
-
           actions: [
-            // Aktionen nur anzeigen, wenn Inhalte sichtbar sind
-            if (showContent) ...[
-              TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Color(0xFFCB9935),
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  ),
-                ),
-                onPressed: () async {
-                  // Bewertung speichern
-                  await saveUserRating(rating);
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed('/home');
-                  reset();
-                  _videoController?.dispose(); // Video-Controller freigeben
-                },
-                child: Text(
-                  'Abschließen',
-                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Color(0xFFCB9935),
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 ),
               ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  ),
-                ),
-                onPressed: () {
-                  String shareText =
-                      'Du hast ${combinedTotalScore} Punkte. Damit bist du ein $finalCharacter.\n\nBeschreibung: $finalCharacterDescription';
-                  Share.share(shareText);
-                },
-                child: Text(
-                  'Teilen',
-                  style:
-                  TextStyle(color: Color(0xFFCB9935), fontFamily: 'Roboto'),
+              onPressed: () async {
+                // Bewertung speichern
+                await saveUserRating(rating);
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/home');
+                reset();
+                _videoController?.dispose(); // Video-Controller freigeben
+              },
+              child: Text(
+                'Abschließen',
+                style: TextStyle(
+                    color: Colors.white, fontFamily: 'Roboto'),
+              ),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 ),
               ),
-            ],
+              onPressed: () {
+                String shareText =
+                    'Du hast ${combinedTotalScore} Punkte. Damit bist du ein $finalCharacter.\n\nBeschreibung: $finalCharacterDescription';
+                Share.share(shareText);
+              },
+              child: Text(
+                'Teilen',
+                style: TextStyle(
+                    color: Color(0xFFCB9935), fontFamily: 'Roboto'),
+              ),
+            ),
           ],
         );
       },
     ).then((_) {
+      isDialogActive = false; // Mark dialog as inactive when it is closed
       _videoController?.dispose(); // Video-Controller freigeben, wenn Dialog geschlossen wird
     });
   }
-
-
 
   Future<void> saveUserRating(double rating) async {
     User? user = _auth.currentUser;
