@@ -8,7 +8,6 @@ import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'custom_footer.dart'; // Import for the custom footer
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
-
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -40,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Initialize YouTube controllers
     _youtubeController = YoutubePlayerController(
-      initialVideoId: 'cu_mXjAnTqg', // Same as desktop
+      initialVideoId: 'cu_mXjAnTqg', // First video
       params: YoutubePlayerParams(
         autoPlay: false,
         showControls: true,
@@ -49,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     _youtubeController1 = YoutubePlayerController(
-      initialVideoId: 'fnSFCXFi69M', // Same as desktop
+      initialVideoId: 'fnSFCXFi69M', // Second video
       params: YoutubePlayerParams(
         autoPlay: false,
         showControls: true,
@@ -75,22 +74,21 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  // Mobile AppBar (grey background, button for right drawer)
+  // Mobile AppBar
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text('PERSONALITY SCORE'),
-      backgroundColor: Color(0xFFF7F5EF), // Light grey for mobile
+      backgroundColor: Color(0xFFF7F5EF), // Light grey
       actions: [
         Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu), // Menu icon to open the right-side drawer for mobile
+            icon: Icon(Icons.menu),
             onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // Open the right-side drawer for mobile
+              Scaffold.of(context).openEndDrawer();
             },
           ),
         ),
       ],
-      automaticallyImplyLeading: false, // Remove back button for mobile
     );
   }
 
@@ -102,34 +100,28 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
       endDrawer: MobileSidebar(),
-      appBar: getValueForScreenType<bool>(
-        context: context,
-        mobile: false,
-        desktop: true,
-      )
-          ? null
-          : _buildAppBar(context),
+      appBar: _buildAppBar(context),
       body: ScreenTypeLayout(
         mobile: _buildMobileLayout(screenHeight, screenWidth),
-        desktop: DesktopLayout(),
+        desktop: DesktopLayout(), // Reuse desktop layout for larger screens
       ),
     );
   }
 
   Widget _buildMobileLayout(double screenHeight, double screenWidth) {
     return SingleChildScrollView(
-      controller: _scrollController, // Attach the scroll controller
+      controller: _scrollController,
       child: Column(
         children: [
-          SizedBox(height: 350),
+          SizedBox(height: 250), // Adjust padding for mobile
           _buildHeaderSection(context, screenHeight, screenWidth),
-          SizedBox(height: 350),
+          SizedBox(height: 250),
           _buildYouTubeSection(screenWidth),
-          SizedBox(height: 350),
+          SizedBox(height: 250),
           _buildPersonalityTypesSection(context, screenHeight, screenWidth),
-          SizedBox(height: 350),
+          SizedBox(height: 250),
           isLoading ? CircularProgressIndicator() : _buildTutorialSection(context),
-          SizedBox(height: 350),
+          SizedBox(height: 250),
           CustomFooter(),
         ],
       ),
@@ -154,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 SelectableText(
                   "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
-                    fontSize: screenHeight * 0.036,
+                    fontSize: screenHeight * 0.03,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                     fontFamily: 'Roboto',
@@ -184,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   onPressed: () {
-                    _scrollToTutorialSection(); // Scroll to the tutorial section
+                    _scrollToTutorialSection();
                   },
                   child: Text(
                     'Beginne den Test',
@@ -219,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             "Wieso MUSST du den Personality Score ausfüllen?",
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
@@ -241,10 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTutorialSection(BuildContext context) {
     return Container(
-      key: _tutorialKey, // Add the key here
+      key: _tutorialKey,
       child: Column(
         children: [
-          SizedBox(height: 40),
           _buildYouTubeSection1(),
           SizedBox(height: 40),
           _buildQuestionsList(context),
@@ -264,9 +255,10 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             "Starte Hier",
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 20),
           Center(
@@ -295,119 +287,24 @@ class _HomeScreenState extends State<HomeScreen> {
       children: currentQuestions.map((questionText) {
         int questionIndex = start + currentQuestions.indexOf(questionText);
         return Container(
-          height: MediaQuery.of(context).size.height / 4,
-          margin: EdgeInsets.only(bottom: 10.0),
-          padding: EdgeInsets.symmetric(
-            vertical: 10.0,
-            horizontal: MediaQuery.of(context).size.width / 10,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12.0),
-          ),
+          padding: EdgeInsets.all(12.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Flexible(
-                child: SelectableText(
-                  questionText,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontFamily: 'Roboto',
-                    fontSize: 22,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                ),
+              SelectableText(
+                questionText,
+                style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
               ),
-              SizedBox(height: 8.0),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Row of vertical lines with margin to align with slider divisions
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(width: 12.0),
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 12.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: List.generate(11, (index) {
-                              return Container(
-                                width: 1,
-                                height: 20,
-                                color: Colors.grey,
-                              );
-                            }),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12.0),
-                    ],
-                  ),
-                  // The slider itself
-                  Slider(
-                    value: (answers[questionIndex] ?? 5).toDouble(),
-                    onChanged: (val) {
-                      setState(() {
-                        answers[questionIndex] = val.toInt();
-                      });
-                    },
-                    min: 0,
-                    max: 10,
-                    divisions: 10,
-                    activeColor: Color(0xFFCB9935),
-                    inactiveColor: Colors.grey,
-                    thumbColor: Color(0xFFCB9935),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'NEIN',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                  Text(
-                    'EHER NEIN',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                  Text(
-                    'NEUTRAL',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                  Text(
-                    'EHER JA',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                  Text(
-                    'JA',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ],
+              Slider(
+                value: (answers[questionIndex] ?? 5).toDouble(),
+                onChanged: (val) {
+                  setState(() {
+                    answers[questionIndex] = val.toInt();
+                  });
+                },
+                min: 0,
+                max: 10,
+                divisions: 10,
               ),
             ],
           ),
@@ -419,7 +316,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavigationButton(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
         backgroundColor: Color(0xFFCB9935),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -428,98 +324,35 @@ class _HomeScreenState extends State<HomeScreen> {
       onPressed: () {
         handleTakeTest(context);
       },
-      child: Text(
-        'Beginne den Test',
-        style: TextStyle(
-          color: Colors.white,
-          fontFamily: 'Roboto',
-          fontSize: 18,
-        ),
-      ),
+      child: Text('Beginne den Test'),
     );
   }
 
-  // Personality types section
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {
-    return Stack(
+    return Column(
       children: [
-        Positioned.fill(
-          child: SvgPicture.asset(
-            'assets/background_personality_type.svg',
-            fit: BoxFit.cover,
-            width: screenWidth,
+        Text(
+          "PERSÖNLICHKEITSSTUFEN",
+          style: TextStyle(
+            fontSize: screenHeight * 0.021,
+            fontWeight: FontWeight.bold,
           ),
+          textAlign: TextAlign.center,
         ),
-        Padding(
-          padding: const EdgeInsets.only(left: 20.0, right: 20, top: 50, bottom: 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "PERSÖNLICHKEITSSTUFEN",
-                style: TextStyle(
-                  fontSize: screenHeight * 0.021,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                "Verstehe dich selbst und andere",
-                style: TextStyle(
-                  fontSize: screenHeight * 0.056,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 20),
-              Text(
-                "Vom Anonymus zum LifeArtist: Die 8 Stufen symbolisieren die wichtigsten Etappen auf dem Weg, dein Potenzial voll auszuschöpfen. Mit einem fundierten Verständnis des Modells wirst du nicht nur dich selbst, sondern auch andere Menschen viel besser verstehen und einordnen können.",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                  fontSize: screenHeight * 0.021,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 70),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFCB9935),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.07,
-                    vertical: screenHeight * 0.021,
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/personality_types');
-                },
-                child: Text(
-                  'Erfahre mehr',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Roboto',
-                    fontSize: screenHeight * 0.021,
-                  ),
-                ),
-              ),
-              SizedBox(height: 40),
-              SizedBox(
-                width: screenWidth * 0.7,
-                height: screenHeight * 0.35,
-                child: Image.asset('assets/adventurer_front.png'),
-              ),
-            ],
+        Text(
+          "Verstehe dich selbst und andere",
+          style: TextStyle(
+            fontSize: screenHeight * 0.04,
+            fontWeight: FontWeight.bold,
           ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(
+          width: screenWidth * 0.7,
+          height: screenHeight * 0.3,
+          child: Image.asset('assets/adventurer_front.png'),
         ),
       ],
     );
   }
-
 }

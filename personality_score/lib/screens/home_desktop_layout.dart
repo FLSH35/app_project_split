@@ -47,10 +47,25 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     super.dispose();
   }
 
+  void _playVideo(VideoPlayerController? controllerToPlay) {
+    setState(() {
+      if (_videoController1 != null && _videoController1 != controllerToPlay) {
+        _videoController1!.pause();
+      }
+      if (_videoController2 != null && _videoController2 != controllerToPlay) {
+        _videoController2!.pause();
+      }
+      if (controllerToPlay != null) {
+        controllerToPlay.play();
+      }
+    });
+  }
+
+
   Future<void> _initializeVideos() async {
     final storage = FirebaseStorage.instance;
-    final gsUrl1 = 'gs://personality-score.appspot.com/IYC Acoustic Jingle.mp4';
-    final gsUrl2 = 'gs://personality-score.appspot.com/IYC Acoustic Jingle.mp4'; // Replace with the correct URL if different
+    final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 3.mov';
+    final gsUrl2 = 'gs://personality-score.appspot.com/Personality Score 1.mov'; // Replace with the correct URL if different
 
     try {
       // Initialize the first video controller
@@ -59,7 +74,6 @@ class _DesktopLayoutState extends State<DesktopLayout> {
         ..setLooping(true)
         ..initialize().then((_) {
           setState(() {});
-          _videoController1!.play();
         });
 
       // Initialize the second video controller
@@ -68,7 +82,6 @@ class _DesktopLayoutState extends State<DesktopLayout> {
         ..setLooping(true)
         ..initialize().then((_) {
           setState(() {});
-          _videoController2!.play();
         });
     } catch (e) {
       print('Error loading video: $e');
@@ -216,12 +229,30 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             builder: (context, constraints) {
               double playerWidth = constraints.maxWidth * 0.55;
               return Center(
-                child: Container(
-                  width: playerWidth,
-                  child: AspectRatio(
-                    aspectRatio: _videoController1!.value.aspectRatio,
-                    child: VideoPlayer(_videoController1!),
-                  ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: playerWidth,
+                      child: AspectRatio(
+                        aspectRatio: _videoController1!.value.aspectRatio,
+                        child: VideoPlayer(_videoController1!),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _videoController1!.value.isPlaying
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                      ),
+                      onPressed: () {
+                        if (_videoController1!.value.isPlaying) {
+                          _videoController1!.pause();
+                        } else {
+                          _playVideo(_videoController1);
+                        }
+                      },
+                    ),
+                  ],
                 ),
               );
             },
@@ -248,14 +279,32 @@ class _DesktopLayoutState extends State<DesktopLayout> {
           _videoController2 != null && _videoController2!.value.isInitialized
               ? LayoutBuilder(
             builder: (context, constraints) {
-              double playerWidth = constraints.maxWidth * 0.55; // 55% of the available width
+              double playerWidth = constraints.maxWidth * 0.55;
               return Center(
-                child: Container(
-                  width: playerWidth,
-                  child: AspectRatio(
-                    aspectRatio: _videoController2!.value.aspectRatio,
-                    child: VideoPlayer(_videoController2!),
-                  ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: playerWidth,
+                      child: AspectRatio(
+                        aspectRatio: _videoController2!.value.aspectRatio,
+                        child: VideoPlayer(_videoController2!),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _videoController2!.value.isPlaying
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                      ),
+                      onPressed: () {
+                        if (_videoController2!.value.isPlaying) {
+                          _videoController2!.pause();
+                        } else {
+                          _playVideo(_videoController2);
+                        }
+                      },
+                    ),
+                  ],
                 ),
               );
             },
