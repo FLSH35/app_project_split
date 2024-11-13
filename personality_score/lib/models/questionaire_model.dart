@@ -545,133 +545,132 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
               return Container(
                 width: dialogWidth,
                 height: dialogHeight,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Hauptinhalte
-                    AnimatedOpacity(
-                      opacity: showContent ? 1.0 : 0.0,
-                      duration: Duration(milliseconds: 500),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SelectableText(
-                            "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
-                            style: TextStyle(
-                                color: Colors.black, fontFamily: 'Roboto'),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: 10),
+                child: SingleChildScrollView( // Wrapping the main content
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Hauptinhalte
+                      AnimatedOpacity(
+                        opacity: showContent ? 1.0 : 0.0,
+                        duration: Duration(milliseconds: 500),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SelectableText(
+                              "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
+                              style: TextStyle(
+                                  color: Colors.black, fontFamily: 'Roboto'),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 10),
                             Image.asset(
                               'assets/$finalCharacter.webp',
                               width: 200,
                               height: 200,
                             ),
-                          SizedBox(height: 10),
-                          // Expandable description
-                          isExpanded
-                              ? Container(
-                            height: 150,
-                            child: SingleChildScrollView(
-                              child: SelectableText(
-                                finalCharacterDescription,
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Roboto',
-                                    fontSize: 18),
+                            SizedBox(height: 10),
+                            // Expandable description
+                            isExpanded
+                                ? Container(
+                              height: 150,
+                              child: SingleChildScrollView(
+                                child: SelectableText(
+                                  finalCharacterDescription,
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Roboto',
+                                      fontSize: 18),
+                                ),
                               ),
-                            ),
-                          )
-                              : SelectableText(
-                            finalCharacterDescription
-                                .split(' ')
-                                .take(15)
-                                .join(' ') +
-                                '...',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Roboto',
-                                fontSize: 18),
-                          ),
-                          SizedBox(height: 10),
-                          // "Lese mehr" button with updated style
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 12.0, horizontal: 32.0),
-                              backgroundColor:
-                              isExpanded ? Colors.black : Color(0xFFCB9935),
-                              side: BorderSide(color: Color(0xFFCB9935)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(8.0)),
-                              ),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                isExpanded = !isExpanded; // Zustand umschalten
-                              });
-                            },
-                            child: Text(
-                              isExpanded ? 'Lese weniger' : 'Lese mehr',
+                            )
+                                : SelectableText(
+                              finalCharacterDescription
+                                  .split(' ')
+                                  .take(15)
+                                  .join(' ') +
+                                  '...',
                               style: TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.black,
                                   fontFamily: 'Roboto',
                                   fontSize: 18),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          // Bewertungsfrage
-                          Text(
-                            'Wie sehr identifizierst du dich mit diesem Ergebnis?',
-                            style: TextStyle(
-                                color: Colors.black, fontFamily: 'Roboto'),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: 10),
-                          // Bewertungsskala
-                          RatingBar.builder(
-                            initialRating: rating,
-                            minRating: 1,
-                            direction: Axis.horizontal,
-                            allowHalfRating: false,
-                            itemCount: 5,
-                            itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                            itemBuilder: (context, _) => Icon(
-                              Icons.star,
-                              color: Colors.amber,
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                      horizontal: 32.0),
+                                backgroundColor:
+                                isExpanded ? Colors.black : Color(0xFFCB9935),
+                                side: BorderSide(color: Color(0xFFCB9935)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(8.0)),
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isExpanded = !isExpanded; // Zustand umschalten
+                                });
+                              },
+                              child: Text(
+                                isExpanded ? 'Lese weniger' : 'Lese mehr',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Roboto'),
+                              ),
                             ),
-                            onRatingUpdate: (newRating) {
-                              setState(() {
-                                rating = newRating;
-                              });
-                            },
-                          ),
-                        ],
+                            SizedBox(height: 10),
+                            Text(
+                              'Wie sehr identifizierst du dich mit diesem Ergebnis?',
+                              style: TextStyle(
+                                  color: Colors.black, fontFamily: 'Roboto'),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 10),
+                            RatingBar.builder(
+                              initialRating: rating,
+                              minRating: 1,
+                              direction: Axis.horizontal,
+                              allowHalfRating: false,
+                              itemCount: 5,
+                              itemPadding:
+                              EdgeInsets.symmetric(horizontal: 4.0),
+                              itemBuilder: (context, _) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                              onRatingUpdate: (newRating) {
+                                setState(() {
+                                  rating = newRating;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    // Video-Overlay
-                    IgnorePointer(
-                      ignoring: true, // Verhindert Interaktion mit dem Video
-                      child: AnimatedOpacity(
-                        opacity: showContent ? 0.0 : 1.0,
-                        duration: Duration(milliseconds: 500),
-                        child: Container(
-                          width: dialogWidth,
-                          height: dialogHeight,
-                          color: Colors.transparent, // Kein Hintergrund
-                          child: AspectRatio(
-                            aspectRatio: _videoController!.value.aspectRatio,
-                            child: VideoPlayer(_videoController!),
+                      IgnorePointer(
+                        ignoring: true, // Verhindert Interaktion mit dem Video
+                        child: AnimatedOpacity(
+                          opacity: showContent ? 0.0 : 1.0,
+                          duration: Duration(milliseconds: 500),
+                          child: Container(
+                            width: dialogWidth,
+                            height: dialogHeight,
+                            color: Colors.transparent, // Kein Hintergrund
+                            child: AspectRatio(
+                              aspectRatio: _videoController!.value.aspectRatio,
+                              child: VideoPlayer(_videoController!),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },
           ),
+
           actions: [
             // Aktionen nur anzeigen, wenn Inhalte sichtbar sind
             if (showContent) ...[
