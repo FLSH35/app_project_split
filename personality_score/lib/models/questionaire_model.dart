@@ -598,7 +598,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.symmetric(
-                                  vertical: 16.0, horizontal: 32.0),
+                                  vertical: 12.0, horizontal: 32.0),
                               backgroundColor:
                               isExpanded ? Colors.black : Color(0xFFCB9935),
                               side: BorderSide(color: Color(0xFFCB9935)),
@@ -620,14 +620,12 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                   fontSize: 18),
                             ),
                           ),
-                          SizedBox(height: 20),
+                          SizedBox(height: 10),
                           // Bewertungsfrage
                           Text(
                             'Wie sehr identifizierst du dich mit diesem Ergebnis?',
                             style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Roboto',
-                                fontSize: 18),
+                                color: Colors.black, fontFamily: 'Roboto'),
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(height: 10),
