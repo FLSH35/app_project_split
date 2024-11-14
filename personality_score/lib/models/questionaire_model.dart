@@ -659,9 +659,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                           duration: Duration(milliseconds: 500),
                           child: Container(
                             width: dialogWidth,
-                            height: dialogHeight,
+                            height: dialogHeight * 0.9, // Reduce height to 90% of the dialog height
                             color: Colors.transparent, // Transparent background
-                            child: ClipRect( // Ensures video is clipped to dialog dimensions
+                            child: ClipRect( // Ensures video is clipped to the adjusted dimensions
                               child: OverflowBox(
                                 alignment: Alignment.center,
                                 minWidth: 0.0,
@@ -669,7 +669,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                 maxWidth: double.infinity,
                                 maxHeight: double.infinity,
                                 child: FittedBox(
-                                  fit: BoxFit.cover, // Scale and crop video to fill dialog height
+                                  fit: BoxFit.cover, // Scale and crop video to fill available space
                                   child: SizedBox(
                                     width: _videoController!.value.size.width,
                                     height: _videoController!.value.size.height,
@@ -842,6 +842,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             .set({
           'combinedTotalScore': combinedTotalScore,
           'lastUpdated': FieldValue.serverTimestamp(),
+          'finalScores': "{$firstTestScore, $secondTestScore, $finalTestScore}",
         }, SetOptions(merge: true));
 
         // Benachrichtige die Listener, dass sich der combinedTotalScore geändert hat
