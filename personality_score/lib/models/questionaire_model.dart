@@ -810,7 +810,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             .collection('users')
             .doc(user.uid)
             .collection('results')
-            .doc(_finalCharacter ?? 'FinalTest')
+            .doc(_questions.first.set)
             .get();
 
         int finalTestScore = finalTestDoc.exists && finalTestDoc.data() != null
