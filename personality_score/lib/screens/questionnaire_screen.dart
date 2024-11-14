@@ -126,19 +126,37 @@ class QuestionnaireScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: SelectableText(
-                    question.text,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'Roboto',
-                      fontSize: 20,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SelectableText(
+                        question.text,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Roboto',
+                          fontSize: 20,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: null,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                    maxLines: null
                   ),
-                ),
+                  if (question.backgroundInfo != "empty") ...[
+                    SizedBox(width: 8.0),
+                    GestureDetector(
+                      onTap: () {
+                        _showInfoDialog(context, question.backgroundInfo);
+                      },
+                      child: Icon(
+                        Icons.help_outline, // Question mark icon
+                        color: Colors.grey[700],
+                        size: 24.0,
+                      ),
+                    ),
+                  ],
+                ],
               ),
               SizedBox(height: 8.0),
               Stack(
@@ -148,12 +166,10 @@ class QuestionnaireScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Left margin
                       SizedBox(width: 12.0), // Adjust width to match desired margin
-                      // Tick marks row
                       Expanded(
                         child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 12.0), // Adjust for desired spacing
+                          margin: EdgeInsets.symmetric(horizontal: 12.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: List.generate(11, (index) {
@@ -164,11 +180,9 @@ class QuestionnaireScreen extends StatelessWidget {
                               );
                             }),
                           ),
-                        )
-
+                        ),
                       ),
-                      // Right margin
-                      SizedBox(width: 12.0), // Adjust width to match desired margin
+                      SizedBox(width: 12.0),
                     ],
                   ),
                   // The slider itself
@@ -189,11 +203,7 @@ class QuestionnaireScreen extends StatelessWidget {
                     thumbColor: Color(0xFFCB9935),
                   ),
                 ],
-              )
-
-
-              ,
-
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -225,6 +235,28 @@ class QuestionnaireScreen extends StatelessWidget {
       }).toList(),
     );
   }
+
+  void _showInfoDialog(BuildContext context, String backgroundInfo) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Info"),
+          content: Text(backgroundInfo),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
 
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
     int questionsPerPage = 7; // Adjusted for mobile layout

@@ -119,46 +119,61 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Flexible(
-                child: SelectableText(
-                  question.text,
-                  style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 22),
-                  textAlign: TextAlign.center,
-                  maxLines: 3
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: SelectableText(
+                      question.text,
+                      style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 22),
+                      textAlign: TextAlign.center,
+                      maxLines: 3,
+                    ),
+                  ),
+                  SizedBox(width: 8.0),
+                  if(question.backgroundInfo != "empty") Tooltip(
+                        message: question.backgroundInfo, // Add background info to the Question model
+                        padding: EdgeInsets.all(8.0),
+                        textStyle: TextStyle(color: Colors.white, fontSize: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      child: Icon(
+                        Icons.help_outline, // Use a question mark icon
+                        color: Colors.grey[700],
+                        size: 24.0,
+                      ),
+                      ),
+                ],
               ),
               SizedBox(height: 8.0),
+              // Existing slider and options implementation...
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Row of vertical lines with margin to align with slider divisions
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Left margin
                       SizedBox(width: 12.0), // Adjust width to match desired margin
-                      // Tick marks row
                       Expanded(
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 12.0), // Adjust for desired spacing
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: List.generate(11, (index) {
-                                return Container(
-                                  width: 1,
-                                  height: 20, // Height of the tick mark
-                                  color: Colors.grey, // Color of the tick mark
-                                );
-                              }),
-                            ),
-                          )
-
+                        child: Container(
+                          margin: EdgeInsets.symmetric(horizontal: 12.0), // Adjust for desired spacing
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: List.generate(11, (index) {
+                              return Container(
+                                width: 1,
+                                height: 20, // Height of the tick mark
+                                color: Colors.grey, // Color of the tick mark
+                              );
+                            }),
+                          ),
+                        ),
                       ),
-                      // Right margin
                       SizedBox(width: 12.0), // Adjust width to match desired margin
                     ],
                   ),
-                  // The slider itself
                   Slider(
                     value: question.value < 0
                         ? 10 - (model.answers[questionIndex] ?? 0).toDouble()
@@ -177,7 +192,6 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
                   ),
                 ],
               ),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -209,6 +223,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
       }).toList(),
     );
   }
+
 
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
     int questionsPerPage = 7; // Number of questions per page

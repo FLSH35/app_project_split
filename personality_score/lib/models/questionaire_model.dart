@@ -296,7 +296,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                 notifyListeners();
                 Navigator.of(context).pop();
               },
-              child: Text('Next',
+              child: Text('Weiter',
                   style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
             ),
           ],
@@ -407,7 +407,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                 Navigator.of(context).pop();
               },
               child: Text(
-                'Next',
+                'Weiter',
                 style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
               ),
             ),

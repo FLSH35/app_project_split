@@ -8,12 +8,14 @@ class Question {
   final int value;
   final int relevancy;
   final String set;
+  final String backgroundInfo; // Add this field
 
   Question({
     required this.text,
     required this.value,
     required this.relevancy,
     required this.set,
+    required this.backgroundInfo
   });
 
   factory Question.fromJson(Map<String, dynamic> json) => _$QuestionFromJson(json);
