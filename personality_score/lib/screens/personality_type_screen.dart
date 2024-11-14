@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Für rootBundle
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import '../helper_functions/questionnaire_helpers.dart';
 import 'personality_types_desktop_layout.dart'; // Importiere das Desktop-Layout
 import 'mobile_sidebar.dart'; // Importiere die mobile Sidebar
 
@@ -249,10 +250,6 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
     );
   }
 
-  // Implementiere deine handleTakeTest-Methode
-  void handleTakeTest(BuildContext context) {
-    // Navigiere zur Testseite oder implementiere die gewünschte Funktionalität
-  }
 }
 
 class PersonalityTypeCard extends StatefulWidget {
