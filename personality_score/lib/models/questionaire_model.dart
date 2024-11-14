@@ -653,21 +653,35 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                         ),
                       ),
                       IgnorePointer(
-                        ignoring: true, // Verhindert Interaktion mit dem Video
+                        ignoring: true, // Prevent interaction with the video
                         child: AnimatedOpacity(
                           opacity: showContent ? 0.0 : 1.0,
                           duration: Duration(milliseconds: 500),
                           child: Container(
                             width: dialogWidth,
                             height: dialogHeight,
-                            color: Colors.transparent, // Kein Hintergrund
-                            child: AspectRatio(
-                              aspectRatio: _videoController!.value.aspectRatio,
-                              child: VideoPlayer(_videoController!),
+                            color: Colors.transparent, // Transparent background
+                            child: ClipRect( // Ensures video is clipped to dialog dimensions
+                              child: OverflowBox(
+                                alignment: Alignment.center,
+                                minWidth: 0.0,
+                                minHeight: 0.0,
+                                maxWidth: double.infinity,
+                                maxHeight: double.infinity,
+                                child: FittedBox(
+                                  fit: BoxFit.cover, // Scale and crop video to fill dialog height
+                                  child: SizedBox(
+                                    width: _videoController!.value.size.width,
+                                    height: _videoController!.value.size.height,
+                                    child: VideoPlayer(_videoController!),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
+
                     ],
                   ),
                 ),
