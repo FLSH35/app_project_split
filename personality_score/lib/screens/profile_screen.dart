@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import '../models/newsletter_service.dart';
 import 'profile_desktop_layout.dart'; // Import the desktop layout
 import 'mobile_sidebar.dart'; // Import the mobile sidebar
 import 'package:personality_score/auth/auth_service.dart';
@@ -16,13 +17,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? finalCharacterData;
   bool _isEditingName = false;
   TextEditingController _nameController = TextEditingController();
-
+  final NewsletterService _newsletterService = NewsletterService();
+  bool isSubscribedToNewsletter = false;
   bool isExpanded = false; // Add this line for expansion state
 
   @override
   void initState() {
     super.initState();
     fetchFinalCharacter();
+    _initializeNewsletterStatus();
+  }
+
+  Future<void> _initializeNewsletterStatus() async {
+    try {
+      final status = await _newsletterService.fetchNewsletterStatus();
+      setState(() {
+        isSubscribedToNewsletter = status;
+      });
+    } catch (e) {
+      print('Error fetching newsletter status: $e');
+    }
+  }
+
+  Future<void> _toggleNewsletterSubscription(bool value) async {
+    try {
+      await _newsletterService.updateNewsletterStatus(value);
+      setState(() {
+        isSubscribedToNewsletter = value;
+      });
+    } catch (e) {
+      print('Error updating newsletter subscription: $e');
+    }
   }
 
   Future<void> fetchFinalCharacter() async {
@@ -258,21 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Color(0xFFCB9935),
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Abschließen',
-                          style: TextStyle(
-                              color: Colors.white, fontFamily: 'Roboto')),
-                    ),
+
                     SizedBox(width: 10),
                     TextButton(
                       style: TextButton.styleFrom(
@@ -290,8 +301,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(
                               color: Color(0xFFCB9935), fontFamily: 'Roboto')),
                     ),
+
+
                   ],
                 ),
+                Container(width: 400,
+                    child: SwitchListTile(
+                      title: Text(
+                        'Newsletter Anmeldung',
+                        style: TextStyle(
+                            fontSize: 18, fontFamily: 'Roboto'),
+                      ),
+                      value: isSubscribedToNewsletter,
+                      onChanged: (value) => _toggleNewsletterSubscription(value),
+                      activeColor: Color(0xFFCB9935),
+                    )),
               ],
             ),
           ),

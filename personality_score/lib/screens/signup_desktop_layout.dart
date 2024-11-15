@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'custom_app_bar.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 
+import 'package:personality_score/models/newsletter_service.dart';
 class SignUpDesktopLayout extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -21,9 +22,31 @@ class SignUpDesktopLayout extends StatefulWidget {
 }
 
 class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
+  final NewsletterService _newsletterService = NewsletterService();
+  bool isSubscribedToNewsletter = false;
   bool _isSignedUp = false; // Flag to track if the user has signed up
   String? userName; // Store the signed-up user's name
+  Future<void> _initializeNewsletterStatus() async {
+    try {
+      final status = await _newsletterService.fetchNewsletterStatus();
+      setState(() {
+        isSubscribedToNewsletter = status;
+      });
+    } catch (e) {
+      print('Error fetching newsletter status: $e');
+    }
+  }
 
+  Future<void> _toggleNewsletterSubscription(bool value) async {
+    try {
+      await _newsletterService.updateNewsletterStatus(value);
+      setState(() {
+        isSubscribedToNewsletter = value;
+      });
+    } catch (e) {
+      print('Error updating newsletter subscription: $e');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +83,19 @@ class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
                       decoration: InputDecoration(labelText: 'Password'),
                       obscureText: true,
                     ),
+
+                    SizedBox(height: 10),
+                    Container(width: 400,
+                        child: SwitchListTile(
+                          title: Text(
+                            'Newsletter Anmeldung',
+                            style: TextStyle(
+                                fontSize: 18, fontFamily: 'Roboto'),
+                          ),
+                          value: isSubscribedToNewsletter,
+                          onChanged: (value) => _toggleNewsletterSubscription(value),
+                          activeColor: Color(0xFFCB9935),
+                        )),
                     SizedBox(height: 20),
 
                     // Sign Up Button

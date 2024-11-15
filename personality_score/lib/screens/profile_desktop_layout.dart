@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'custom_app_bar.dart'; // Import the custom AppBar
+import 'package:personality_score/models/newsletter_service.dart';
 
 class ProfileDesktopLayout extends StatefulWidget {
   final TextEditingController nameController;
@@ -25,7 +26,37 @@ class ProfileDesktopLayout extends StatefulWidget {
 }
 
 class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
+
+  final NewsletterService _newsletterService = NewsletterService();
+  bool isSubscribedToNewsletter = false;
   bool isExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNewsletterStatus();
+  }
+  Future<void> _initializeNewsletterStatus() async {
+    try {
+      final status = await _newsletterService.fetchNewsletterStatus();
+      setState(() {
+        isSubscribedToNewsletter = status;
+      });
+    } catch (e) {
+      print('Error fetching newsletter status: $e');
+    }
+  }
+
+  Future<void> _toggleNewsletterSubscription(bool value) async {
+    try {
+      await _newsletterService.updateNewsletterStatus(value);
+      setState(() {
+        isSubscribedToNewsletter = value;
+      });
+    } catch (e) {
+      print('Error updating newsletter subscription: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +88,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CircleAvatar(
-              radius: 125,
+              radius: 100,
               backgroundImage: AssetImage(
                   'assets/${widget.finalCharacterData?['finalCharacter']}.webp'),
               backgroundColor: Colors.transparent,
@@ -117,7 +148,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                         SizedBox(height: 10),
                         isExpanded
                             ? Container(
-                          height: 350, // Set a fixed height for scrolling
+                          height: 300, // Set a fixed height for scrolling
                           child: SingleChildScrollView(
                             child: SelectableText(
                                 widget.finalCharacterData![
@@ -134,17 +165,17 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                             padding: const EdgeInsets.all(20.0),
                             child: SingleChildScrollView(
                               child: SelectableText(
-                                  widget.finalCharacterData![
-                                  'finalCharacterDescription']
-                                      .split('. ')
-                                      .take(4)
-                                      .join('. ') +
-                                      '...',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Roboto',
-                                      fontSize: 18),
-                                ),
+                                widget.finalCharacterData![
+                                'finalCharacterDescription']
+                                    .split('. ')
+                                    .take(4)
+                                    .join('. ') +
+                                    '...',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Roboto',
+                                    fontSize: 18),
+                              ),
 
                             ),
                           ),
@@ -174,57 +205,54 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                               fontSize: 18,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        )
+                    ],
                   ),
                 ),
-              )
+              ))
             else
               SelectableText(
                 'No final character found.',
                 style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
               ),
+            SizedBox(height: 20),
             SizedBox(height: 20), // Add spacing before buttons
             // Finish and Share buttons
+
             Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: Color(0xFFCB9935),
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Abschließen',
-                      style: TextStyle(
-                          color: Colors.white, fontFamily: 'Roboto')),
-                ),
-                SizedBox(width: 10),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                    ),
-                  ),
+    TextButton(
+    style: TextButton.styleFrom(
+    backgroundColor: Color(0xFFCB9935),
+    padding: EdgeInsets.symmetric(horizontal: 20),
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+    ),),
                   onPressed: () {
                     String shareText = '${widget.finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${widget.finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${widget.finalCharacterData!['finalCharacterDescription']}';
                     Share.share(shareText);
                   },
                   child: Text('Teilen',
                       style: TextStyle(
-                          color: Color(0xFFCB9935), fontFamily: 'Roboto')),
+                          color: Colors.white, fontFamily: 'Roboto')),
                 ),
+
               ],
             ),
+            Container(width: 400,
+            child: SwitchListTile(
+              title: Text(
+                'Newsletter Anmeldung',
+                style: TextStyle(
+                    fontSize: 18, fontFamily: 'Roboto'),
+              ),
+              value: isSubscribedToNewsletter,
+              onChanged: (value) => _toggleNewsletterSubscription(value),
+              activeColor: Color(0xFFCB9935),
+            )),
+
           ],
         ),
       ),

@@ -21,6 +21,27 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     'Die Test-Fragen beantworte ich schnell, ohne lange nachzudenken.',
     'Ich antworte ehrlich und gewissenhaft.',
   ];
+  final List<Map<String, String>> testimonials = [
+    {
+      "name": "Andrés",
+      "text": "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
+      "image": "https://via.placeholder.com/150",
+      "personalityType": "Traveller",
+    },
+    {
+      "name": "Jana",
+      "text": "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
+      "image": "https://via.placeholder.com/150",
+      "personalityType": "Traveller",
+    },
+    {
+      "name": "Christoph",
+      "text": "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
+      "image": "https://via.placeholder.com/150",
+      "personalityType": "Individual",
+    },
+  ];
+
   Map<int, int> answers = {};
   int currentPage = 0;
   int questionsPerPage = 7;
@@ -117,6 +138,8 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             SizedBox(height: 350),
             isLoading ? CircularProgressIndicator() : _buildTutorialSection(context),
             SizedBox(height: 350),
+            _buildTestimonialSection(), // Add the testimonial section here
+            SizedBox(height: 100),
             CustomFooter(),
           ],
         ),
@@ -472,6 +495,164 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       ],
     );
   }
+
+  Widget _buildTestimonialSection() {
+    PageController _pageController = PageController(viewportFraction: 0.4);
+    int selectedIndex = 0;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          color: Color(0xFFF7F5EF),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Was unsere Nutzer sagen",
+                style: TextStyle(
+                  fontSize: 28, // Larger font size for the section title
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Roboto',
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 20),
+              SizedBox(
+                height: 360, // Adjust height based on design
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          selectedIndex = index;
+                        });
+                      },
+                      itemCount: testimonials.length,
+                      itemBuilder: (context, index) {
+                        final isSelected = index == selectedIndex;
+                        return Transform.scale(
+                          scale: isSelected ? 1.15 : 0.85,
+                          child: _buildTestimonialCard(
+                            testimonials[index]['name']!,
+                            testimonials[index]['text']!,
+                            testimonials[index]['personalityType']!,
+                            isSelected,
+                          ),
+                        );
+                      },
+                    ),
+                    Positioned(
+                      left: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back_ios),
+                        onPressed: () {
+                          if (_pageController.hasClients) {
+                            _pageController.previousPage(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_forward_ios),
+                        onPressed: () {
+                          if (_pageController.hasClients) {
+                            _pageController.nextPage(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTestimonialCard(
+      String name,
+      String text,
+      String personalityType,
+      bool isSelected,
+      ) {
+    return Container(
+      width: isSelected ? 100 : 70, // Adjust width based on selection
+      margin: EdgeInsets.symmetric(horizontal: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(height: 20),
+          Icon(
+            Icons.person, // Placeholder icon
+            size: isSelected ? 90 : 70, // Adjust icon size for selected card
+            color: Colors.grey[700],
+          ),
+          SizedBox(height: 16),
+          Text(
+            name,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isSelected ? 20 : 16, // Adjust font size
+              fontFamily: 'Roboto',
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 8),
+          Text(
+            personalityType,
+            style: TextStyle(
+              fontSize: isSelected ? 18 : 14, // Adjust font size
+              fontFamily: 'Roboto',
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: isSelected ? 16 : 12, // Adjust font size
+                fontFamily: 'Roboto',
+                color: Colors.grey[800],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+
 
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
