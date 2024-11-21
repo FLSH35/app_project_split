@@ -1,7 +1,14 @@
 // desktop_layout.dart
-
 import 'package:flutter/material.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:flutter/services.dart';
+import 'dart:typed_data';
+import 'dart:html' as html;
+
+
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:personality_score/screens/pdf_viewer_screen.dart';
 import 'custom_app_bar.dart'; // Import your custom app bar
 import 'custom_footer.dart'; // Import your custom footer
 import 'dart:math'; // For 3D transformations
@@ -54,11 +61,15 @@ class _DesktopLayoutState extends State<DesktopLayout> {
   VideoPlayerController? _videoController1;
   VideoPlayerController? _videoController2;
 
+
+
+
   @override
   void initState() {
     super.initState();
     _initializeVideos();
     _loadTutorialQuestions();
+
   }
 
   @override
@@ -82,7 +93,13 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     });
   }
 
-
+  final List<Map<String, String>> pdfFiles = [
+    {
+      'name': 'Input Certificate',
+      'url': 'assets/Input_Certificate.pdf', // Relative URL for web
+    },
+    // Add more PDFs as needed
+  ];
   Future<void> _initializeVideos() async {
     final storage = FirebaseStorage.instance;
     final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 3.mov';
@@ -129,6 +146,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
         controller: _scrollController, // Attach the scroll controller
         child: Column(
           children: [
+
             SizedBox(height: 350),
             _buildHeaderSection(context, screenHeight, screenWidth),
             SizedBox(height: 350),

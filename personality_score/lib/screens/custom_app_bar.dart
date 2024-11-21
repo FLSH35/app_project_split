@@ -61,7 +61,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildNavButton(context, 'ALLGEMEIN', '/home'),
+                _buildNavButton(context, 'START', '/home'),
                 SizedBox(width: 10),
                 Flexible(
                   child: GestureDetector(
@@ -80,7 +80,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 SizedBox(width: 10),
-                _buildNavButton(context, 'STUFEN', '/personality_types'),
+                _buildNavButton(context, 'EINSTUFUNG', '/personality_types'),
               ],
             ),
           ),

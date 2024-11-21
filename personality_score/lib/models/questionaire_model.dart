@@ -1,3 +1,11 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:flutter/services.dart';
+import 'dart:typed_data';
+import 'dart:html' as html;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -10,7 +18,9 @@ import 'package:universal_html/html.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:personality_score/models/EmailSenderModel.dart';
+import 'package:http/http.dart' as http;
 
+import '../screens/pdf_viewer_screen.dart';
 import 'newsletter_service.dart';
 
 class QuestionnaireModel with ChangeNotifier {
@@ -65,6 +75,12 @@ class QuestionnaireModel with ChangeNotifier {
   String? get finalCharacter => _finalCharacter;
 
   String? get finalCharacterDescription => _finalCharacterDescription;
+
+
+  bool _isCertificateLoading = true;
+
+
+
 
 
   /// Loading questions from the service
@@ -431,6 +447,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     }
   }
 
+
   void completeFinalTest(BuildContext context) async {
     String finalCharacter;
 
@@ -489,8 +506,55 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         combinedTotalScore, gsUrl1);
   }
 
+  final List<Map<String, String>> pdfFiles = [
+    {
+      'name': 'Input Certificate',
+      'url': 'assets/Input_Certificate.pdf', // Relative URL for web
+    },
+    // Add more PDFs as needed
+  ];
 
+  /// Function to download the preloaded certificate
+  void _downloadGeneratedCertificate() {
+    try {
+      if (certificateManager.certificateBytes == null) {
+        throw Exception("Certificate not preloaded!");
+      }
 
+      final Uint8List certificateBytes = certificateManager.certificateBytes!;
+      final blob = html.Blob([certificateBytes], 'application/pdf');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+
+      final anchor = html.AnchorElement(href: url)
+        ..download = 'certificate_generated.pdf'
+        ..target = 'blank';
+      anchor.click();
+
+      html.Url.revokeObjectUrl(url);
+    } catch (e) {
+      print('Error downloading preloaded certificate: $e');
+    }
+  }
+
+  /// Function to download the existing PDF
+  Future<void> _downloadExistingPDF() async {
+    try {
+      final ByteData pdfData = await rootBundle.load('Input_Certificate.pdf');
+      final Uint8List pdfBytes = pdfData.buffer.asUint8List();
+
+      final blob = html.Blob([pdfBytes], 'application/pdf');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+
+      final anchor = html.AnchorElement(href: url)
+        ..download = 'Input_Certificate.pdf'
+        ..target = 'blank';
+      anchor.click();
+
+      html.Url.revokeObjectUrl(url);
+    } catch (e) {
+      print('Error downloading existing PDF: $e');
+    }
+  }
 
   Future<void> showFinalResultDialog(
       BuildContext context,
@@ -510,11 +574,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     // Controller für die E-Mail-Eingabe
     TextEditingController emailController = TextEditingController();
 
-// Instantiate the EmailSenderModel
-    EmailSenderModel emailSender = EmailSenderModel();
-
     // Prüfe, ob der Benutzer eingeloggt ist oder ein anonymer Benutzer ist
     User? user = _auth.currentUser;
+
     bool isAnonymous = user?.isAnonymous ?? true;
     print("is anonymous");
     print(isAnonymous);
@@ -527,7 +589,18 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       print('Fehler beim Laden der Video-URL: $e');
       videoUrl = ''; // Fehlerbehandlung
     }
-
+    // Start preloading certificate in the background
+    Future.microtask(() async {
+      await certificateManager
+          .preloadCertificateData(title: 'Adventurer', name: 'Frank')
+          .then((_) {
+        if (isDialogActive) {
+          _isCertificateLoading = false; // Update loading state
+        }
+      }).catchError((e) {
+        print("Error preloading certificate: $e");
+      });
+    });
     // Video-Controller initialisieren
     _videoController = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
 
@@ -536,10 +609,10 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
     // Dialog anzeigen
     await showDialog(
-      context: Navigator.of(context, rootNavigator: true).context,
-      barrierDismissible: false, // Verhindert Schließen durch Tippen außerhalb
+      context: context, // Changed from Navigator.of(context, rootNavigator: true).context
+      barrierDismissible: false, // Prevents closing by tapping outside
       builder: (BuildContext context) {
-        // Dynamische Größen basierend auf dem Bildschirm
+        // Dynamic sizes based on the screen
         double screenHeight = MediaQuery.of(context).size.height;
         double screenWidth = MediaQuery.of(context).size.width;
         double dialogWidth = screenWidth * 0.6;
@@ -558,7 +631,8 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
           ),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              // Timer starten, um die Inhalte nach 14 Sekunden anzuzeigen
+
+              // Start timer to show content after 14 seconds
               Future.delayed(Duration(seconds: 14), () {
                 if (isDialogActive) {
                   setState(() {
@@ -574,7 +648,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Hauptinhalte
+                      // Main content
                       AnimatedOpacity(
                         opacity: showContent ? 1.0 : 0.0,
                         duration: Duration(milliseconds: 500),
@@ -594,7 +668,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                 ),
                               ),
                               SizedBox(height: 20),
-                              // Option 1: Direkt einloggen
+                              // Option 1: Direct login
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   padding: EdgeInsets.symmetric(
@@ -615,7 +689,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                 ),
                               ),
                               SizedBox(height: 10),
-                              // Option 2: E-Mail-Adresse eingeben
+                              // Option 2: Enter email address
                               SelectableText(
                                 "Oder geben Sie Ihre E-Mail-Adresse ein, um das Ergebnis per E-Mail zu erhalten und weitere interessante Neuigkeiten zu bekommen.",
                                 textAlign: TextAlign.center,
@@ -638,58 +712,70 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                               SizedBox(height: 10),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 12.0, horizontal: 32.0),
                                   backgroundColor: Color(0xFFCB9935),
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(8.0)),
                                   ),
                                 ),
                                 onPressed: () async {
-                                  if (emailController.text.isNotEmpty && isValidEmail(emailController.text)) {
-                                    final newsletterService = NewsletterService();
-                                    await newsletterService.subscribeToNewsletter(
-                                      emailController.text,
-                                      "Meine Liste",
-                                    );
+                                  if (emailController.text.isNotEmpty &&
+                                      isValidEmail(emailController.text)) {
+                                      setState(() {
+                                        isAnonymous = false;
+                                        showContent = true; // Update to show subscribed content
+                                      });
+                                      try {
+                                      // Newsletter subscription (call Cloud Function)
+                                      final Uri cloudFunctionUrl = Uri.parse(
+                                        'https://YOUR_CLOUD_FUNCTION_URL/subscribeNewsletter',
+                                      );
 
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text("Download your certificate"),
-                                          content: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text("Click the button below to download your certificate."),
-                                              SizedBox(height: 10),
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                  downloadPDF('assets/Input_Certificate.pdf');
-                                                },
-                                                child: Text('Download Certificate'),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    );
+                                      final response = await http.post(
+                                        cloudFunctionUrl,
+                                        headers: {'Content-Type': 'application/json'},
+                                        body: jsonEncode({
+                                          'email': emailController.text,
+                                          'listName': 'Meine Liste',
+                                        }),
+                                      );
+
+                                      if (response.statusCode == 200) {
+
+                                      } else {
+                                        // Error: Show error message
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                          content: Text(
+                                              'Fehler beim Abonnieren des Newsletters: ${response.body}'),
+                                        ));
+                                      }
+                                    } catch (e) {
+                                      // Network or server error
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                        content: Text('Ein Fehler ist aufgetreten: $e'),
+                                      ));
+                                    }
                                   } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                      content: Text('Gebe eine valide Email-Adresse an.'),
+                                    // Invalid email
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content:
+                                      Text('Gebe eine valide Email-Adresse an.'),
                                     ));
                                   }
                                 },
-
                                 child: Text(
                                   'Ergebnis ansehen',
                                   style: TextStyle(fontFamily: 'Roboto'),
                                 ),
-                              ),
-
+                              )
                             ] else ...[
-                              // Inhalte für angemeldete Benutzer
+                              // Content for logged-in users
                               SelectableText(
                                 "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
                                 textAlign: TextAlign.center,
@@ -705,7 +791,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                 height: 200,
                               ),
                               SizedBox(height: 10),
-                              // Erweiterbare Beschreibung
+                              // Expandable description
                               isExpanded
                                   ? Container(
                                 height: 150,
@@ -783,7 +869,36 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                   });
                                 },
                               ),
+                              PDFListItem(
+                                pdfName: 'Generated Certificate',
+                                isLoading: _isCertificateLoading,
+                                onDownload: _isCertificateLoading ? null : _downloadGeneratedCertificate,
+                              ),
+                              PDFListItem(
+                                pdfName: 'Existing Input Certificate',
+                                onDownload: _downloadExistingPDF,
+                              ),
                             ],
+                            SizedBox(height: 20),
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Color(0xFFCB9935),
+                                    padding: EdgeInsets.symmetric(horizontal: 20),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    // Save rating
+                                    await saveUserRating(rating);
+                                    Navigator.of(context).pop();
+                                    _videoController?.dispose(); // Release video controller
+                                  },
+                                  child: Text(
+                                    'Abschließen',
+                                    style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                                  ),
+                                ),
                           ],
                         ),
                       ),
@@ -797,7 +912,8 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                             width: dialogWidth,
                             height: dialogHeight * 0.9,
                             color: Colors.transparent,
-                            child: ClipRect(
+                            child: _videoController != null && _videoController!.value.isInitialized
+                                ? ClipRect(
                               child: OverflowBox(
                                 alignment: Alignment.center,
                                 minWidth: 0.0,
@@ -813,10 +929,12 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                   ),
                                 ),
                               ),
-                            ),
+                            )
+                                : SizedBox(), // Or any placeholder widget
                           ),
                         ),
                       ),
+
                       // Skip Button
                       Positioned(
                         bottom: 10,
@@ -857,45 +975,15 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
               );
             },
           ),
-          actions: [
-            if (!isAnonymous)
-              TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Color(0xFFCB9935),
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  ),
-                ),
-                onPressed: () async {
-                  // Bewertung speichern
-                  await saveUserRating(rating);
-                  Navigator.of(context).pop();
-                  _videoController?.dispose(); // Video-Controller freigeben
-                },
-                child: Text(
-                  'Abschließen',
-                  style:
-                  TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-                ),
-              ),
-          ],
         );
       },
     ).then((_) {
-      isDialogActive = false; // Markiere den Dialog als inaktiv
-      _videoController?.dispose(); // Video-Controller freigeben
+      isDialogActive = false; // Mark the dialog as inactive
+      _videoController?.dispose(); // Release video controller
     });
   }
-  void downloadPDF(String filePath) {
-    // Implement the download logic here
-    // Example for web:
-    AnchorElement(
-      href: filePath,
-    )
-      ..setAttribute('download', 'Input_Certificate.pdf')
-      ..click();
-  }
+
+
   bool isValidEmail(String email) {
     final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     return regex.hasMatch(email);

@@ -1,9 +1,11 @@
 // personality_types_desktop_layout.dart
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For rootBundle
 import 'package:flutter_svg/flutter_svg.dart';
 import '../helper_functions/questionnaire_helpers.dart';
 import 'custom_app_bar.dart';
+import 'package:video_player/video_player.dart';
 
 class PersonalityTypesDesktopLayout extends StatefulWidget {
   @override
@@ -11,6 +13,11 @@ class PersonalityTypesDesktopLayout extends StatefulWidget {
 }
 
 class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopLayout> {
+
+
+  // Video player controllers
+  VideoPlayerController? _videoController1;
+
   final List<Map<String, String>> personalityTypes = [
     {
       "name": "Stufe 1: Anonymous",
@@ -61,6 +68,23 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
   void initState() {
     super.initState();
     _loadDescriptions(); // Call the method here
+    _initializeVideos();
+  }
+  Future<void> _initializeVideos() async {
+    final storage = FirebaseStorage.instance;
+    final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 2.mov';
+    try {
+      // Initialize the first video controller
+      String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
+      _videoController1 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
+        ..setLooping(true)
+        ..initialize().then((_) {
+          setState(() {});
+        });
+
+    } catch (e) {
+      print('Error loading video: $e');
+    }
   }
 
   // The _loadDescriptions method is placed inside the state class
@@ -95,9 +119,10 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
       body: SingleChildScrollView(
         child: Column(
           children: [
+
             // Header Section
             Container(
-              height: screenHeight / 3,
+              height: screenHeight/3*2,
               decoration: BoxDecoration(
                 color: Colors.transparent,
               ),
@@ -114,8 +139,10 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
                       fontFamily: 'Roboto',
                     ),
                   ),
+                  SizedBox(height: 20),
+                  _buildVideoSection1(),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
                     child: SelectableText(
                       "Lerne das Modell kennen.",
                       textAlign: TextAlign.center,
@@ -217,8 +244,78 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
         ),
       ),
     );
+
+
+
+  }
+  Widget _buildVideoSection1() {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            "Wieso MUSST du den Personality Score ausfüllen?",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 20),
+          _videoController1 != null && _videoController1!.value.isInitialized
+              ? LayoutBuilder(
+            builder: (context, constraints) {
+              double playerWidth = constraints.maxWidth * 0.55;
+              return Center(
+                child: Column(
+                  children: [
+                    Container(
+                      width: playerWidth,
+                      child: AspectRatio(
+                        aspectRatio: _videoController1!.value.aspectRatio,
+                        child: VideoPlayer(_videoController1!),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _videoController1!.value.isPlaying
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                      ),
+                      onPressed: () {
+                        if (_videoController1!.value.isPlaying) {
+                          _videoController1!.pause();
+                        } else {
+                          _playVideo(_videoController1);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          )
+              : CircularProgressIndicator(),
+        ],
+      ),
+    );
   }
 
+  @override
+  void dispose() {
+    _videoController1?.dispose();
+    super.dispose();
+  }
+
+  void _playVideo(VideoPlayerController? controllerToPlay) {
+    setState(() {
+      if (_videoController1 != null && _videoController1 != controllerToPlay) {
+        _videoController1!.pause();
+      }
+      if (controllerToPlay != null) {
+        controllerToPlay.play();
+      }
+    });
+  }
 }
 
 class PersonalityTypeCard extends StatefulWidget {
