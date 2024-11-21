@@ -187,7 +187,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       Navigator.of(context).pushNamed('/profile');
                     },
                     child: Text(
-                      'Go to Profile',
+                      'Zum Profil',
                       style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                     ),
                   ),

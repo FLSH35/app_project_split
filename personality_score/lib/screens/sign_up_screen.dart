@@ -172,7 +172,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Navigator.of(context).pushNamed('/profile'); // Go to profile
                 },
                 child: SelectableText(
-                  'Go to Profile',
+                  'Zum Profil',
                   style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                 ),
               ),

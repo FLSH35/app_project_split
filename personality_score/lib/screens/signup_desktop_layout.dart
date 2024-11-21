@@ -197,7 +197,7 @@ class _SignUpDesktopLayoutState extends State<SignUpDesktopLayout> {
                         Navigator.of(context).pushNamed('/profile'); // Navigate to profile
                       },
                       child: Text(
-                        'Go to Profile',
+                        'Zum Profil',
                         style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                       ),
                     ),

@@ -26,6 +26,14 @@ dependencies:
   mailer: ^5.0.0
   youtube_player_iframe: ^2.2.0 # Check for the latest version on pub.dev
   flutter_rating_bar: ^4.0.0
+  package_info_plus: ^4.0.0
+  universal_html: ^2.0.8
+  path_provider: ^2.0.15
+  flutter_email_sender: ^5.0.2
+  pdf: ^3.8.1
+  http: ^1.2.1
+  printing: ^5.9.0
+  syncfusion_flutter_pdf: ^20.4.39
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +42,7 @@ dev_dependencies:
   json_serializable: ^6.1.5
   flutter_lints: ^4.0.0
   mockito: ^5.0.16
+  flutter_email_sender: ^5.0.2
 
   firebase_auth_mocks: ^0.14.0
 flutter:
@@ -43,3 +52,12 @@ flutter:
     - assets/
     - assets/auswertungen/
     - assets/icons/
+
+  fonts:
+    - family: SortsMillGoudy
+      fonts:
+        - asset: assets/fonts/SortsMillGoudy-Italic.ttf
+
+    - family: AlexBrush
+      fonts:
+        - asset: assets/fonts/AlexBrush-Regular.ttf

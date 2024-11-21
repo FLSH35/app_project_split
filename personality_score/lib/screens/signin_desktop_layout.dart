@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore access
+import 'package:cloud_firestore/cloud_firestore.dart'; // Für Firestore-Zugriff
 import 'custom_app_bar.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 
@@ -19,14 +19,14 @@ class SignInDesktopLayout extends StatefulWidget {
 }
 
 class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
-  bool _isSignedIn = false; // Flag to check sign-in status
-  String? userName; // Variable to store the user's name
+  bool _isSignedIn = false; // Status, ob der Benutzer angemeldet ist
+  String? userName; // Variable für den Benutzernamen
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Sign In - Desktop',
+        title: 'Anmeldung - Desktop',
       ),
       body: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -38,11 +38,11 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (!_isSignedIn) ...[
-                    // Email Input
+                    // Eingabe für Email
                     TextField(
                       controller: widget.emailController,
                       decoration: InputDecoration(
-                        labelText: 'Email',
+                        labelText: 'E-Mail',
                         labelStyle: TextStyle(color: Colors.grey),
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey),
@@ -51,15 +51,15 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                           borderSide: BorderSide(color: Colors.grey),
                         ),
                       ),
-                      style: TextStyle(color: Colors.black), // Set email text color to white
+                      style: TextStyle(color: Colors.black),
                     ),
                     SizedBox(height: 20),
 
-                    // Password Input
+                    // Eingabe für Passwort
                     TextField(
                       controller: widget.passwordController,
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'Passwort',
                         labelStyle: TextStyle(color: Colors.grey),
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey),
@@ -69,23 +69,24 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                         ),
                       ),
                       obscureText: true,
-                      style: TextStyle(color: Colors.black), // Set password text color to white
+                      style: TextStyle(color: Colors.black),
                     ),
                     SizedBox(height: 20),
 
-                    // Forgot Password Button
+                    // Passwort vergessen
                     TextButton(
                       onPressed: () async {
                         if (widget.emailController.text.isNotEmpty) {
                           final authService = Provider.of<AuthService>(context, listen: false);
                           await authService.sendPasswordResetEmail(widget.emailController.text);
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: SelectableText("Password reset link sent to ${widget.emailController.text}"),
+                            content: SelectableText(
+                                "Link zum Zurücksetzen des Passworts wurde an ${widget.emailController.text} gesendet."),
                             backgroundColor: Colors.green,
                           ));
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: SelectableText("Please enter your email address to reset password."),
+                            content: SelectableText("Bitte geben Sie Ihre E-Mail-Adresse ein."),
                             backgroundColor: Colors.red,
                           ));
                         }
@@ -97,20 +98,19 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                     ),
                     SizedBox(height: 20),
 
-                    // Link to Sign Up
+                    // Registrierung
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pushReplacementNamed('/signup');
                       },
                       child: Text(
-                        'Du hast noch keinen Account? Registriere dich hier!',
+                        'Noch keinen Account? Hier registrieren!',
                         style: TextStyle(color: Colors.lightBlue),
                       ),
                     ),
-
                     SizedBox(height: 20),
 
-                    // Sign In Button
+                    // Anmelden-Button
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
@@ -127,16 +127,38 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                           widget.passwordController.text,
                         );
                         if (authService.user != null) {
-                          await fetchUserName(); // Fetch user name after sign-in
+                          await fetchUserName(); // Benutzername abrufen
                           setState(() {
-                            _isSignedIn = true; // User successfully signed in
+                            _isSignedIn = true; // Erfolgreich angemeldet
                           });
                         }
                       },
                       child: Text('Anmelden'),
                     ),
+                    SizedBox(height: 20),
 
-                    // Error Message
+                    // Ohne Account fortfahren
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                        backgroundColor: Colors.grey,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: () async {
+                        final authService = Provider.of<AuthService>(context, listen: false);
+                        await authService.signInAnonymously(); // Anonym anmelden
+                        handleTakeTest(context); // Direkt zum Test
+                      },
+                      child: Text(
+                        'Ohne Account fortfahren',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                      ),
+                    ),
+
+                    // Fehlernachricht
                     Consumer<AuthService>(
                       builder: (context, authService, child) {
                         if (authService.errorMessage != null) {
@@ -149,7 +171,7 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                       },
                     ),
                   ] else ...[
-                    // Show welcome message after sign-in
+                    // Begrüßung nach Anmeldung
                     if (userName != null)
                       Text(
                         'Hallo $userName!',
@@ -160,7 +182,7 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                       ),
                     SizedBox(height: 20),
 
-                    // Show the "Begin Test" button after sign-in
+                    // Test starten
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
@@ -171,30 +193,10 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                         ),
                       ),
                       onPressed: () {
-                        handleTakeTest(context); // Navigate to the test
+                        handleTakeTest(context); // Zum Test
                       },
                       child: Text(
                         'Beginne den Test',
-                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-
-                    // Show the "Go to Profile" button after sign-in
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-                        backgroundColor: Color(0xFFCB9935),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pushNamed('/profile'); // Navigate to profile
-                      },
-                      child: Text(
-                        'Go to Profile',
                         style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                       ),
                     ),
@@ -205,7 +207,6 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
           ],
         ),
       ),
-
       backgroundColor: Color(0xFFEDE8DB),
     );
   }
@@ -216,15 +217,14 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
       DocumentSnapshot snapshot = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .get(); // Fetch the user document
+          .get();
 
       if (snapshot.exists) {
-        // Cast snapshot.data() to a Map<String, dynamic>
         final userData = snapshot.data() as Map<String, dynamic>?;
 
         if (userData != null) {
           setState(() {
-            userName = userData['name']; // Access the user's name safely
+            userName = userData['name'];
           });
         }
       }

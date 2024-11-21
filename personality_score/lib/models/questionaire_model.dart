@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:personality_score/services/question_service.dart';
 import 'package:personality_score/models/question.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:universal_html/html.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:personality_score/models/EmailSenderModel.dart';
 
+import 'newsletter_service.dart';
 
 class QuestionnaireModel with ChangeNotifier {
   QuestionService _questionService = QuestionService();
@@ -478,7 +481,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
     // Show final result dialog
     String? name = user?.displayName;
-    String greetingText = 'Gratulation $name';
+    String greetingText = 'Gratulation';
 
     final gsUrl1 = 'gs://personality-score.appspot.com/IYC Acoustic Jingle.mp4';
     showFinalResultDialog(
@@ -486,20 +489,35 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         combinedTotalScore, gsUrl1);
   }
 
+
+
+
   Future<void> showFinalResultDialog(
       BuildContext context,
       String finalCharacter,
       String finalCharacterDescription,
       String greetingText,
       int combinedTotalScore,
-      String videoStorageUrl) async {
+      String videoStorageUrl
+      ) async {
     // Zustandsvariablen
     bool isExpanded = false;
     double rating = 0.0;
     VideoPlayerController? _videoController;
     bool showContent = false; // Steuert die Sichtbarkeit der Inhalte
-    bool isDialogActive = true; // Tracks if the dialog is still open
+    bool isDialogActive = true; // Verfolgt, ob der Dialog noch geöffnet ist
 
+    // Controller für die E-Mail-Eingabe
+    TextEditingController emailController = TextEditingController();
+
+// Instantiate the EmailSenderModel
+    EmailSenderModel emailSender = EmailSenderModel();
+
+    // Prüfe, ob der Benutzer eingeloggt ist oder ein anonymer Benutzer ist
+    User? user = _auth.currentUser;
+    bool isAnonymous = user?.isAnonymous ?? true;
+    print("is anonymous");
+    print(isAnonymous);
     // Video-URL vor dem Anzeigen des Dialogs abrufen
     String videoUrl;
     try {
@@ -518,7 +536,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
     // Dialog anzeigen
     await showDialog(
-      context: context,
+      context: Navigator.of(context, rootNavigator: true).context,
       barrierDismissible: false, // Verhindert Schließen durch Tippen außerhalb
       builder: (BuildContext context) {
         // Dynamische Größen basierend auf dem Bildschirm
@@ -533,13 +551,14 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             '$greetingText, du hast es geschafft!',
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.bold),
+              color: Colors.black,
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              // Timer starten, um die Inhalte nach 14 Sekunden in den Vordergrund zu bringen
+              // Timer starten, um die Inhalte nach 14 Sekunden anzuzeigen
               Future.delayed(Duration(seconds: 14), () {
                 if (isDialogActive) {
                   setState(() {
@@ -562,96 +581,213 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SelectableText(
-                              "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
-                              style: TextStyle(
-                                  color: Colors.black, fontFamily: 'Roboto'),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 10),
-                            Image.asset(
-                              'assets/$finalCharacter.webp',
-                              width: 200,
-                              height: 200,
-                            ),
-                            SizedBox(height: 10),
-                            // Expandable description
-                            isExpanded
-                                ? Container(
-                              height: 150,
-                              child: SingleChildScrollView(
-                                child: SelectableText(
-                                  finalCharacterDescription,
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Roboto',
-                                      fontSize: 18),
-                                ),
-                              ),
-                            )
-                                : SelectableText(
-                              finalCharacterDescription
-                                  .split(' ')
-                                  .take(15)
-                                  .join(' ') +
-                                  '...',
-                              style: TextStyle(
+                            if (isAnonymous) ...[
+                              Icon(Icons.lock, size: 50, color: Colors.grey),
+                              SizedBox(height: 10),
+                              SelectableText(
+                                "Ergebnis gesperrt. Melden Sie sich an, um es zu sehen.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
                                   color: Colors.black,
                                   fontFamily: 'Roboto',
-                                  fontSize: 18),
-                            ),
-                            SizedBox(height: 10),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 12.0, horizontal: 32.0),
-                                backgroundColor:
-                                isExpanded ? Colors.black : Color(0xFFCB9935),
-                                side: BorderSide(color: Color(0xFFCB9935)),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.all(Radius.circular(8.0)),
+                                  fontSize: 16,
                                 ),
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  isExpanded = !isExpanded; // Zustand umschalten
-                                });
-                              },
-                              child: Text(
-                                isExpanded ? 'Lese weniger' : 'Lese mehr',
+                              SizedBox(height: 20),
+                              // Option 1: Direkt einloggen
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 12.0, horizontal: 32.0),
+                                  backgroundColor: Color(0xFFCB9935),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(8.0)),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pushNamed('/signin');
+                                },
+                                child: Text(
+                                  'Einloggen',
+                                  style: TextStyle(fontFamily: 'Roboto'),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              // Option 2: E-Mail-Adresse eingeben
+                              SelectableText(
+                                "Oder geben Sie Ihre E-Mail-Adresse ein, um das Ergebnis per E-Mail zu erhalten und weitere interessante Neuigkeiten zu bekommen.",
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Colors.white, fontFamily: 'Roboto'),
+                                  color: Colors.black,
+                                  fontFamily: 'Roboto',
+                                  fontSize: 16,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Wie sehr identifizierst du dich mit diesem Ergebnis?',
-                              style: TextStyle(
-                                  color: Colors.black, fontFamily: 'Roboto'),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 10),
-                            RatingBar.builder(
-                              initialRating: rating,
-                              minRating: 1,
-                              direction: Axis.horizontal,
-                              allowHalfRating: false,
-                              itemCount: 5,
-                              itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                              itemBuilder: (context, _) => Icon(
-                                Icons.star,
-                                color: Colors.amber,
+                              SizedBox(height: 10),
+                              TextField(
+                                controller: emailController,
+                                decoration: InputDecoration(
+                                  labelText: 'E-Mail-Adresse eingeben',
+                                  border: OutlineInputBorder(),
+                                  contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 10),
+                                ),
                               ),
-                              onRatingUpdate: (newRating) {
-                                setState(() {
-                                  rating = newRating;
-                                });
-                              },
-                            ),
+                              SizedBox(height: 10),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
+                                  backgroundColor: Color(0xFFCB9935),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  if (emailController.text.isNotEmpty && isValidEmail(emailController.text)) {
+                                    final newsletterService = NewsletterService();
+                                    await newsletterService.subscribeToNewsletter(
+                                      emailController.text,
+                                      "Meine Liste",
+                                    );
+
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text("Download your certificate"),
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text("Click the button below to download your certificate."),
+                                              SizedBox(height: 10),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                  downloadPDF('assets/Input_Certificate.pdf');
+                                                },
+                                                child: Text('Download Certificate'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                      content: Text('Gebe eine valide Email-Adresse an.'),
+                                    ));
+                                  }
+                                },
+
+                                child: Text(
+                                  'Ergebnis ansehen',
+                                  style: TextStyle(fontFamily: 'Roboto'),
+                                ),
+                              ),
+
+                            ] else ...[
+                              // Inhalte für angemeldete Benutzer
+                              SelectableText(
+                                "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Image.asset(
+                                'assets/$finalCharacter.webp',
+                                width: 200,
+                                height: 200,
+                              ),
+                              SizedBox(height: 10),
+                              // Erweiterbare Beschreibung
+                              isExpanded
+                                  ? Container(
+                                height: 150,
+                                child: SingleChildScrollView(
+                                  child: SelectableText(
+                                    finalCharacterDescription,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Roboto',
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ),
+                              )
+                                  : SelectableText(
+                                finalCharacterDescription
+                                    .split(' ')
+                                    .take(15)
+                                    .join(' ') +
+                                    '...',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Roboto',
+                                  fontSize: 18,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 12.0, horizontal: 32.0),
+                                  backgroundColor: isExpanded
+                                      ? Colors.black
+                                      : Color(0xFFCB9935),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(8.0)),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    isExpanded = !isExpanded;
+                                  });
+                                },
+                                child: Text(
+                                  isExpanded ? 'Lese weniger' : 'Lese mehr',
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                'Wie sehr identifizierst du dich mit diesem Ergebnis?',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              RatingBar.builder(
+                                initialRating: rating,
+                                minRating: 1,
+                                direction: Axis.horizontal,
+                                allowHalfRating: false,
+                                itemCount: 5,
+                                itemPadding:
+                                EdgeInsets.symmetric(horizontal: 4.0),
+                                itemBuilder: (context, _) => Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
+                                onRatingUpdate: (newRating) {
+                                  setState(() {
+                                    rating = newRating;
+                                  });
+                                },
+                              ),
+                            ],
                           ],
                         ),
                       ),
+                      // Video Overlay
                       IgnorePointer(
                         ignoring: true, // Prevent interaction with the video
                         child: AnimatedOpacity(
@@ -659,9 +795,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                           duration: Duration(milliseconds: 500),
                           child: Container(
                             width: dialogWidth,
-                            height: dialogHeight * 0.9, // Reduce height to 90% of the dialog height
-                            color: Colors.transparent, // Transparent background
-                            child: ClipRect( // Ensures video is clipped to the adjusted dimensions
+                            height: dialogHeight * 0.9,
+                            color: Colors.transparent,
+                            child: ClipRect(
                               child: OverflowBox(
                                 alignment: Alignment.center,
                                 minWidth: 0.0,
@@ -669,7 +805,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                 maxWidth: double.infinity,
                                 maxHeight: double.infinity,
                                 child: FittedBox(
-                                  fit: BoxFit.cover, // Scale and crop video to fill available space
+                                  fit: BoxFit.cover,
                                   child: SizedBox(
                                     width: _videoController!.value.size.width,
                                     height: _videoController!.value.size.height,
@@ -681,7 +817,40 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                           ),
                         ),
                       ),
-
+                      // Skip Button
+                      Positioned(
+                        bottom: 10,
+                        right: 10,
+                        child: AnimatedOpacity(
+                          opacity: showContent ? 0.0 : 1.0,
+                          duration: Duration(milliseconds: 500),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.all(12.0),
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                showContent = true; // Show content
+                              });
+                              _videoController?.pause(); // Pause the video
+                              _videoController?.setVolume(0); // Mute the video sound
+                              Future.delayed(Duration(milliseconds: 500), () {
+                                _videoController?.dispose(); // Dispose of the video completely
+                                _videoController = null;
+                              });
+                            },
+                            child: Icon(
+                              Icons.arrow_forward, // Arrow icon instead of text
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -689,55 +858,49 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             },
           ),
           actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Color(0xFFCB9935),
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            if (!isAnonymous)
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Color(0xFFCB9935),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                  ),
+                ),
+                onPressed: () async {
+                  // Bewertung speichern
+                  await saveUserRating(rating);
+                  Navigator.of(context).pop();
+                  _videoController?.dispose(); // Video-Controller freigeben
+                },
+                child: Text(
+                  'Abschließen',
+                  style:
+                  TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                 ),
               ),
-              onPressed: () async {
-                // Bewertung speichern
-                await saveUserRating(rating);
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/home');
-                reset();
-                _videoController?.dispose(); // Video-Controller freigeben
-              },
-              child: Text(
-                'Abschließen',
-                style: TextStyle(
-                    color: Colors.white, fontFamily: 'Roboto'),
-              ),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                ),
-              ),
-              onPressed: () {
-                String shareText =
-                    'Du hast ${combinedTotalScore} Punkte. Damit bist du ein $finalCharacter.\n\nBeschreibung: $finalCharacterDescription';
-                Share.share(shareText);
-              },
-              child: Text(
-                'Teilen',
-                style: TextStyle(
-                    color: Color(0xFFCB9935), fontFamily: 'Roboto'),
-              ),
-            ),
           ],
         );
       },
     ).then((_) {
-      isDialogActive = false; // Mark dialog as inactive when it is closed
-      _videoController?.dispose(); // Video-Controller freigeben, wenn Dialog geschlossen wird
+      isDialogActive = false; // Markiere den Dialog als inaktiv
+      _videoController?.dispose(); // Video-Controller freigeben
     });
   }
+  void downloadPDF(String filePath) {
+    // Implement the download logic here
+    // Example for web:
+    AnchorElement(
+      href: filePath,
+    )
+      ..setAttribute('download', 'Input_Certificate.pdf')
+      ..click();
+  }
+  bool isValidEmail(String email) {
+    final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return regex.hasMatch(email);
+  }
+
 
   Future<void> saveUserRating(double rating) async {
     User? user = _auth.currentUser;

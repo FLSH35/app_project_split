@@ -12,13 +12,43 @@ import 'package:personality_score/models/questionaire_model.dart';
 import 'package:personality_score/screens/personality_type_screen.dart'; // Import the new screen
 import 'package:personality_score/screens/questionnaire_tutorial_screen.dart';
 
+import 'package:package_info_plus/package_info_plus.dart';
+import 'dart:html' as html;
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+Future<void> checkForUpdates() async {
+  // Fetch the current app version
+  final packageInfo = await PackageInfo.fromPlatform();
+  String currentVersion = packageInfo.version;
+
+  // Fetch the latest version from Firestore
+  final snapshot = await FirebaseFirestore.instance
+      .collection('appConfig')
+      .doc('latestVersion')
+      .get();
+
+  if (snapshot.exists) {
+    String latestVersion = snapshot['version'];
+
+    if (latestVersion != currentVersion) {
+      // Reload the page if the versions don't match
+      html.window.location.reload();
+    }
+  }
+}
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await checkForUpdates();
+
   runApp(MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   @override

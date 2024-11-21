@@ -9,13 +9,24 @@ class AuthService with ChangeNotifier {
   User? get user => _user;
   String? get errorMessage => _errorMessage;
 
+  bool get isAnonymous => _user?.isAnonymous ?? true; // Check if the user is anonymous
+  bool get isLoggedIn => _user != null && !_user!.isAnonymous; // Check if the user is logged in
+
   AuthService(BuildContext context) {
     _auth.authStateChanges().listen((user) => _onAuthStateChanged(user, context));
   }
 
   Future<void> signUpWithEmail(String email, String password) async {
     try {
-      await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      if (_user != null && _user!.isAnonymous) {
+        // Link the anonymous user to a permanent account
+        await _user!.linkWithCredential(
+          EmailAuthProvider.credential(email: email, password: password),
+        );
+      } else {
+        // Create a new permanent account
+        await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      }
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();
@@ -31,19 +42,23 @@ class AuthService with ChangeNotifier {
     }
   }
 
+  Future<void> signInAnonymously() async {
+    try {
+      await _auth.signInAnonymously();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
   Future<void> signOut() async {
     await _auth.signOut();
   }
 
   void _onAuthStateChanged(User? user, BuildContext context) {
     _user = user;
-    _errorMessage = null;  // Clear error message on successful sign-in
+    _errorMessage = null; // Clear error message on successful sign-in
     notifyListeners();
-
-    if (_user != null) {
-      // Navigate to profile screen when authenticated
-      Navigator.of(context).pushReplacementNamed('/profile');
-    }
   }
 
   Future<void> updateDisplayName(String displayName) async {
@@ -55,11 +70,10 @@ class AuthService with ChangeNotifier {
     }
   }
 
-  // Method to send a password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
-      _errorMessage = null;  // Clear any previous error
+      _errorMessage = null; // Clear any previous error
       notifyListeners();
     } catch (e) {
       _errorMessage = e.toString();
