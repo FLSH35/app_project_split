@@ -242,8 +242,7 @@ class QuestionnaireModel with ChangeNotifier {
     int possibleScore = _questions.length *
         10; // Calculate possible score for the current set
 
-    if (_totalScore > (possibleScore *
-        0.55)) { // Check if total score is more than 50% of possible score
+    if (_totalScore > 275) { // Check if total score is more than 50% of possible score
       message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
 Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 8. Damit hast du bereits echte „Lebenskompetenz“ erreicht und gehörst damit bereits zu einer kleinen Minderheit. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 im Bereich der „Inkompetenz“ zu verorten sind. Für deine bisherige Entwicklung also schonmal ein dickes Lob.
 Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
@@ -325,7 +324,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
   }
 
 
-  void completeSecondTest(BuildContext context) {
+  Future<void> completeSecondTest(BuildContext context) async {
     score_factor += _questions.length;
 
     String message;
@@ -335,9 +334,12 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
     int possibleScore = _questions.length *
         10; // Calculate possible score for the current set
 
-    double threshold = (_questions.first.set == 'BewussteKompetenz') ? 0.7 : 0.65;
+    double threshold = (_questions.first.set == 'BewussteKompetenz') ? 675 : 540;
+    final firstScore = await fetchScoreAndCount('Kompetenz');
 
-    if (_totalScore > (possibleScore * threshold)) { // Check if total score exceeds the threshold
+    int progressScore = _totalScore + firstScore['score']!;
+
+    if ( progressScore > threshold) { // Check if total score exceeds the threshold
       if (_questions.first.set == 'BewussteKompetenz') {
         message = """Herzlichen Glückwunsch: Du hast den zweiten Teil des Tests absolviert. Damit scheiden weitere 2 der möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 7 und Stufe 8. 
 Falls du nicht geschummelt hast 😉, müssen wir dir an dieser Stelle aufrichtige Anerkennung zollen: Diesen Bereich der „unbewussten Kompetenz“ erreichen unter 1% aller Menschen.
@@ -379,7 +381,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         return AlertDialog(
           backgroundColor: Color(0xFFC7C7C7),
           title: SelectableText(
-            '$_totalScore von $possibleScore Punkte erreicht',
+            '$progressScore von $possibleScore Punkte erreicht',
             style: TextStyle(fontFamily: 'Roboto'),
           ),
           content: SingleChildScrollView(
@@ -451,22 +453,23 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
   void completeFinalTest(BuildContext context) async {
     String finalCharacter;
 
-    int possibleScore = _questions.length *
-        10; // Calculate possible score for the final set
+    final firstScore = await fetchScoreAndCount('Kompetenz');
+    final secondScore = await fetchScoreAndCount((['Individual', 'Reacher', 'Resident', 'LifeArtist'].contains(_questions.first.set))?'BewussteInkompetenz' : 'BewussteKompetenz');
+    int progressScore = _totalScore + firstScore['score']! + secondScore['score']!;
 
     // Determine final character based on score
     if (_questions.first.set == 'Individual') {
       finalCharacter =
-      _totalScore > (possibleScore * 0.65) ? "Individual" : "Traveller";
+      progressScore > 840 ? "Individual" : "Traveller";
     } else if (_questions.first.set == 'Reacher') {
       finalCharacter =
-      _totalScore > (possibleScore * 0.65) ? "Reacher" : "Explorer";
+      progressScore > 780 ? "Reacher" : "Explorer";
     } else if (_questions.first.set == 'Resident') {
       finalCharacter =
-      _totalScore > (possibleScore * 0.5) ? "Resident" : "Anonymous";
+      progressScore > 540 ? "Resident" : "Anonymous";
     } else {
       finalCharacter =
-      _totalScore > (possibleScore * 0.85) ? "LifeArtist" : "Adventurer";
+      _totalScore > 1050 ? "LifeArtist" : "Adventurer";
     }
 
     // Load the final character's description
@@ -1008,8 +1011,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       }
     }
   }
-
-  Future<void> calculateCombinedTotalScore() async {
+  Future<int> getFirstScore() async {
     User? user = _auth.currentUser;
     if (user != null) {
       try {
@@ -1021,87 +1023,85 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
             .doc('Kompetenz')
             .get();
 
-        int firstTestScore = firstTestDoc.exists && firstTestDoc.data() != null
+        return firstTestDoc.exists && firstTestDoc.data() != null
             ? firstTestDoc.data()!['totalScore'] ?? 0
             : 0;
 
-        // Anzahl der Fragen im ersten Test (Kompetenz)
-        int firstTestQuestionsCount = firstTestDoc.exists &&
-            firstTestDoc.data() != null
-            ? firstTestDoc.data()!['answers']?.length ?? 0
-            : 0;
-
-        // Abrufen der Total-Scores vom zweiten Test (abhängig vom finalCharacter)
-        String secondTestSet = (_finalCharacter == 'LifeArtist' ||
-            _finalCharacter == 'Adventurer' ||
-            _finalCharacter == 'Individual' || _finalCharacter == 'Traveller')
-            ? 'BewussteKompetenz'
-            : 'BewussteInkompetenz';
-
-        final secondTestDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('results')
-            .doc(secondTestSet)
-            .get();
-
-        int secondTestScore = secondTestDoc.exists &&
-            secondTestDoc.data() != null
-            ? secondTestDoc.data()!['totalScore'] ?? 0
-            : 0;
-
-        // Anzahl der Fragen im zweiten Test
-        int secondTestQuestionsCount = secondTestDoc.exists &&
-            secondTestDoc.data() != null
-            ? secondTestDoc.data()!['answers']?.length ?? 0
-            : 0;
-
-        // Abrufen der Total-Scores vom finalen Test
-        final finalTestDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('results')
-            .doc(_questions.first.set)
-            .get();
-
-        int finalTestScore = finalTestDoc.exists && finalTestDoc.data() != null
-            ? finalTestDoc.data()!['totalScore'] ?? 0
-            : 0;
-
-        // Anzahl der Fragen im finalen Test
-        int finalTestQuestionsCount = finalTestDoc.exists &&
-            finalTestDoc.data() != null
-            ? finalTestDoc.data()!['answers']?.length ?? 0
-            : 0;
-
-        // Berechnung der kombinierten Total-Scores
-        int totalQuestions = firstTestQuestionsCount +
-            secondTestQuestionsCount + finalTestQuestionsCount;
-        if (totalQuestions > 0) {
-          combinedTotalScore = ((firstTestScore + secondTestScore + finalTestScore) / totalQuestions *10).round();
-        } else {
-          combinedTotalScore =
-          0; // Setze auf 0, wenn keine Fragen vorhanden sind
-        }
-
-        // Speichern des kombinierten Total-Scores in Firebase
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('results')
-            .doc('finalCharacter')
-            .set({
-          'combinedTotalScore': combinedTotalScore,
-          'lastUpdated': FieldValue.serverTimestamp(),
-          'finalScores': "{$firstTestScore, $secondTestScore, $finalTestScore}",
-        }, SetOptions(merge: true));
-
-        // Benachrichtige die Listener, dass sich der combinedTotalScore geändert hat
-        notifyListeners();
       } catch (error) {
         print("Fehler beim Abrufen der Scores: $error");
       }
     }
+    return 0;
   }
+  // Helper function to retrieve score and question count
+  Future<Map<String, int>> fetchScoreAndCount(String docId) async {
+    User? user = _auth.currentUser;
+    if (user == null) return {'score': 0, 'questions': 0};
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('results')
+        .doc(docId)
+        .get();
+
+    if (doc.exists && doc.data() != null) {
+      final data = doc.data()!;
+      return {
+        'score': data['totalScore'] ?? 0,
+        'questions': data['answers']?.length ?? 0,
+      };
+    }
+    return {'score': 0, 'questions': 0};
+  }
+  Future<void> calculateCombinedTotalScore() async {
+    User? user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+
+
+      // Determine the second test set based on the final character
+      String secondTestSet = (_finalCharacter == 'LifeArtist' ||
+          _finalCharacter == 'Adventurer' ||
+          _finalCharacter == 'Individual' ||
+          _finalCharacter == 'Traveller')
+          ? 'BewussteKompetenz'
+          : 'BewussteInkompetenz';
+
+      // Fetch data for all tests
+      final firstTest = await fetchScoreAndCount('Kompetenz');
+      final secondTest = await fetchScoreAndCount(secondTestSet);
+      final finalTest = await fetchScoreAndCount(_questions.first.set);
+
+      // Calculate combined total score
+      int totalScore = firstTest['score']! + secondTest['score']! + finalTest['score']!;
+      int totalQuestions = firstTest['questions']! +
+          secondTest['questions']! +
+          finalTest['questions']!;
+
+      combinedTotalScore = totalQuestions > 0
+          ? ((totalScore / totalQuestions) * 10).round()
+          : 0;
+
+      // Save combined score to Firebase
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('results')
+          .doc('finalCharacter')
+          .set({
+        'combinedTotalScore': combinedTotalScore,
+        'lastUpdated': FieldValue.serverTimestamp(),
+        'finalScores': "{$firstTest['score']}, ${secondTest['score']}, ${finalTest['score']}",
+      }, SetOptions(merge: true));
+
+      // Notify listeners about the score update
+      notifyListeners();
+    } catch (error, stackTrace) {
+      print("Error calculating combined total score: $error");
+      print(stackTrace);
+    }
+  }
+
 }
 
