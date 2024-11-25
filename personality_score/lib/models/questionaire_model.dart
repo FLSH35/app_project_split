@@ -1,27 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:pdf/pdf.dart';
 import 'package:flutter/services.dart';
-import 'dart:typed_data';
 import 'dart:html' as html;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:personality_score/services/question_service.dart';
 import 'package:personality_score/models/question.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:universal_html/html.dart';
 import 'package:video_player/video_player.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:personality_score/models/EmailSenderModel.dart';
 import 'package:http/http.dart' as http;
 
 import '../screens/pdf_viewer_screen.dart';
-import 'newsletter_service.dart';
 
 class QuestionnaireModel with ChangeNotifier {
   QuestionService _questionService = QuestionService();
@@ -77,7 +69,195 @@ class QuestionnaireModel with ChangeNotifier {
   String? get finalCharacterDescription => _finalCharacterDescription;
 
 
-  bool _isCertificateLoading = true;
+  bool _isCertificateLoading = false;
+  bool _isCertificateGenerated = false;
+
+
+
+
+  Future<String> getHighestResultCollection() async {
+    User? user = _auth.currentUser;
+    if (user == null) throw Exception("User not logged in");
+
+    try {
+      String userId = user.uid;
+      final userDocRef = FirebaseFirestore.instance.collection('users').doc(userId);
+
+      int maxCollectionNumber = 0;
+
+      // Try accessing collections in sequence
+      while (true) {
+        final collectionName = 'results_${maxCollectionNumber + 1}';
+        final collectionRef = userDocRef.collection(collectionName);
+
+        try {
+          // Attempt to get a document from the collection to check if it exists
+          final snapshot = await collectionRef.limit(1).get();
+          if (snapshot.docs.isNotEmpty) {
+            maxCollectionNumber++;
+          } else {
+            break; // Exit loop if the collection doesn't exist
+          }
+        } catch (e) {
+          // Break the loop if accessing the collection causes an error
+          break;
+        }
+      }
+
+      // Return the highest results collection found
+      if (maxCollectionNumber == 0) {
+        return 'results_1'; // Default to 'results_1' if no results exist
+      }
+      return 'results_$maxCollectionNumber';
+    } catch (e) {
+      print('Error fetching highest result collection: $e');
+      return 'results_1'; // Return default in case of error
+    }
+  }
+
+
+
+
+  Future<void> saveProgress() async {
+    _isLoading = true;
+    notifyListeners();
+
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        // Fetch the highest result collection name
+        String? highestResultCollection = await getHighestResultCollection();
+
+        if (highestResultCollection == null) {
+          throw Exception("No results collection found for the user.");
+        }
+
+        // Create a list of maps with question IDs and corresponding scores
+        List<Map<String, dynamic>> answersWithIds = _questions.asMap().entries.map((entry) {
+          int index = entry.key;
+          Question question = entry.value;
+          return {
+            'id': question.id,
+            'answer': _answers[index],
+          };
+        }).toList();
+
+        // Save progress to the highest results collection
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection(highestResultCollection)
+            .doc(_currentSet)
+            .set({
+          'set': _currentSet,
+          'totalScore': _totalScore,
+          'isCompleted': _isFirstTestCompleted || _isSecondTestCompleted,
+          'completionDate': FieldValue.serverTimestamp(),
+          'currentPage': _currentPage,
+          'answers': answersWithIds, // Save answers with IDs
+          'combinedTotalScore': combinedTotalScore,
+        }, SetOptions(merge: true));
+
+        print("Progress saved to $highestResultCollection");
+      } catch (error) {
+        print("Error saving progress: $error");
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }
+  }
+
+
+
+  Future<void> loadProgress() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        // Get the highest result collection
+        String? highestResultCollection = await getHighestResultCollection();
+
+        if (highestResultCollection != null) {
+          // Fetch the data from the highest result collection
+          DocumentSnapshot resultSnapshot = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection(highestResultCollection)
+              .doc(_currentSet)
+              .get();
+
+          if (resultSnapshot.exists) {
+            final data = resultSnapshot.data() as Map<String, dynamic>;
+            _totalScore = data['totalScore'] ?? 0;
+            _isFirstTestCompleted = data['isCompleted'] ?? false;
+            _currentPage = data['currentPage'] ?? 0;
+
+            // Parse answers with IDs
+            _answers = List<int?>.from(
+              _questions.map((q) {
+                var savedAnswer = data['answers']?.firstWhere(
+                        (a) => a['id'] == q.id,
+                    orElse: () => null);
+                return savedAnswer?['answer'] ?? 5; // Default to 5 if no saved answer
+              }),
+            );
+
+            _finalCharacter = data['finalCharacter'];
+            _finalCharacterDescription = data['finalCharacterDescription'];
+            combinedTotalScore = data['combinedTotalScore'] ?? 0;
+
+            notifyListeners();
+          } else {
+            print("No data found in the highest result collection.");
+          }
+        } else {
+          print("No result collections found for the user.");
+        }
+      } catch (error) {
+        print("Error loading progress: $error");
+      }
+    }
+  }
+
+
+  Future<String> createNextResultsCollection() async {
+    User? user = _auth.currentUser;
+    if (user == null) throw Exception("User not logged in");
+
+    try {
+      // Get the highest result collection
+      String? highestResultCollection = await getHighestResultCollection();
+
+      // Determine the next collection number
+      int nextResultNumber = 1; // Default to 1 if no results exist
+      if (highestResultCollection != null) {
+        final match = RegExp(r'results_(\d+)').firstMatch(highestResultCollection);
+        if (match != null) {
+          nextResultNumber = int.parse(match.group(1)!) + 1;
+        }
+      }
+
+      // Create the new collection
+      String newCollectionName = 'results_$nextResultNumber';
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection(newCollectionName)
+          .doc('finalCharacter') // Initial document
+          .set({
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'initialized',
+      });
+
+      return newCollectionName;
+    } catch (error) {
+      print("Error creating next results collection: $error");
+      throw Exception("Failed to create next results collection");
+    }
+  }
+
+
+
 
 
 
@@ -118,68 +298,26 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
 
-  Future<void> saveProgress() async {
-    _isLoading = true; // Start loading
-    notifyListeners(); // Notify listeners to show loading spinner
-
-    User? user = _auth.currentUser;
-    if (user != null) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('results')
-            .doc(_currentSet)
-            .set({
-          'set': _currentSet,
-          'totalScore': _totalScore,
-          'isCompleted': _isFirstTestCompleted || _isSecondTestCompleted,
-          'completionDate': FieldValue.serverTimestamp(),
-          'currentPage': _currentPage,
-          'answers': _answers,
-          'combinedTotalScore': combinedTotalScore,
-        }, SetOptions(merge: true));
-      } catch (error) {
-        print("Error saving progress: $error");
-      } finally {
-        _isLoading = false; // Stop loading after the save operation completes
-        notifyListeners(); // Notify listeners to hide loading spinner
-      }
-    }
-  }
 
 
-  Future<void> loadProgress() async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('results')
-          .doc(_currentSet)
-          .get();
-      if (doc.exists) {
-        final data = doc.data()!;
-        _totalScore = data['totalScore'];
-        _isFirstTestCompleted = data['isCompleted'];
-        _currentPage = data['currentPage'] ?? 0;
-        _answers = List<int?>.from(
-            data['answers'] ?? List<int?>.filled(_questions.length, 5));
-        _finalCharacter = data['finalCharacter'];
-        _finalCharacterDescription = data['finalCharacterDescription'];
-        combinedTotalScore = data['_combinedTotalScore'];
-        notifyListeners();
-      }
-    }
-  }
+
+
+
+
+
 
   void answerQuestion(int index, int value) {
+    // Ensure the answers list stores a map of ID and value
     _answers[index] = value;
-    _totalScore =
-        _answers.where((a) => a != null).fold(0, (sum, a) => sum + a!);
+
+    // Update the total score
+    _totalScore = _answers.where((a) => a != null).fold(0, (sum, a) => sum + a!);
+
+    // Save progress with IDs included
     saveProgress();
     notifyListeners();
   }
+
 
   Future<void> nextPage(BuildContext context) async {
     if ((_currentPage + 1) * 7 < _questions.length) {
@@ -218,6 +356,7 @@ class QuestionnaireModel with ChangeNotifier {
     saveProgress();
     notifyListeners();
   }
+
 
 
   double getProgress() {
@@ -481,26 +620,37 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     _finalCharacterDescription = finalCharacterDescription;
     notifyListeners();
 
-    // Save final character and description to Firestore
-    User? user = _auth.currentUser;
-    if (user != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('results')
-          .doc('finalCharacter')
-          .set({
-        'finalCharacter': _finalCharacter,
-        'finalCharacterDescription': _finalCharacterDescription,
-        // Add the combined total score here
-        'completionDate': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+
+    try {
+      // Get the highest result collection
+      String? highestResultCollection = await getHighestResultCollection();
+
+      if (highestResultCollection == null) {
+        print("No result collections found.");
+        return;
+      }
+      // Save final character and description to Firestore
+      User? user = _auth.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection(highestResultCollection)
+            .doc('finalCharacter')
+            .set({
+          'finalCharacter': _finalCharacter,
+          'finalCharacterDescription': _finalCharacterDescription,
+          // Add the combined total score here
+          'completionDate': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+    } catch (error) {
+      print("Error saving final character to highest result collection: $error");
     }
 
-    await calculateCombinedTotalScore();
 
-    // Show final result dialog
-    String? name = user?.displayName;
+  await calculateCombinedTotalScore();
+
     String greetingText = 'Gratulation';
 
     final gsUrl1 = 'gs://personality-score.appspot.com/IYC Acoustic Jingle.mp4';
@@ -508,6 +658,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         context, finalCharacter, finalCharacterDescription, greetingText,
         combinedTotalScore, gsUrl1);
   }
+
 
   final List<Map<String, String>> pdfFiles = [
     {
@@ -592,18 +743,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       print('Fehler beim Laden der Video-URL: $e');
       videoUrl = ''; // Fehlerbehandlung
     }
-    // Start preloading certificate in the background
-    Future.microtask(() async {
-      await certificateManager
-          .preloadCertificateData(title: 'Adventurer', name: 'Frank')
-          .then((_) {
-        if (isDialogActive) {
-          _isCertificateLoading = false; // Update loading state
-        }
-      }).catchError((e) {
-        print("Error preloading certificate: $e");
-      });
-    });
+
     // Video-Controller initialisieren
     _videoController = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
 
@@ -873,10 +1013,62 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                 },
                               ),
                               PDFListItem(
-                                pdfName: 'Generated Certificate',
+                                pdfName: _isCertificateGenerated
+                                    ? 'Download Zertifikat_${DateFormat('dd-MM-yyyy').format(DateTime.now())}.pdf'
+                                    : 'Lasse dir dein Zertifikat erstellen',
                                 isLoading: _isCertificateLoading,
-                                onDownload: _isCertificateLoading ? null : _downloadGeneratedCertificate,
+                                onDownload: _isCertificateLoading
+                                    ? null
+                                    : () async {
+                                  if (_isCertificateGenerated) {
+                                    // Download existing certificate
+                                      checkAndDownloadCertificate();
+                                  } else {
+                                    // Generate and save certificate
+                                    setState(() {
+                                      _isCertificateLoading = true;
+                                    });
+
+                                    try {
+                                      // Generate the certificate
+                                      await certificateManager.preloadCertificateData(
+                                        title: 'Adventurer',
+                                        name: 'Frank',
+                                      );
+
+                                      // Save the certificate to Firebase Storage
+                                      final path =
+                                          'certificates/${user!.uid}/certificate_${DateFormat('yyyyMMdd').format(DateTime.now())}.pdf';
+                                      final storageRef = FirebaseStorage.instance.ref(path);
+                                      await storageRef.putData(certificateManager.certificateBytes!);
+
+                                      // Save the path to Firestore
+                                      await saveCertificatePath(user!.uid, path);
+
+                                      // Update state to show download button
+                                      setState(() {
+                                        _isCertificateGenerated = true;
+                                      });
+
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Certificate generated successfully!')),
+                                      );
+                                    } catch (e) {
+                                      print("Error: $e");
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Failed to generate certificate: $e')),
+                                      );
+                                    } finally {
+                                      setState(() {
+                                        _isCertificateLoading = false;
+                                      });
+                                    }
+                                  }
+                                },
                               ),
+
+
+
                               PDFListItem(
                                 pdfName: 'Existing Input Certificate',
                                 onDownload: _downloadExistingPDF,
@@ -991,56 +1183,167 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     return regex.hasMatch(email);
   }
-
-
   Future<void> saveUserRating(double rating) async {
     User? user = _auth.currentUser;
     if (user != null) {
       try {
+        // Get the highest result collection
+        final highestResultCollection = await getHighestResultCollection();
+
+        if (highestResultCollection != null) {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .collection('results')
+            .collection(highestResultCollection)
             .doc('finalCharacter')
             .set({
           'userRating': rating,
           'ratingDate': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+
+        print("User rating saved to $highestResultCollection");
+        } else {
+          print("No result collections found to save user rating.");
+        }
       } catch (e) {
         print('Error saving user rating: $e');
       }
     }
   }
+  Future<void> saveCertificatePath(String userId, String path) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        // Get the highest result collection
+        final highestResultCollection = await getHighestResultCollection();
+
+        if (highestResultCollection != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection(highestResultCollection)
+              .doc('finalCharacter')
+              .set({
+            'certificatePath': path, // Save only the certificate path
+          }, SetOptions(merge: true));
+
+          print("Path saved to $highestResultCollection");
+        } else {
+          print("No result collections found to save user rating.");
+        }
+      } catch (e) {
+        print("Error saving certificate path to Firestore: $e");
+        throw Exception("Failed to save certificate path");
+      }
+    }
+  }
+
+
+  Future<String?> getCertificatePath(String userId) async {
+    User? user = _auth.currentUser;
+
+    if (user != null) {
+      try {
+        // Get the highest result collection
+        final highestResultCollection = await getHighestResultCollection();
+
+        if (highestResultCollection != null) {
+          // Retrieve the document
+          final docSnapshot = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection(highestResultCollection)
+              .doc('finalCharacter')
+              .get();
+
+          // Check if the document exists and contains the 'certificatePath' field
+          if (docSnapshot.exists && docSnapshot.data() != null) {
+            final data = docSnapshot.data()!;
+            if (data.containsKey('certificatePath')) {
+              return data['certificatePath'] as String?;
+            }
+          }
+        } else {
+          print("No result collections found to retrieve the certificate path.");
+        }
+      } catch (e) {
+        print("Error retrieving certificate path from Firestore: $e");
+        throw Exception("Failed to retrieve certificate path");
+      }
+    }
+
+    return null; // Return null if not found
+  }
+
+
+  Future<void> checkAndDownloadCertificate() async {
+    User? user = _auth.currentUser;
+
+    if (user != null) {
+      final certificatePath = await getCertificatePath(user.uid);
+
+      if (certificatePath != null) {
+        // Certificate path found, proceed to download
+        final certificateUrl =
+        await FirebaseStorage.instance.ref(certificatePath).getDownloadURL();
+
+        final anchor = html.AnchorElement(href: certificateUrl)
+          ..download = 'Zertifikat_${DateFormat('dd-MM-yyyy').format(DateTime.now())}.pdf'
+          ..target = '_blank';
+        anchor.click();
+
+        print("Certificate downloaded successfully.");
+      } else {
+        // No certificate found
+        print("No certificate path found for this user.");
+      }
+    } else {
+      print("No user logged in.");
+    }
+  }
+
+
   Future<int> getFirstScore() async {
     User? user = _auth.currentUser;
     if (user != null) {
       try {
-        // Abrufen der Total-Scores vom ersten Test (Kompetenz)
-        final firstTestDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('results')
-            .doc('Kompetenz')
-            .get();
+        // Get the highest result collection
+        final highestResultCollection = await getHighestResultCollection();
 
-        return firstTestDoc.exists && firstTestDoc.data() != null
-            ? firstTestDoc.data()!['totalScore'] ?? 0
-            : 0;
+        if (highestResultCollection != null) {
+          // Fetch the highest result collection for the "Kompetenz" test
+          final firstTestDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection(highestResultCollection)
+              .doc('Kompetenz') // Assuming "Kompetenz" is a fixed test name
+              .get();
 
+          return firstTestDoc.exists && firstTestDoc.data() != null
+              ? firstTestDoc.data()!['totalScore'] ?? 0
+              : 0;
+        }
       } catch (error) {
-        print("Fehler beim Abrufen der Scores: $error");
+        print("Error fetching first score: $error");
       }
-    }
+
+  }
     return 0;
   }
+
   // Helper function to retrieve score and question count
   Future<Map<String, int>> fetchScoreAndCount(String docId) async {
     User? user = _auth.currentUser;
     if (user == null) return {'score': 0, 'questions': 0};
+
+
+        // Get the highest result collection
+    final highestResultCollection = await getHighestResultCollection();
+
     final doc = await FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
-        .collection('results')
+        .collection(highestResultCollection!)
         .doc(docId)
         .get();
 
@@ -1053,6 +1356,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     }
     return {'score': 0, 'questions': 0};
   }
+
+
+
   Future<void> calculateCombinedTotalScore() async {
     User? user = _auth.currentUser;
     if (user == null) return;
@@ -1083,17 +1389,22 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
           ? ((totalScore / totalQuestions) * 10).round()
           : 0;
 
-      // Save combined score to Firebase
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('results')
-          .doc('finalCharacter')
-          .set({
-        'combinedTotalScore': combinedTotalScore,
-        'lastUpdated': FieldValue.serverTimestamp(),
-        'finalScores': "{$firstTest['score']}, ${secondTest['score']}, ${finalTest['score']}",
-      }, SetOptions(merge: true));
+      // Get the highest result collection
+      final highestResultCollection = await getHighestResultCollection();
+
+      if (highestResultCollection != null) {
+        // Save combined score to Firebase
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection(highestResultCollection)
+            .doc('finalCharacter')
+            .set({
+          'combinedTotalScore': combinedTotalScore,
+          'lastUpdated': FieldValue.serverTimestamp(),
+          'finalScores': "{$firstTest['score']}, ${secondTest['score']}, ${finalTest['score']}",
+        }, SetOptions(merge: true));
+      }
 
       // Notify listeners about the score update
       notifyListeners();
@@ -1103,5 +1414,6 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     }
   }
 
-}
 
+
+}

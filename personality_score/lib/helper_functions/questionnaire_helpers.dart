@@ -14,12 +14,14 @@ void handleTakeTest(BuildContext context) {
     return;
   }
 
-
   // If the total score is zero, navigate directly to the questionnaire
   if (model.totalScore == 0) {
-    Navigator.of(context).pushNamed('/questionnaire');
+    model.createNextResultsCollection().then((_) {
+      Navigator.of(context).pushNamed('/questionnaire');
+    });
     return;
   }
+
   // If the total score is not zero, show the dialog
   showDialog(
     context: context,
@@ -42,6 +44,7 @@ void handleTakeTest(BuildContext context) {
           ),
         ),
         actions: [
+          // Option to start fresh
           TextButton(
             style: TextButton.styleFrom(
               backgroundColor: Color(0xFFCB9935), // Gold background for button
@@ -51,15 +54,19 @@ void handleTakeTest(BuildContext context) {
               ),
             ),
             onPressed: () {
+              // Reset the model and create a new results collection
               model.reset();
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamed('/question'); // Start fresh
+              model.createNextResultsCollection().then((_) {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
+              });
             },
             child: Text(
               'Neu beginnen',
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
             ),
           ),
+          // Option to continue from the last page
           TextButton(
             style: TextButton.styleFrom(
               backgroundColor: Colors.transparent, // Transparent background
@@ -69,6 +76,7 @@ void handleTakeTest(BuildContext context) {
               ),
             ),
             onPressed: () {
+              // Continue from the last saved progress
               model.continueFromLastPage();
               Navigator.of(context).pop();
               Navigator.of(context).pushNamed('/questionnaire'); // Continue from where left off
@@ -83,3 +91,4 @@ void handleTakeTest(BuildContext context) {
     },
   );
 }
+

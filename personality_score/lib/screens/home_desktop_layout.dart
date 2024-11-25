@@ -1,4 +1,6 @@
 // desktop_layout.dart
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
@@ -6,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'dart:html' as html;
 
+import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:personality_score/screens/pdf_viewer_screen.dart';
@@ -32,19 +36,19 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     {
       "name": "Andrés",
       "text": "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
-      "image": "https://via.placeholder.com/150",
+      "image": "testimonials/Andres.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Jana",
       "text": "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
-      "image": "https://via.placeholder.com/150",
+      "image": "testimonials/Jana.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Christoph",
       "text": "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
-      "image": "https://via.placeholder.com/150",
+      "image": "testimonials/Christoph.jpg",
       "personalityType": "Individual",
     },
   ];
@@ -557,6 +561,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
                             testimonials[index]['name']!,
                             testimonials[index]['text']!,
                             testimonials[index]['personalityType']!,
+                            testimonials[index]['image']!,
                             isSelected,
                           ),
                         );
@@ -601,10 +606,12 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     );
   }
 
+
   Widget _buildTestimonialCard(
       String name,
       String text,
       String personalityType,
+      String imagePath, // Add imagePath parameter
       bool isSelected,
       ) {
     return Container(
@@ -625,10 +632,14 @@ class _DesktopLayoutState extends State<DesktopLayout> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(height: 20),
-          Icon(
-            Icons.person, // Placeholder icon
-            size: isSelected ? 90 : 70, // Adjust icon size for selected card
-            color: Colors.grey[700],
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50.0), // Make the image circular
+            child: Image.asset(
+              imagePath,
+              width: isSelected ? 90 : 70, // Adjust image size for selected card
+              height: isSelected ? 90 : 70,
+              fit: BoxFit.cover,
+            ),
           ),
           SizedBox(height: 16),
           Text(
@@ -670,6 +681,19 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     );
   }
 
+
+// Function to fetch image bytes using dio
+  Future<Uint8List> _fetchImageBytes(String imageUrl) async {
+    try {
+      final response = await Dio().get(
+        imageUrl,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return Uint8List.fromList(response.data);
+    } catch (e) {
+      throw Exception('Failed to fetch image: $e');
+    }
+  }
 
 
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {

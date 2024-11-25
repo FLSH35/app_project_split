@@ -1,3 +1,5 @@
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
@@ -75,10 +77,13 @@ class CertificateManager {
       ),
     );
 
-    // Save the certificate bytes
-    _certificateBytes = await pdf.save();
+    // Offload saving the PDF to a background thread
+    _certificateBytes = await compute(savePdfInBackground, pdf);
   }
-
+// Function to save the PDF in a background thread
+  Future<Uint8List> savePdfInBackground(pw.Document pdf) async {
+    return await pdf.save();
+  }
 
   /// Get the preloaded certificate bytes
   Uint8List? get certificateBytes => _certificateBytes;
@@ -110,22 +115,23 @@ void _downloadGeneratedCertificate() {
 }
 
 /// Function to download the existing PDF
-Future<void> _downloadExistingPDF() async {
+Future<void> downloadExistingPDFFromFirebase(String storagePath, String fileName) async {
   try {
-    final ByteData pdfData = await rootBundle.load('Input_Certificate.pdf');
-    final Uint8List pdfBytes = pdfData.buffer.asUint8List();
+    // Get the Firebase Storage reference
+    final storageRef = FirebaseStorage.instance.refFromURL(storagePath);
 
-    final blob = html.Blob([pdfBytes], 'application/pdf');
-    final url = html.Url.createObjectUrlFromBlob(blob);
+    // Get the download URL for the file
+    final String downloadUrl = await storageRef.getDownloadURL();
 
-    final anchor = html.AnchorElement(href: url)
-      ..download = 'Input_Certificate.pdf'
+    // Create an anchor element to trigger the download
+    final html.AnchorElement anchor = html.AnchorElement(href: downloadUrl)
+      ..download = fileName
       ..target = 'blank';
-    anchor.click();
 
-    html.Url.revokeObjectUrl(url);
+    // Trigger the click to download the file
+    anchor.click();
   } catch (e) {
-    print('Error downloading existing PDF: $e');
+    print('Error downloading PDF from Firebase Storage: $e');
   }
 }
 

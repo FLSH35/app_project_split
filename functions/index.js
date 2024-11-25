@@ -1,27 +1,33 @@
-const functions = require('firebase-functions');
-const cors = require('cors')({ origin: true });
-const axios = require('axios');
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { initializeApp } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
+const { getStorage } = require("firebase-admin/storage");
 
-const API_URL = 'https://ifyouchange42862.api-us1.com/api/3/contacts';
-API_KEY = 'a8bb1fd8ba76b2b1a0c2c58b1745ba2fc458e5f69da898048ccd790b14a5206db1bd9ef7'
+initializeApp();
 
-exports.proxyActiveCampaign = functions.https.onRequest((req, res) => {
-  cors(req, res, async () => {
-    if (req.method !== 'POST') {
-      return res.status(405).send('Method Not Allowed');
-    }
-
+exports.firestoreToStorage = onDocumentCreated(
+  "users/{userId}/results/finalCharacter",
+  async (event) => {
     try {
-      const response = await axios.get(API_URL, {
-        headers: {
-          'Api-Token': API_TOKEN,
-          'Content-Type': 'application/json',
-        },
-        params: req.body, // Use email or other query params here
+      const { data, params } = event; // Firestore document data and params
+      const userId = params.userId;
+
+      if (!data) {
+        console.log(`No data in document for user ${userId}`);
+        return;
+      }
+
+      const bucket = getStorage().bucket();
+      const filePath = `users/${userId}/finalCharacter.json`;
+      const fileContent = JSON.stringify(data);
+
+      await bucket.file(filePath).save(fileContent, {
+        contentType: "application/json",
       });
-      res.status(response.status).json(response.data);
+
+      console.log(`Data for user ${userId} saved to ${filePath}`);
     } catch (error) {
-      res.status(error.response?.status || 500).json({ error: error.message });
+      console.error("Error saving data to Storage:", error);
     }
-  });
-});
+  }
+);
