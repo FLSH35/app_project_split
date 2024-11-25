@@ -660,13 +660,6 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
   }
 
 
-  final List<Map<String, String>> pdfFiles = [
-    {
-      'name': 'Input Certificate',
-      'url': 'assets/Input_Certificate.pdf', // Relative URL for web
-    },
-    // Add more PDFs as needed
-  ];
 
   /// Function to download the preloaded certificate
   void _downloadGeneratedCertificate() {
@@ -1032,8 +1025,8 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                     try {
                                       // Generate the certificate
                                       await certificateManager.preloadCertificateData(
-                                        title: 'Adventurer',
-                                        name: 'Frank',
+                                        title: finalCharacter,
+                                        name: 'User-Name',
                                       );
 
                                       // Save the certificate to Firebase Storage
