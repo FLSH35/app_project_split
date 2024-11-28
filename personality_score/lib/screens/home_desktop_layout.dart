@@ -97,13 +97,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     });
   }
 
-  final List<Map<String, String>> pdfFiles = [
-    {
-      'name': 'Input Certificate',
-      'url': 'assets/Input_Certificate.pdf', // Relative URL for web
-    },
-    // Add more PDFs as needed
-  ];
+
   Future<void> _initializeVideos() async {
     final storage = FirebaseStorage.instance;
     final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 3.mov';

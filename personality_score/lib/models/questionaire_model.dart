@@ -858,57 +858,63 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                   ),
                                 ),
                                 onPressed: () async {
-                                  if (emailController.text.isNotEmpty &&
-                                      isValidEmail(emailController.text)) {
-                                      setState(() {
-                                        isAnonymous = false;
-                                        showContent = true; // Update to show subscribed content
-                                      });
-                                      try {
+                                  if (emailController.text.isNotEmpty && isValidEmail(emailController.text)) {
+                                    setState(() {
+                                      isAnonymous = false;
+                                      showContent = true; // Update to show subscribed content
+                                    });
+
+                                    try {
                                       // Newsletter subscription (call Cloud Function)
                                       final Uri cloudFunctionUrl = Uri.parse(
-                                        'https://YOUR_CLOUD_FUNCTION_URL/subscribeNewsletter',
+                                        'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter',
                                       );
 
-                                      final response = await http.post(
-                                        cloudFunctionUrl,
-                                        headers: {'Content-Type': 'application/json'},
-                                        body: jsonEncode({
+                                      final response = await http.get(
+                                        cloudFunctionUrl.replace(queryParameters: {
                                           'email': emailController.text,
-                                          'listName': 'Meine Liste',
+                                          'list_name': 'Meine Liste',
                                         }),
                                       );
 
                                       if (response.statusCode == 200) {
-
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Newsletter erfolgreich abonniert!'),
+                                          ),
+                                        );
                                       } else {
                                         // Error: Show error message
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
-                                          content: Text(
-                                              'Fehler beim Abonnieren des Newsletters: ${response.body}'),
-                                        ));
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Fehler beim Abonnieren des Newsletters: ${response.body}',
+                                            ),
+                                          ),
+                                        );
                                       }
                                     } catch (e) {
                                       // Network or server error
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                        content: Text('Ein Fehler ist aufgetreten: $e'),
-                                      ));
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Ein Fehler ist aufgetreten: $e'),
+                                        ),
+                                      );
                                     }
                                   } else {
                                     // Invalid email
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content:
-                                      Text('Gebe eine valide Email-Adresse an.'),
-                                    ));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Bitte gebe eine gültige E-Mail-Adresse ein.'),
+                                      ),
+                                    );
                                   }
                                 },
                                 child: Text(
                                   'Ergebnis ansehen',
                                   style: TextStyle(fontFamily: 'Roboto'),
                                 ),
+
                               )
                             ] else ...[
                               // Content for logged-in users
