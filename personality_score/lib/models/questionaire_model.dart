@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:html' as html;
@@ -69,10 +68,7 @@ class QuestionnaireModel with ChangeNotifier {
   String? get finalCharacterDescription => _finalCharacterDescription;
 
 
-  bool _isCertificateLoading = false;
-  bool _isCertificateGenerated = false;
-
-
+  TextEditingController nameController = TextEditingController();
 
 
   Future<String> getHighestResultCollection() async {
@@ -661,39 +657,17 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
 
 
-  /// Function to download the preloaded certificate
-  void _downloadGeneratedCertificate() {
-    try {
-      if (certificateManager.certificateBytes == null) {
-        throw Exception("Certificate not preloaded!");
-      }
-
-      final Uint8List certificateBytes = certificateManager.certificateBytes!;
-      final blob = html.Blob([certificateBytes], 'application/pdf');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-
-      final anchor = html.AnchorElement(href: url)
-        ..download = 'certificate_generated.pdf'
-        ..target = 'blank';
-      anchor.click();
-
-      html.Url.revokeObjectUrl(url);
-    } catch (e) {
-      print('Error downloading preloaded certificate: $e');
-    }
-  }
-
   /// Function to download the existing PDF
-  Future<void> _downloadExistingPDF() async {
+  Future<void> _downloadExistingPDF(String pdf_path) async {
     try {
-      final ByteData pdfData = await rootBundle.load('Input_Certificate.pdf');
+      final ByteData pdfData = await rootBundle.load(pdf_path);
       final Uint8List pdfBytes = pdfData.buffer.asUint8List();
 
       final blob = html.Blob([pdfBytes], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
 
       final anchor = html.AnchorElement(href: url)
-        ..download = 'Input_Certificate.pdf'
+        ..download = pdf_path.split('/')[1]
         ..target = 'blank';
       anchor.click();
 
@@ -837,6 +811,15 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                               ),
                               SizedBox(height: 10),
                               TextField(
+                                controller: nameController,
+                                decoration: InputDecoration(
+                                  labelText: 'Dein Vorname',
+                                  border: OutlineInputBorder(),
+                                  contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 10),
+                                ),
+                              ),
+                              TextField(
                                 controller: emailController,
                                 decoration: InputDecoration(
                                   labelText: 'E-Mail-Adresse eingeben',
@@ -873,43 +856,27 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                       final response = await http.get(
                                         cloudFunctionUrl.replace(queryParameters: {
                                           'email': emailController.text,
-                                          'list_name': 'Meine Liste',
+                                          'first_name': nameController.text, // Hier den Vornamen hinzufügen
+                                          // 'list_name': 'Meine Liste', // Optional, falls benötigt
                                         }),
                                       );
 
                                       if (response.statusCode == 200) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text('Newsletter erfolgreich abonniert!'),
-                                          ),
-                                        );
+                                        print('Newsletter erfolgreich abonniert!');
                                       } else {
-                                        // Error: Show error message
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Fehler beim Abonnieren des Newsletters: ${response.body}',
-                                            ),
-                                          ),
-                                        );
+                                        print('Fehler beim Abonnieren des Newsletters: ${response.body}');
                                       }
                                     } catch (e) {
-                                      // Network or server error
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Ein Fehler ist aufgetreten: $e'),
-                                        ),
-                                      );
+                                      // Netzwerk- oder Serverfehler
+                                      print('Ein Fehler ist aufgetreten: $e');
                                     }
                                   } else {
-                                    // Invalid email
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Bitte gebe eine gültige E-Mail-Adresse ein.'),
-                                      ),
-                                    );
+                                    // Ungültige Eingaben
+                                    print('Bitte gebe eine gültige E-Mail-Adresse und deinen Vornamen ein.');
                                   }
-                                },
+                                }
+
+                                ,
                                 child: Text(
                                   'Ergebnis ansehen',
                                   style: TextStyle(fontFamily: 'Roboto'),
@@ -1011,67 +978,12 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                   });
                                 },
                               ),
-                              PDFListItem(
-                                pdfName: _isCertificateGenerated
-                                    ? 'Download Zertifikat_${DateFormat('dd-MM-yyyy').format(DateTime.now())}.pdf'
-                                    : 'Lasse dir dein Zertifikat erstellen',
-                                isLoading: _isCertificateLoading,
-                                onDownload: _isCertificateLoading
-                                    ? null
-                                    : () async {
-                                  if (_isCertificateGenerated) {
-                                    // Download existing certificate
-                                      checkAndDownloadCertificate();
-                                  } else {
-                                    // Generate and save certificate
-                                    setState(() {
-                                      _isCertificateLoading = true;
-                                    });
-
-                                    try {
-                                      // Generate the certificate
-                                      await certificateManager.preloadCertificateData(
-                                        title: finalCharacter,
-                                        name: 'User-Name',
-                                      );
-
-                                      // Save the certificate to Firebase Storage
-                                      final path =
-                                          'certificates/${user!.uid}/certificate_${DateFormat('yyyyMMdd').format(DateTime.now())}.pdf';
-                                      final storageRef = FirebaseStorage.instance.ref(path);
-                                      await storageRef.putData(certificateManager.certificateBytes!);
-
-                                      // Save the path to Firestore
-                                      await saveCertificatePath(user!.uid, path);
-
-                                      // Update state to show download button
-                                      setState(() {
-                                        _isCertificateGenerated = true;
-                                      });
-
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Certificate generated successfully!')),
-                                      );
-                                    } catch (e) {
-                                      print("Error: $e");
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Failed to generate certificate: $e')),
-                                      );
-                                    } finally {
-                                      setState(() {
-                                        _isCertificateLoading = false;
-                                      });
-                                    }
-                                  }
-                                },
-                              ),
-
-
 
                               PDFListItem(
-                                pdfName: 'Existing Input Certificate',
-                                onDownload: _downloadExistingPDF,
+                                pdfName: '$finalCharacter. Deine Beschreibung zum herunterladen!',
+                                onDownload: () => _downloadExistingPDF('auswertungen/$finalCharacter.pdf'),
                               ),
+
                             ],
                             SizedBox(height: 20),
                                 TextButton(

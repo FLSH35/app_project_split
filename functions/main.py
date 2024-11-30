@@ -113,18 +113,39 @@ def add_contact_to_list(contact_id, list_id):
     data = {"contactList": {"list": list_id, "contact": contact_id, "status": 1}}
     requests.post(f"{API_URL}/contactLists", json=data, headers=HEADERS)
 
-# Firebase Cloud Function
+def submit_form(email, first_name):
+    form_url = 'https://ifyouchange42862.activehosted.com/proc.php'
+    data = {
+        'u': '25',
+        'f': '25',
+        's': '',
+        'c': '0',
+        'm': '0',
+        'act': 'sub',
+        'v': '2',
+        'or': '1b8a5663599fc2cbe3a86b7a3d3f244c',  # Wert aus deinem Formular
+        'firstname': first_name,
+        'email': email
+    }
+
+    response = requests.post(form_url, data=data)
+    if response.status_code == 200:
+        print("Formular erfolgreich übermittelt. Double Opt-In E-Mail wurde gesendet.")
+    else:
+        raise Exception(f"Fehler beim Übermitteln des Formulars: {response.status_code} - {response.text}")
+
+
 @https_fn.on_request()
 def manage_newsletter(req: https_fn.Request) -> https_fn.Response:
     """
-    Function to manage newsletter operations.
-    Accepts the following parameters:
+    Funktion zur Verwaltung von Newsletter-Operationen.
+    Akzeptiert die folgenden Parameter:
     - email
-    - list_name
+    - first_name
     """
     # CORS: Erlaubt Anfragen von allen Ursprüngen (oder spezifischen Domains)
     response_headers = {
-        "Access-Control-Allow-Origin": "*",  # Erlaubt alle Domains. Alternativ spezifische: "http://localhost:59671"
+        "Access-Control-Allow-Origin": "*",  # Erlaubt alle Domains
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
     }
@@ -133,40 +154,40 @@ def manage_newsletter(req: https_fn.Request) -> https_fn.Response:
     if req.method == 'OPTIONS':
         return https_fn.Response("", status=204, headers=response_headers)
 
+    # Anfrageparameter abrufen
     email = req.args.get('email')
-    list_name = req.args.get('list_name', 'Default List')
+    first_name = req.args.get('first_name')
 
     if not email:
         return https_fn.Response(
-            "Missing email parameter",
+            "Fehlender Parameter: email",
+            status=400,
+            headers=response_headers,
+        )
+
+    if not first_name:
+        return https_fn.Response(
+            "Fehlender Parameter: first_name",
             status=400,
             headers=response_headers,
         )
 
     try:
-        # Create or get contact
-        contact = create_or_get_contact(email)
-        contact_id = contact['id']
-
-        # Create or get list
-        lst = create_or_get_list(list_name)
-        list_id = lst['id']
-
-        # Add contact to list
-        add_contact_to_list(contact_id, list_id)
+        # Formular übermitteln, um Double Opt-In auszulösen
+        submit_form(email, first_name)
 
         return https_fn.Response(
-            "Contact successfully added to the newsletter list!",
+            "Kontakt erfolgreich zum Newsletter hinzugefügt! Double Opt-In-E-Mail wurde gesendet.",
             status=200,
             headers=response_headers,
         )
     except Exception as e:
         return https_fn.Response(
-            f"Error: {e}",
+            f"Fehler: {e}",
             status=500,
             headers=response_headers,
         )
-    
+
 
 
 @https_fn.on_request()

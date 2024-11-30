@@ -1,24 +1,15 @@
 // desktop_layout.dart
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:pdf/pdf.dart';
 import 'package:flutter/services.dart';
-import 'dart:typed_data';
-import 'dart:html' as html;
 
-import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+import 'package:personality_score/helper_functions/video_helper.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:personality_score/screens/pdf_viewer_screen.dart';
 import 'custom_app_bar.dart'; // Import your custom app bar
 import 'custom_footer.dart'; // Import your custom footer
 import 'dart:math'; // For 3D transformations
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:video_player/video_player.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class DesktopLayout extends StatefulWidget {
   @override
@@ -49,6 +40,18 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       "name": "Christoph",
       "text": "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
       "image": "testimonials/Christoph.jpg",
+      "personalityType": "Individual",
+    },
+    {
+      "name": "Alex",
+      "text": "Endlich ein Persönlichkeitstest, der mir weiterhilft.",
+      "image": "testimonials/Alex.jpg",
+      "personalityType": "Traveller",
+    },
+    {
+      "name": "Klaus",
+      "text": "Woher kennt er mich so gut?",
+      "image": "testimonials/Klaus.jpg",
       "personalityType": "Individual",
     },
   ];
@@ -148,7 +151,12 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             SizedBox(height: 350),
             _buildHeaderSection(context, screenHeight, screenWidth),
             SizedBox(height: 350),
-            _buildVideoSection1(),
+            VideoWidget(
+              videoController: _videoController1,
+              screenHeight: MediaQuery.of(context).size.height,
+              headerText: "Wieso MUSST du den Personality Score ausfüllen?",
+              subHeaderText: "Erfahre es im Video!",
+            ),
             SizedBox(height: 350),
             _buildPersonalityTypesSection(context, screenHeight, screenWidth),
             SizedBox(height: 350),
@@ -164,12 +172,19 @@ class _DesktopLayoutState extends State<DesktopLayout> {
   }
 
   Widget _buildTutorialSection(BuildContext context) {
+
     return Container(
       key: _tutorialKey, // Add the key here
       child: Column(
         children: [
           SizedBox(height: 40),
-          _buildVideoSection2(),
+
+          VideoWidget(
+            videoController: _videoController2,
+            screenHeight: MediaQuery.of(context).size.height,
+            headerText: "Starte Hier",
+            subHeaderText: "10 Minuten. 120 Fragen. Bis zu deinem Ergebnis!",
+          ),
           SizedBox(height: 40),
           _buildQuestionsList(context),
           SizedBox(height: 40),
@@ -250,109 +265,9 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     );
   }
 
-  Widget _buildVideoSection1() {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "Wieso MUSST du den Personality Score ausfüllen?",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20),
-          _videoController1 != null && _videoController1!.value.isInitialized
-              ? LayoutBuilder(
-            builder: (context, constraints) {
-              double playerWidth = constraints.maxWidth * 0.55;
-              return Center(
-                child: Column(
-                  children: [
-                    Container(
-                      width: playerWidth,
-                      child: AspectRatio(
-                        aspectRatio: _videoController1!.value.aspectRatio,
-                        child: VideoPlayer(_videoController1!),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _videoController1!.value.isPlaying
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                      ),
-                      onPressed: () {
-                        if (_videoController1!.value.isPlaying) {
-                          _videoController1!.pause();
-                        } else {
-                          _playVideo(_videoController1);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          )
-              : CircularProgressIndicator(),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildVideoSection2() {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "Starte Hier",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20),
-          _videoController2 != null && _videoController2!.value.isInitialized
-              ? LayoutBuilder(
-            builder: (context, constraints) {
-              double playerWidth = constraints.maxWidth * 0.55;
-              return Center(
-                child: Column(
-                  children: [
-                    Container(
-                      width: playerWidth,
-                      child: AspectRatio(
-                        aspectRatio: _videoController2!.value.aspectRatio,
-                        child: VideoPlayer(_videoController2!),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _videoController2!.value.isPlaying
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                      ),
-                      onPressed: () {
-                        if (_videoController2!.value.isPlaying) {
-                          _videoController2!.pause();
-                        } else {
-                          _playVideo(_videoController2);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          )
-              : CircularProgressIndicator(),
-        ],
-      ),
-    );
-  }
+
+
 
   Widget _buildQuestionsList(BuildContext context) {
     int start = currentPage * questionsPerPage;
@@ -674,21 +589,6 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       ),
     );
   }
-
-
-// Function to fetch image bytes using dio
-  Future<Uint8List> _fetchImageBytes(String imageUrl) async {
-    try {
-      final response = await Dio().get(
-        imageUrl,
-        options: Options(responseType: ResponseType.bytes),
-      );
-      return Uint8List.fromList(response.data);
-    } catch (e) {
-      throw Exception('Failed to fetch image: $e');
-    }
-  }
-
 
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
