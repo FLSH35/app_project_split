@@ -52,7 +52,25 @@ class AuthService with ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
+    try {
+      await _auth.signOut();
+      _user = null; // Clear the user
+      _errorMessage = null; // Clear error messages
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> logout(BuildContext context) async {
+    try {
+      await signOut();
+      Navigator.of(context).pushReplacementNamed('/'); // Navigate to login page
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
   }
 
   void _onAuthStateChanged(User? user, BuildContext context) {

@@ -5,6 +5,7 @@ import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'custom_app_bar.dart'; // Import the custom AppBar
 import 'package:personality_score/models/newsletter_service.dart';
+import 'package:personality_score/auth/auth_service.dart';
 
 class ProfileDesktopLayout extends StatefulWidget {
   final TextEditingController nameController;
@@ -60,7 +61,8 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<AuthService>(context).user;
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.user;
 
     if (user == null) {
       return Scaffold(
@@ -252,7 +254,29 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
               onChanged: (value) => _toggleNewsletterSubscription(value),
               activeColor: Color(0xFFCB9935),
             )),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                await authService.logout(context);
+              },
+              style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                  backgroundColor: Colors.grey,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                  ),
 
+              ),
+              child: Text(
+                'Abmelden',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Roboto',
+                  fontSize: 18,
+                ),
+              ),
+            ),
           ],
         ),
       ),
