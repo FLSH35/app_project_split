@@ -561,7 +561,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 6),
+          SizedBox(height: 7),
           Text(
             personalityType,
             style: TextStyle(
