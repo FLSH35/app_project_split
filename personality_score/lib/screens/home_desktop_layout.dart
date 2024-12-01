@@ -27,31 +27,31 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     {
       "name": "Andrés",
       "text": "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
-      "image": "testimonials/Andres.jpg",
+      "image": "assets/testimonials/Andres.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Jana",
       "text": "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
-      "image": "testimonials/Jana.jpg",
+      "image": "assets/testimonials/Jana.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Christoph",
       "text": "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
-      "image": "testimonials/Christoph.jpg",
+      "image": "assets/testimonials/Christoph.jpg",
       "personalityType": "Individual",
     },
     {
       "name": "Alex",
       "text": "Endlich ein Persönlichkeitstest, der mir weiterhilft.",
-      "image": "testimonials/Alex.jpg",
+      "image": "assets/testimonials/Alex.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Klaus",
       "text": "Woher kennt er mich so gut?",
-      "image": "testimonials/Klaus.jpg",
+      "image": "assets/testimonials/Klaus.jpg",
       "personalityType": "Individual",
     },
   ];

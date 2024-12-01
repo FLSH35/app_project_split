@@ -96,7 +96,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                       ),
                       if (!_hasStartedPlaying)
                         Image.asset(
-                          'thumbnail.png',
+                          'assets/thumbnail.png',
                           fit: BoxFit.cover,
                           width: videoWidth,
                           height: videoHeight,
