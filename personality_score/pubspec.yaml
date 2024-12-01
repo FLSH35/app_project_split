@@ -57,6 +57,8 @@ flutter:
     - assets/
     - assets/auswertungen/
     - assets/icons/
+    - assets/testimonials/
+    - assets/thumbnail.png
 
   fonts:
     - family: SortsMillGoudy
