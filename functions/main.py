@@ -216,23 +216,36 @@ def export_to_csv(req: https_fn.Request) -> https_fn.Response:
 
         for user in users:
             user_id = user.id
-            results_ref = users_ref.document(user_id).collection("results_2")
-            results = results_ref.stream()
+            user_doc_ref = users_ref.document(user_id)
 
-            for result in results:
-                # Process only the "finalCharacter" document
-                if result.id == "finalCharacter":
-                    data = result.to_dict()
-                    try:
-                        csv_writer.writerow([
-                            user_id,
-                            data.get("combinedTotalScore", ""),
-                            data.get("completionDate", ""),
-                            data.get("finalCharacter", "")
-                        ])
-                    except Exception as e:
-                        # Skip rows with issues
-                        print(f"Error processing user {user_id}: {e}")
+            # Fetch all sub-collections of the user document
+            subcollections = user_doc_ref.collections()
+
+            for subcollection in subcollections:
+                subcollection_name = subcollection.id
+
+                # Filter collections by pattern (results_x or results)
+                if subcollection_name == "results" or subcollection_name.startswith("results_"):
+                    results = subcollection.stream()
+
+                    for result in results:
+                        # Check for the presence of required fields
+                        data = result.to_dict()
+                        if (
+                            "combinedTotalScore" in data
+                            and "completionDate" in data
+                            and "finalCharacter" in data
+                        ):
+                            try:
+                                csv_writer.writerow([
+                                    user_id,
+                                    data.get("combinedTotalScore", ""),
+                                    data.get("completionDate", ""),
+                                    data.get("finalCharacter", "")
+                                ])
+                            except Exception as e:
+                                # Skip rows with issues
+                                print(f"Error processing user {user_id} in {subcollection_name}: {e}")
 
         # Save CSV file to Cloud Storage
         csv_filename = "users_data_snapshot.csv"
@@ -249,3 +262,11 @@ def export_to_csv(req: https_fn.Request) -> https_fn.Response:
             f"Error exporting to CSV: {e}",
             status=500
         )
+
+
+# https://us-central1-personality-score.cloudfunctions.net
+
+# https://<region>-<project-id>.cloudfunctions.net/export_to_csv
+
+
+# firebase deploy --only functions

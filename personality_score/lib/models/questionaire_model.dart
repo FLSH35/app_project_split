@@ -769,7 +769,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                               Icon(Icons.lock, size: 50, color: Colors.grey),
                               SizedBox(height: 10),
                               SelectableText(
-                                "Ergebnis gesperrt. Melden Sie sich an, um es zu sehen.",
+                                "Ergebnis gesperrt. Melde dich an, um es zu sehen.",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.black,
@@ -801,7 +801,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                               SizedBox(height: 10),
                               // Option 2: Enter email address
                               SelectableText(
-                                "Oder geben Sie Ihre E-Mail-Adresse ein, um das Ergebnis per E-Mail zu erhalten und weitere interessante Neuigkeiten zu bekommen.",
+                                "Ohne Login. Gebe jetzt deinen Namen und deine Email an, um das Testergebnis freizuschalten.",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.black,

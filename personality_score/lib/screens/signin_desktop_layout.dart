@@ -199,6 +199,22 @@ class _SignInDesktopLayoutState extends State<SignInDesktopLayout> {
                         'Beginne den Test',
                         style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                       ),
+                    ),SizedBox(height: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFCB9935),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/profile');
+                      },
+                      child: Text(
+                        'Zum Profil',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                      ),
                     ),
                   ],
                 ],

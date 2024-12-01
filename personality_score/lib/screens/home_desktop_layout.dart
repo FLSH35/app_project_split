@@ -540,17 +540,17 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 20),
+          SizedBox(height: isSelected ? 30 : 20),
           ClipRRect(
             borderRadius: BorderRadius.circular(50.0), // Make the image circular
             child: Image.asset(
               imagePath,
-              width: isSelected ? 90 : 70, // Adjust image size for selected card
-              height: isSelected ? 90 : 70,
+              width: isSelected ? 110 : 90, // Adjust image size for selected card
+              height: isSelected ? 110 : 90,
               fit: BoxFit.cover,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 12),
           Text(
             name,
             style: TextStyle(
@@ -561,7 +561,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 6),
           Text(
             personalityType,
             style: TextStyle(
@@ -573,7 +573,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
           ),
           SizedBox(height: 16),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 6.0),
             child: Text(
               text,
               style: TextStyle(
@@ -583,8 +583,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
               ),
               textAlign: TextAlign.center,
             ),
-          ),
-          SizedBox(height: 16),
+          )
         ],
       ),
     );
