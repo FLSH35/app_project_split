@@ -2,8 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
-import 'package:provider/provider.dart';
-import 'package:personality_score/models/questionaire_model.dart'; // Make sure to import your QuestionnaireModel
 import 'custom_app_bar.dart';
 
 class QuestionnaireDesktopTutorialLayout extends StatefulWidget {

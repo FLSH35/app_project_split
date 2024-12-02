@@ -54,14 +54,14 @@ class _VideoWidgetState extends State<VideoWidget> {
       padding: EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Text(
+          SelectableText(
             widget.headerText,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
+          SelectableText(
             widget.subHeaderText,
             style: TextStyle(
               fontSize: 18,

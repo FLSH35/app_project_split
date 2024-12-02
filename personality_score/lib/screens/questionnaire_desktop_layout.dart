@@ -131,7 +131,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
                     ),
                   ),
                   SizedBox(width: 8.0),
-                  if(question.backgroundInfo != "empty") Tooltip(
+                  if(question.backgroundInfo != "empty" && false) Tooltip(
                         message: question.backgroundInfo, // Add background info to the Question model
                         padding: EdgeInsets.all(8.0),
                         textStyle: TextStyle(color: Colors.white, fontSize: 14),

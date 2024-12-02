@@ -17,6 +17,11 @@ class DesktopLayout extends StatefulWidget {
 }
 
 class _DesktopLayoutState extends State<DesktopLayout> {
+
+  late PageController _pageController;
+  late int selectedIndex;
+  int initialPage = 0;
+
   bool isLoading = true;
   List<String> tutorialQuestions = [
     'Mit dem Schieberegler kann ich 10 verschiedene Stufen einstellen.',
@@ -76,7 +81,13 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     super.initState();
     _initializeVideos();
     _loadTutorialQuestions();
-
+    // Set initialPage to a large value to simulate infinite scrolling
+    initialPage = testimonials.length * 1000;
+    selectedIndex = initialPage % testimonials.length;
+    _pageController = PageController(
+      initialPage: initialPage,
+      viewportFraction: 0.4,
+    );
   }
 
   @override
@@ -86,19 +97,6 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     super.dispose();
   }
 
-  void _playVideo(VideoPlayerController? controllerToPlay) {
-    setState(() {
-      if (_videoController1 != null && _videoController1 != controllerToPlay) {
-        _videoController1!.pause();
-      }
-      if (_videoController2 != null && _videoController2 != controllerToPlay) {
-        _videoController2!.pause();
-      }
-      if (controllerToPlay != null) {
-        controllerToPlay.play();
-      }
-    });
-  }
 
 
   Future<void> _initializeVideos() async {
@@ -428,11 +426,13 @@ class _DesktopLayoutState extends State<DesktopLayout> {
   }
 
   Widget _buildTestimonialSection() {
-    PageController _pageController = PageController(viewportFraction: 0.4);
-    int selectedIndex = 0;
+
 
     return StatefulBuilder(
       builder: (context, setState) {
+        // Keep track of the selected index
+        int selectedIndex = initialPage % testimonials.length;
+
         return Container(
           padding: EdgeInsets.all(16.0),
           color: Color(0xFFF7F5EF),
@@ -450,7 +450,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
               ),
               SizedBox(height: 20),
               SizedBox(
-                height: 360, // Adjust height based on design
+                height: 450, // Adjust height based on design
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -458,21 +458,23 @@ class _DesktopLayoutState extends State<DesktopLayout> {
                       controller: _pageController,
                       onPageChanged: (index) {
                         setState(() {
-                          selectedIndex = index;
+                          // Update selectedIndex using modulo to wrap around
+                          selectedIndex = index % testimonials.length;
                         });
                       },
-                      itemCount: testimonials.length,
+                      // Set itemCount to null for infinite scrolling
                       itemBuilder: (context, index) {
-                        final isSelected = index == selectedIndex;
-                        return Transform.scale(
-                          scale: isSelected ? 1.15 : 0.85,
-                          child: _buildTestimonialCard(
-                            testimonials[index]['name']!,
-                            testimonials[index]['text']!,
-                            testimonials[index]['personalityType']!,
-                            testimonials[index]['image']!,
-                            isSelected,
-                          ),
+                        // Adjust index to wrap around using modulo
+                        int adjustedIndex = index % testimonials.length;
+                        return Align(
+                            alignment: Alignment.center,
+                            child: _buildTestimonialCard(
+                              testimonials[adjustedIndex]['name']!,
+                              testimonials[adjustedIndex]['text']!,
+                              testimonials[adjustedIndex]['personalityType']!,
+                              testimonials[adjustedIndex]['image']!
+
+                            ),
                         );
                       },
                     ),
@@ -515,79 +517,81 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     );
   }
 
-
   Widget _buildTestimonialCard(
       String name,
       String text,
       String personalityType,
-      String imagePath, // Add imagePath parameter
-      bool isSelected,
+      String imagePath,
       ) {
-    return Container(
-      width: isSelected ? 100 : 70, // Adjust width based on selection
-      margin: EdgeInsets.symmetric(horizontal: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: isSelected ? 30 : 20),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(50.0), // Make the image circular
-            child: Image.asset(
-              imagePath,
-              width: isSelected ? 110 : 90, // Adjust image size for selected card
-              height: isSelected ? 110 : 90,
-              fit: BoxFit.cover,
+    return SizedBox(
+      width: 580, // Adjust width based on selection
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
             ),
-          ),
-          SizedBox(height: 12),
-          Text(
-            name,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: isSelected ? 20 : 16, // Adjust font size
-              fontFamily: 'Roboto',
-              color: Colors.black,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 30),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(50.0), // Make the image circular
+              child: Image.asset(
+                imagePath,
+                width: 250, // Adjust image size for selected card
+                height: 250,
+                fit: BoxFit.cover,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 6),
-          Text(
-            personalityType,
-            style: TextStyle(
-              fontSize: isSelected ? 18 : 14, // Adjust font size
-              fontFamily: 'Roboto',
-              color: Colors.grey[600],
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6.0),
-            child: Text(
-              text,
+            SizedBox(height: 12),
+            Text(
+              name,
               style: TextStyle(
-                fontSize: isSelected ? 16 : 12, // Adjust font size
+                fontWeight: FontWeight.bold,
+                fontSize: 24, // Adjust font size
                 fontFamily: 'Roboto',
-                color: Colors.grey[800],
+                color: Colors.black,
               ),
               textAlign: TextAlign.center,
             ),
-          )
-        ],
+            SizedBox(height: 6),
+            Text(
+              personalityType,
+              style: TextStyle(
+                fontSize: 22, // Adjust font size
+                fontFamily: 'Roboto',
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 20, // Adjust font size
+                  fontFamily: 'Roboto',
+                  color: Colors.grey[800],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
+
+
 
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
