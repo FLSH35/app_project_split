@@ -1,17 +1,23 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/models/questionaire_model.dart'; // Adjust the path accordingly
-import 'package:personality_score/auth/auth_service.dart'; // Import AuthService to check authentication
+import 'package:personality_score/auth/auth_service.dart';
+
+import '../screens/signin_dialog.dart'; // Import AuthService to check authentication
+
+
+
 
 void handleTakeTest(BuildContext context) {
   final authService = Provider.of<AuthService>(context, listen: false);
   final model = Provider.of<QuestionnaireModel>(context, listen: false);
 
-  // Check if the user is logged in
-  if (authService.user == null) {
-    // Redirect to sign-in page
-    Navigator.of(context).pushNamed('/signin');
-    return;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? user = _auth.currentUser;
+
+  if (user == null) {
+    Navigator.of(context).pushNamed('/questionnaire');
   }
 
   // If the total score is zero, navigate directly to the questionnaire

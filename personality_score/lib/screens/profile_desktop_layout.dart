@@ -5,7 +5,7 @@ import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'custom_app_bar.dart'; // Import the custom AppBar
 import 'package:personality_score/models/newsletter_service.dart';
-import 'package:personality_score/auth/auth_service.dart';
+import 'package:personality_score/screens/signin_dialog.dart'; // Import the SignInDialog
 
 class ProfileDesktopLayout extends StatefulWidget {
   final TextEditingController nameController;
@@ -27,16 +27,58 @@ class ProfileDesktopLayout extends StatefulWidget {
 }
 
 class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
-
   final NewsletterService _newsletterService = NewsletterService();
   bool isSubscribedToNewsletter = false;
   bool isExpanded = false;
 
+  bool _isAuthenticated = false;
+  bool _hasDisplayName = false;
+
   @override
   void initState() {
     super.initState();
-    _initializeNewsletterStatus();
+    _initialize();
   }
+
+  Future<void> _initialize() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    if (authService.user == null || authService.user?.displayName == null) {
+      // Show sign-in dialog after the first frame is rendered
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await showDialog(
+          context: context,
+          builder: (context) => SignInDialog(
+            emailController: TextEditingController(),
+            passwordController: TextEditingController(),
+            allowAnonymous: false, // Disallow anonymous sign-in
+          ),
+        );
+
+        // Check if the user is now authenticated and has a displayName
+        if (authService.user != null && authService.user?.displayName != null) {
+          setState(() {
+            _isAuthenticated = true;
+            _hasDisplayName = true;
+            widget.nameController.text = authService.user!.displayName!;
+          });
+          await _initializeNewsletterStatus();
+        } else {
+          // User did not sign in or set a displayName; navigate back
+          Navigator.of(context).pop(); // Close the profile screen
+        }
+      });
+    } else {
+      // User is authenticated and has a displayName
+      setState(() {
+        _isAuthenticated = true;
+        _hasDisplayName = true;
+        widget.nameController.text = authService.user!.displayName!;
+      });
+      await _initializeNewsletterStatus();
+    }
+  }
+
   Future<void> _initializeNewsletterStatus() async {
     try {
       final status = await _newsletterService.fetchNewsletterStatus();
@@ -61,23 +103,20 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
-    final user = authService.user;
-
-    if (user == null) {
+    if (!_isAuthenticated || !_hasDisplayName) {
+      // Show a loading indicator while authentication is in progress
       return Scaffold(
         appBar: CustomAppBar(
-          title: 'Profile',
+          title: 'Personality Score',
         ),
         body: Center(
-          child: SelectableText(
-            'Please sign in to see your profile.',
-            style: TextStyle(
-                fontSize: 18, color: Colors.white, fontFamily: 'Roboto'),
-          ),
+          child: CircularProgressIndicator(),
         ),
       );
     }
+
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.user;
 
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),

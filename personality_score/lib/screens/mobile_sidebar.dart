@@ -1,9 +1,10 @@
 // mobile_sidebar.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:personality_score/screens/signin_dialog.dart';
+
 
 class MobileSidebar extends StatelessWidget {
   @override
@@ -20,25 +21,23 @@ class MobileSidebar extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min, // Only take up space required by content
               children: [
-
-            Padding(
-            padding: const EdgeInsets.symmetric(vertical: 36.0),
-            child: GestureDetector(
-              onTap: () async {
-                const url = 'https://ifyouchange.com/';
-                if (await canLaunch(url)) {
-                  await launch(url);
-                } else {
-                  throw 'Could not launch $url';
-                }
-              },
-              child: Image.asset(
-                'assets/Logo-IYC-gross.png',
-                height: 40,
-              ),
-            ),
-
-            ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 36.0),
+                  child: GestureDetector(
+                    onTap: () async {
+                      const url = 'https://ifyouchange.com/';
+                      if (await canLaunch(url)) {
+                        await launch(url);
+                      } else {
+                        throw 'Could not launch $url';
+                      }
+                    },
+                    child: Image.asset(
+                      'assets/Logo-IYC-gross.png',
+                      height: 40,
+                    ),
+                  ),
+                ),
                 ListTile(
                   title: Text('ALLGEMEIN'),
                   onTap: () {
@@ -46,8 +45,6 @@ class MobileSidebar extends StatelessWidget {
                     Navigator.of(context).pushNamed('/home');
                   },
                 ),
-
-
                 ListTile(
                   title: Text('STUFEN'),
                   onTap: () {
@@ -61,11 +58,7 @@ class MobileSidebar extends StatelessWidget {
                       title: Text('PROFIL'),
                       onTap: () {
                         Navigator.of(context).pop();
-                        if (authService.user == null) {
-                          Navigator.of(context).pushNamed('/signin');
-                        } else {
                           Navigator.of(context).pushNamed('/profile');
-                        }
                       },
                     );
                   },
@@ -77,4 +70,26 @@ class MobileSidebar extends StatelessWidget {
       ),
     );
   }
+
+  // Add the showSignInDialog function
+  void showSignInDialog(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => SignInDialog(
+        emailController: emailController,
+        passwordController: passwordController,
+        allowAnonymous: false,
+
+      ),
+    ).then((_) {
+      // Dispose controllers when the dialog is closed
+      emailController.dispose();
+      passwordController.dispose();
+    });
+  }
+
+
 }

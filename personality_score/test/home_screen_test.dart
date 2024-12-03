@@ -16,7 +16,6 @@ void main() {
     child: MaterialApp(
       home: HomeScreen(),
       routes: {
-        '/signin': (_) => Scaffold(body: Text('Sign In Screen')),
         '/profile': (_) => Scaffold(body: Text('Profile Screen')),
         '/questionnaire': (_) => Scaffold(body: Text('Questionnaire Screen')),
       },

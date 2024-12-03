@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:personality_score/screens/signin_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import '../models/questionaire_model.dart';
@@ -32,12 +33,13 @@ class QuestionnaireScreen extends StatelessWidget {
               color: Color(0xFFEDE8DB),
             ),
           ),
+          
           // Inside your Consumer2 widget
           Consumer2<AuthService, QuestionnaireModel>(
             builder: (context, authService, model, child) {
               if (authService.user == null) {
                 Future.microtask(() {
-                  Navigator.of(context).pushNamed('/signin');
+                   showSignInDialog(context); // Show the SignInDialog;
                 });
                 return SizedBox.shrink();
               }
@@ -55,6 +57,25 @@ class QuestionnaireScreen extends StatelessWidget {
       ),
     );
   }
+  void showSignInDialog(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => SignInDialog(
+        emailController: emailController,
+        passwordController: passwordController,
+
+        allowAnonymous: true,
+      ),
+    ).then((_) {
+      // Dispose controllers when the dialog is closed
+      emailController.dispose();
+      passwordController.dispose();
+    });
+  }
+
 
   // Mobile AppBar with a menu button to open the sidebar
   AppBar _buildAppBar(BuildContext context) {

@@ -4,8 +4,6 @@ import 'package:personality_score/screens/questionnaire_screen.dart';
 import 'package:provider/provider.dart';
 import 'auth/auth_service.dart';
 import 'screens/home_screen.dart';
-import 'screens/sign_in_screen.dart';
-import 'screens/sign_up_screen.dart';
 import 'firebase_options.dart'; // Ensure you have this file generated
 import 'package:personality_score/screens/profile_screen.dart';
 import 'package:personality_score/models/questionaire_model.dart';
@@ -66,8 +64,6 @@ class MyApp extends StatelessWidget {
         initialRoute: '/home',
         routes: {
           '/': (context) => HomeScreen(),
-          '/signin': (context) => SignInScreen(),
-          '/signup': (context) => SignUpScreen(),
           '/home': (context) => HomeScreen(),
           '/questionnaire': (context) => QuestionnaireScreen(),
           '/questionnaire_tutorial': (context) => QuestionnaireTutorialScreen(), // New route

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:personality_score/screens/signin_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/models/questionaire_model.dart';
 import '../auth/auth_service.dart';
 import '../models/question.dart';
-import 'package:lottie/lottie.dart';
 import 'custom_app_bar.dart';
 
 class QuestionnaireDesktopLayout extends StatefulWidget {
@@ -17,13 +17,51 @@ class QuestionnaireDesktopLayout extends StatefulWidget {
 
 class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout> {
   bool isLoading = true;
+  bool _isAuthenticated = false; // Track authentication status
 
   @override
   void initState() {
     super.initState();
-    _loadQuestions();
-  }
 
+    // Use addPostFrameCallback to ensure context is available
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final authService = Provider.of<AuthService>(context, listen: false);
+
+      if (authService.user == null) {
+        // Show the sign-in dialog
+        await showSignInDialog(context);
+
+        // After the dialog is closed, check if the user is authenticated
+        if (authService.user != null) {
+          setState(() {
+            _isAuthenticated = true;
+          });
+          // Load questions after authentication
+          _loadQuestions();
+        } else {
+          // User did not sign in; you can handle this case as needed
+          // For example, navigate back or show a message
+          Navigator.of(context).pop(); // Close the questionnaire screen
+        }
+      } else {
+        // User is already authenticated
+        setState(() {
+          _isAuthenticated = true;
+        });
+        _loadQuestions();
+      }
+    });
+  }
+  Future<void> showSignInDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => SignInDialog(
+        emailController: TextEditingController(),
+        passwordController: TextEditingController(),
+        allowAnonymous: true, // Or as per your requirement
+      ),
+    );
+  }
   Future<void> _loadQuestions() async {
     final model = Provider.of<QuestionnaireModel>(context, listen: false);
 
@@ -38,6 +76,16 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
 
   @override
   Widget build(BuildContext context) {
+    // If not authenticated, show a loading indicator or placeholder
+    if (!_isAuthenticated) {
+      return Scaffold(
+        appBar: CustomAppBar(
+          title: 'Personality Score',
+        ),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Personality Score',
@@ -51,15 +99,8 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
               color: Color(0xFFEDE8DB),
             ),
           ),
-          Consumer2<AuthService, QuestionnaireModel>(
-            builder: (context, authService, model, child) {
-              if (authService.user == null) {
-                Future.microtask(() {
-                  Navigator.of(context).pushNamed('/signin');
-                });
-                return SizedBox.shrink();
-              }
-
+          Consumer<QuestionnaireModel>(
+            builder: (context, model, child) {
               return _buildQuestionnaire(context, model);
             },
           ),

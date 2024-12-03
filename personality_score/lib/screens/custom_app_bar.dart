@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:personality_score/screens/signin_dialog.dart'; // Import the SignInDialog
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -27,11 +28,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     return IconButton(
                       icon: Icon(Icons.person, color: _getIconColor(context, '/profile')),
                       onPressed: () {
-                        if (authService.user == null) {
-                          Navigator.of(context).pushNamed('/signin');
-                        } else {
                           Navigator.of(context).pushNamed('/profile');
-                        }
                       },
                     );
                   },
@@ -89,6 +86,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight + 30);
 
@@ -117,4 +115,25 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ? Color(0xFFCB9935)
         : Colors.black;
   }
+
+  // Add the showSignInDialog function
+  void showSignInDialog(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => SignInDialog(
+        emailController: emailController,
+        passwordController: passwordController,
+        allowAnonymous: false,
+
+      ),
+    ).then((_) {
+      // Dispose controllers when the dialog is closed
+      emailController.dispose();
+      passwordController.dispose();
+    });
+  }
+
 }

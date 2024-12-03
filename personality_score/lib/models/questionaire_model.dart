@@ -13,6 +13,7 @@ import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 
 import '../screens/pdf_viewer_screen.dart';
+import '../screens/signin_dialog.dart';
 
 class QuestionnaireModel with ChangeNotifier {
   QuestionService _questionService = QuestionService();
@@ -677,6 +678,25 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     }
   }
 
+  void showSignInDialog(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => SignInDialog(
+        emailController: emailController,
+        passwordController: passwordController,
+        allowAnonymous: false,
+      ),
+    ).then((_) {
+      // Dispose controllers when the dialog is closed
+      emailController.dispose();
+      passwordController.dispose();
+    });
+  }
+
+
   Future<void> showFinalResultDialog(
       BuildContext context,
       String finalCharacter,
@@ -791,7 +811,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                   ),
                                 ),
                                 onPressed: () {
-                                  Navigator.of(context).pushNamed('/signin');
+                                  showSignInDialog(context); // Show the SignInDialog
                                 },
                                 child: Text(
                                   'Einloggen',
