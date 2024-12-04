@@ -1025,6 +1025,8 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                     Navigator.of(context).pop();
                                     _videoController
                                         ?.dispose(); // Release video controller
+
+                                    Navigator.of(context).pushNamed('/home');
                                   },
                                   child: Text(
                                     'Abschließen',
