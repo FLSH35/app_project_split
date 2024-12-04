@@ -23,6 +23,7 @@ class QuestionnaireModel with ChangeNotifier {
 
   int score_factor = 0;
 
+  bool isSubscribed = true;
 
   int _totalScore = 0; // Store total score across all sets
 
@@ -783,7 +784,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                if ((user == null || user.displayName == null) && !showContent) ...[
+                                if ((user == null || user.displayName == null) && isSubscribed) ...[
                                   Icon(Icons.lock, size: 50, color: Colors.grey),
                                   SizedBox(height: 10),
                                   SelectableText(
@@ -866,6 +867,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                         setState(() {
                                           showContent =
                                           true; // Update to show subscribed content
+                                          isSubscribed = true;
                                         });
 
                                         try {
