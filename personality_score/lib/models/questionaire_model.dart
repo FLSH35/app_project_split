@@ -23,7 +23,7 @@ class QuestionnaireModel with ChangeNotifier {
 
   int score_factor = 0;
 
-  bool isSubscribed = true;
+  bool isSubscribed = false;
 
   int _totalScore = 0; // Store total score across all sets
 
@@ -784,7 +784,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                if ((user == null || user.displayName == null) && isSubscribed) ...[
+                                if ((user == null || user.displayName == null) && !isSubscribed) ...[
                                   Icon(Icons.lock, size: 50, color: Colors.grey),
                                   SizedBox(height: 10),
                                   SelectableText(
@@ -865,9 +865,10 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                           isValidEmail(emailController.text) &&
                                           nameController.text.isNotEmpty) {
                                         setState(() {
+                                          isSubscribed = true;
                                           showContent =
                                           true; // Update to show subscribed content
-                                          isSubscribed = true;
+
                                         });
 
                                         try {
