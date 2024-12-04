@@ -39,7 +39,7 @@ dependencies:
   pdf_merger: ^0.0.6
   cached_network_image: ^3.2.3 # Optional for caching images
   dio: ^5.0.5
-
+  timezone: ^0.7.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -24,6 +24,7 @@ class SignInDialog extends StatefulWidget {
 class _SignInDialogState extends State<SignInDialog> {
   bool _isAnimating = false; // Flag to control the success animation
   bool _isSignUpMode = true; // Flag to toggle between sign-in and sign-up
+  bool _isLoading = false; // Flag to control loading state
 
   // Controller for name input in sign-up form
   final TextEditingController nameController = TextEditingController();
@@ -37,43 +38,63 @@ class _SignInDialogState extends State<SignInDialog> {
           borderRadius: BorderRadius.circular(16),
         ),
         backgroundColor: Color(0xFFEDE8DB),
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: SingleChildScrollView(
-            child: _isAnimating
-                ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 100),
-                SizedBox(height: 20),
-              ],
-            )
-                : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _isSignUpMode ? _buildSignUpForm() : _buildSignInForm(),
-                SizedBox(height: 20),
-                // Switch between modes
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _isSignUpMode = !_isSignUpMode;
-                    });
-                  },
-                  child: Text(
-                    _isSignUpMode
-                        ? 'Hast du bereits einen Account? Hier anmelden!'
-                        : 'Noch keinen Account? Hier registrieren!',
-                    style: TextStyle(color: Colors.lightBlue),
-                  ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: SingleChildScrollView(
+                child: _isAnimating
+                    ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green, size: 100),
+                    SizedBox(height: 20),
+                  ],
+                )
+                    : _isLoading
+                    ? Center(
+                  child: CircularProgressIndicator(),
+                )
+                    : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _isSignUpMode ? _buildSignUpForm() : _buildSignInForm(),
+                    SizedBox(height: 20),
+                    // Switch between modes
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _isSignUpMode = !_isSignUpMode;
+                        });
+                      },
+                      child: Text(
+                        _isSignUpMode
+                            ? 'Hast du bereits einen Account? Hier anmelden!'
+                            : 'Noch keinen Account? Hier registrieren!',
+                        style: TextStyle(color: Colors.lightBlue),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+            // Exit Button at the top-right corner
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                icon: Icon(Icons.close, color: Colors.grey),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/home');
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
   // Build Sign In Form
   Widget _buildSignInForm() {
     return Column(
@@ -133,7 +154,7 @@ class _SignInDialogState extends State<SignInDialog> {
               borderRadius: BorderRadius.all(Radius.circular(8.0)),
             ),
           ),
-          onPressed: _signIn,
+          onPressed: _isLoading ? null : _signIn,
           child: Text('Anmelden'),
         ),
         SizedBox(height: 20),
@@ -149,7 +170,7 @@ class _SignInDialogState extends State<SignInDialog> {
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
-            onPressed: _continueWithoutAccount,
+            onPressed: _isLoading ? null : _continueWithoutAccount,
             child: Text(
               'Ohne Account fortfahren',
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
@@ -235,7 +256,7 @@ class _SignInDialogState extends State<SignInDialog> {
               borderRadius: BorderRadius.all(Radius.circular(8.0)),
             ),
           ),
-          onPressed: _signUp,
+          onPressed: _isLoading ? null : _signUp,
           child: Text('Registrieren'),
         ),
 
@@ -252,7 +273,7 @@ class _SignInDialogState extends State<SignInDialog> {
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
-            onPressed: _continueWithoutAccount,
+            onPressed: _isLoading ? null : _continueWithoutAccount,
             child: Text(
               'Ohne Account fortfahren',
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
@@ -322,6 +343,10 @@ class _SignInDialogState extends State<SignInDialog> {
       // Speichere den aktuellen Benutzer (vor dem Login)
       User? previousUser = authService.user;
 
+      setState(() {
+        _isLoading = true;
+      });
+
       // Melde den Benutzer mit E-Mail und Passwort an
       await authService.signInWithEmail(
         widget.emailController.text,
@@ -334,23 +359,28 @@ class _SignInDialogState extends State<SignInDialog> {
         if (previousUser != null && previousUser.isAnonymous) {
           await mergeAnonymousDataWithUser(previousUser, authService.user!);
 
-          // Lösche das anonyme Benutzerkonto
-          await previousUser.delete();
         }
 
         setState(() {
           _isAnimating = true;
+          _isLoading = false;
         });
-        Future.delayed(Duration(seconds: 2), () {
+        Future.delayed(Duration(seconds: 1), () {
           Navigator.of(context).pop();
         });
       } else {
+        setState(() {
+          _isLoading = false;
+        });
         _showMessage(
           authService.errorMessage ?? "Anmeldung fehlgeschlagen.",
           Colors.red,
         );
       }
     } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
       String errorMessage;
       if (e.code == 'user-not-found') {
         errorMessage = "Kein Benutzer mit dieser E-Mail gefunden.";
@@ -361,16 +391,22 @@ class _SignInDialogState extends State<SignInDialog> {
       }
       _showMessage(errorMessage, Colors.red);
     } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
       _showMessage("Ein Fehler ist aufgetreten.", Colors.red);
     }
   }
-
 
   void _signUp() async {
     if (widget.emailController.text.isNotEmpty &&
         isValidEmail(widget.emailController.text)) {
       final authService = Provider.of<AuthService>(context, listen: false);
       try {
+        setState(() {
+          _isLoading = true;
+        });
+
         // Speichere den aktuellen Benutzer (vor der Registrierung)
         User? currentUser = authService.user;
 
@@ -405,10 +441,11 @@ class _SignInDialogState extends State<SignInDialog> {
 
           setState(() {
             _isAnimating = true;
+            _isLoading = false;
           });
 
           // Schließe den Dialog nach 2 Sekunden
-          Future.delayed(Duration(seconds: 2), () {
+          Future.delayed(Duration(seconds: 1), () {
             Navigator.of(context).pop();
           });
         } else {
@@ -439,14 +476,18 @@ class _SignInDialogState extends State<SignInDialog> {
 
           setState(() {
             _isAnimating = true;
+            _isLoading = false;
           });
 
           // Schließe den Dialog nach 2 Sekunden
-          Future.delayed(Duration(seconds: 2), () {
+          Future.delayed(Duration(seconds: 1), () {
             Navigator.of(context).pop();
           });
         }
       } on FirebaseAuthException catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
         String errorMessage;
         if (e.code == 'email-already-in-use') {
           errorMessage = "E-Mail ist bereits registriert.";
@@ -461,6 +502,9 @@ class _SignInDialogState extends State<SignInDialog> {
         }
         _showMessage(errorMessage, Colors.red);
       } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
         _showMessage("Ein Fehler ist aufgetreten.", Colors.red);
       }
     } else {
@@ -468,16 +512,18 @@ class _SignInDialogState extends State<SignInDialog> {
     }
   }
 
-
-
   void _continueWithoutAccount() async {
     final authService = Provider.of<AuthService>(context, listen: false);
+    setState(() {
+      _isLoading = true;
+    });
     await authService.signInAnonymously(); // Sign in anonymously
     setState(() {
       _isAnimating = true;
+      _isLoading = false;
     });
     // Wait for 2 seconds, then close the dialog
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(Duration(seconds: 1), () {
       Navigator.of(context).pop();
     });
   }

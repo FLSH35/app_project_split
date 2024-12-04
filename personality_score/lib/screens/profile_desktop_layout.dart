@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
-import 'custom_app_bar.dart'; // Import the custom AppBar
-import 'package:personality_score/screens/signin_dialog.dart'; // Import the SignInDialog
+import 'package:intl/intl.dart'; // Import für Datum und Zeitformatierung
+import 'custom_app_bar.dart'; // Import der benutzerdefinierten AppBar
+import 'package:personality_score/screens/signin_dialog.dart'; // Import des Anmelde-Dialogs
+import 'package:intl/date_symbol_data_local.dart';
 
 class ProfileDesktopLayout extends StatefulWidget {
   final TextEditingController nameController;
@@ -31,8 +33,8 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
 
   List<Map<String, dynamic>> validResults = [];
   late PageController _pageController;
-  int selectedIndex = 0; // To keep track of the current page
-  int initialPage = 10000; // For infinite scrolling
+  int selectedIndex = 0; // Aktuelle Seite
+  int initialPage = 10000; // Für unendliches Scrollen
 
   @override
   void initState() {
@@ -44,9 +46,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
   Future<void> fetchFinalCharacters() async {
     _isLoading = true;
     try {
-      final user = Provider
-          .of<AuthService>(context, listen: false)
-          .user;
+      final user = Provider.of<AuthService>(context, listen: false).user;
       if (user != null) {
         final userDocRef =
         FirebaseFirestore.instance.collection('users').doc(user.uid);
@@ -70,9 +70,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
             if (data != null &&
                 data['combinedTotalScore'] != null &&
                 data['combinedTotalScore'] is num) {
-              // Check if 'completionDate' exists
               if (data['completionDate'] != null) {
-                // Add the collection name to the data
                 data['collectionName'] = collectionName;
                 tempResults.add(data);
               }
@@ -80,65 +78,79 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
           }
         }
 
-        // Sort tempResults by 'completionDate' descending
+        // Sortieren nach Abschlussdatum absteigend
         tempResults.sort((a, b) {
           Timestamp dateA = a['completionDate'];
           Timestamp dateB = b['completionDate'];
-          return dateB.compareTo(dateA); // Sort in descending order
+          return dateB.compareTo(dateA);
         });
 
         setState(() {
-          validResults = tempResults; // Update the state
+          validResults = tempResults;
           selectedIndex = initialPage % validResults.length;
         });
       }
     } catch (error) {
-      print("Error loading Profile Data: $error");
+      print("Fehler beim Laden der Profildaten: $error");
     }
     _isLoading = false;
   }
 
   Future<void> _initialize() async {
+    await initializeDateFormatting('de_DE', null); // Lokalisierungsdaten initialisieren
     final authService = Provider.of<AuthService>(context, listen: false);
 
     if (authService.user == null || authService.user?.displayName == null) {
-      // Show sign-in dialog after the first frame is rendered
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await showDialog(
           context: context,
-          barrierDismissible: false, // Prevents dismissing by tapping outside
-          builder: (context) =>
-              SignInDialog(
-                emailController: TextEditingController(),
-                passwordController: TextEditingController(),
-                allowAnonymous: false, // Disallow anonymous sign-in
-              ),
+          barrierDismissible: false,
+          builder: (context) => SignInDialog(
+            emailController: TextEditingController(),
+            passwordController: TextEditingController(),
+            allowAnonymous: false,
+          ),
         );
 
-        // Re-check authentication state after dialog closes
-        final updatedAuthService = Provider.of<AuthService>(
-            context, listen: false);
+        final updatedAuthService =
+        Provider.of<AuthService>(context, listen: false);
         if (updatedAuthService.user != null &&
             updatedAuthService.user!.displayName != null) {
           setState(() {
             widget.nameController.text = updatedAuthService.user!.displayName!;
           });
-          // Now fetch the characters
           fetchFinalCharacters();
         } else {
-          // Handle case where sign-in failed or was canceled
+          // Handle fehlgeschlagene Anmeldung
         }
       });
     } else {
-      // User is authenticated and has a displayName
       setState(() {
         widget.nameController.text = authService.user!.displayName!;
       });
-      // Fetch the characters
       fetchFinalCharacters();
     }
   }
 
+  int _calculateGermanOffset(DateTime date) {
+    DateTime dstStart = _lastSundayOfMonth(date.year, 3);
+    dstStart = DateTime(date.year, 3, dstStart.day, 2);
+    DateTime dstEnd = _lastSundayOfMonth(date.year, 10);
+    dstEnd = DateTime(date.year, 10, dstEnd.day, 3);
+
+    if (date.isAfter(dstStart) && date.isBefore(dstEnd)) {
+      return 2; // Sommerzeit (MESZ)
+    } else {
+      return 1; // Winterzeit (MEZ)
+    }
+  }
+
+  DateTime _lastSundayOfMonth(int year, int month) {
+    DateTime lastDayOfMonth = DateTime(year, month + 1, 0);
+    int weekday = lastDayOfMonth.weekday;
+    int lastSunday = lastDayOfMonth.day - ((weekday) % 7);
+    return DateTime(year, month, lastSunday);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +163,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
       ),
       body: Center(
         child: SingleChildScrollView(
-          // Added to prevent overflow in smaller screens
+          // Hinzugefügt, um Überlauf auf kleineren Bildschirmen zu verhindern
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -165,7 +177,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                     child: TextField(
                       controller: widget.nameController,
                       decoration: InputDecoration(
-                        labelText: 'Display Name',
+                        labelText: 'Anzeigename',
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -195,183 +207,179 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
               ),
               SizedBox(height: 20),
               if (_isLoading)
-              // Display the loading indicator when data is loading
                 Center(child: CircularProgressIndicator())
-              else
-                if (validResults.isNotEmpty)
-                // Display the results if data is available
-                  Column(
-                    children: [
-                      SizedBox(
-                        height: 700, // Adjust height as needed
-                        child: PageView.builder(
-                          controller: _pageController,
-                          onPageChanged: (index) {
-                            setState(() {
-                              selectedIndex = index % validResults.length;
-                              isExpanded =
-                              false; // Reset expansion when page changes
-                            });
-                          },
-                          // Set itemCount to null for infinite scrolling
-                          itemBuilder: (context, index) {
-                            int adjustedIndex = index % validResults.length;
-                            Map<String,
-                                dynamic> data = validResults[adjustedIndex];
+              else if (validResults.isNotEmpty)
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 700, // Höhe nach Bedarf anpassen
+                      child: PageView.builder(
+                        controller: _pageController,
+                        onPageChanged: (index) {
+                          setState(() {
+                            selectedIndex = index % validResults.length;
+                            isExpanded = false;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          int adjustedIndex = index % validResults.length;
+                          Map<String, dynamic> data =
+                          validResults[adjustedIndex];
 
-                            String completionDate = '';
-                            if (data['completionDate'] != null) {
-                              Timestamp timestamp = data['completionDate'];
-                              DateTime date = timestamp.toDate();
-                              completionDate =
-                              '${date.day}.${date.month}.${date.year}';
-                            }
+                          String completionDate = '';
+                          if (data['completionDate'] != null) {
+                            Timestamp timestamp = data['completionDate'];
+                            DateTime date = timestamp.toDate();
 
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Title with left and right arrows
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.arrow_left),
-                                      onPressed: () {
-                                        _pageController.previousPage(
-                                            duration: Duration(
-                                                milliseconds: 300),
-                                            curve: Curves.ease);
-                                      },
-                                    ),
-                                    Text(
-                                        'Test abgeschlossen am: $completionDate',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Roboto')),
-                                    IconButton(
-                                      icon: Icon(Icons.arrow_right),
-                                      onPressed: () {
-                                        _pageController.nextPage(
-                                            duration: Duration(
-                                                milliseconds: 300),
-                                            curve: Curves.ease);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 20),
-                                CircleAvatar(
-                                  radius: 100,
-                                  backgroundImage: AssetImage(
-                                      'assets/${data['finalCharacter']}.webp'),
-                                  backgroundColor: Colors.transparent,
-                                ),
-                                SizedBox(height: 20),
-                                Card(
-                                  color: Color(0xFFF7F5EF),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SelectableText(
-                                            '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}!',
+                            // Berechne deutsche Zeit
+                            int offset = _calculateGermanOffset(date);
+                            DateTime dateInGermany =
+                            date.add(Duration(hours: offset));
+
+                            // Formatierung des Datums und der Uhrzeit
+                            DateFormat dateFormat =
+                            DateFormat('dd.MM.yyyy HH:mm', 'de_DE');
+                            completionDate =
+                                dateFormat.format(dateInGermany) + ' Uhr';
+                          }
+
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Titel mit Pfeilen und Nummerierung
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.arrow_left),
+                                    onPressed: () {
+                                      _pageController.previousPage(
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.ease);
+                                    },
+                                  ),
+                                  Text(
+                                      'Ergebnis ${adjustedIndex + 1}: abgeschlossen am $completionDate',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Roboto')),
+                                  IconButton(
+                                    icon: Icon(Icons.arrow_right),
+                                    onPressed: () {
+                                      _pageController.nextPage(
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.ease);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              CircleAvatar(
+                                radius: 100,
+                                backgroundImage: AssetImage(
+                                    'assets/${data['finalCharacter']}.webp'),
+                                backgroundColor: Colors.transparent,
+                              ),
+                              SizedBox(height: 20),
+                              Card(
+                                color: Color(0xFFF7F5EF),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SelectableText(
+                                          '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}!',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontFamily: 'Roboto')),
+                                      SizedBox(height: 10),
+                                      isExpanded
+                                          ? Container(
+                                        height: 300,
+                                        child: SingleChildScrollView(
+                                          child: SelectableText(
+                                            data['finalCharacterDescription'] ??
+                                                'Beschreibung nicht verfügbar.',
                                             style: TextStyle(
                                                 color: Colors.black,
-                                                fontFamily: 'Roboto')),
-                                        SizedBox(height: 10),
-                                        isExpanded
-                                            ? Container(
-                                          height:
-                                          300,
-                                          // Set a fixed height for scrolling
+                                                fontFamily: 'Roboto',
+                                                fontSize: 18),
+                                          ),
+                                        ),
+                                      )
+                                          : Container(
+                                        height: 250,
+                                        child: Padding(
+                                          padding:
+                                          const EdgeInsets.all(20.0),
                                           child: SingleChildScrollView(
                                             child: SelectableText(
-                                              data[
-                                              'finalCharacterDescription'] ??
-                                                  'Beschreibung nicht verfügbar.',
+                                              data['finalCharacterDescription'] !=
+                                                  null
+                                                  ? data[
+                                              'finalCharacterDescription']
+                                                  .split('. ')
+                                                  .take(4)
+                                                  .join('. ') +
+                                                  '...'
+                                                  : 'Beschreibung nicht verfügbar.',
                                               style: TextStyle(
                                                   color: Colors.black,
                                                   fontFamily: 'Roboto',
                                                   fontSize: 18),
                                             ),
                                           ),
-                                        )
-                                            : Container(
-                                          height: 250,
-                                          child: Padding(
-                                            padding:
-                                            const EdgeInsets.all(20.0),
-                                            child: SingleChildScrollView(
-                                              child: SelectableText(
-                                                data['finalCharacterDescription'] !=
-                                                    null
-                                                    ? data[
-                                                'finalCharacterDescription']
-                                                    .split('. ')
-                                                    .take(4)
-                                                    .join('. ') +
-                                                    '...'
-                                                    : 'Beschreibung nicht verfügbar.',
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontFamily: 'Roboto',
-                                                    fontSize: 18),
-                                              ),
-                                            ),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 32.0),
+                                          backgroundColor: isExpanded
+                                              ? Colors.black
+                                              : Color(0xFFCB9935),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8.0)),
                                           ),
                                         ),
-                                        // "Lese mehr" or "Lese weniger" button
-                                        TextButton(
-                                          style: ElevatedButton.styleFrom(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 32.0),
-                                            backgroundColor: isExpanded
-                                                ? Colors.black
-                                                : Color(0xFFCB9935),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(8.0)),
-                                            ),
+                                        onPressed: () {
+                                          setState(() {
+                                            isExpanded = !isExpanded;
+                                          });
+                                        },
+                                        child: Text(
+                                          isExpanded
+                                              ? 'Lese weniger'
+                                              : 'Lese mehr',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontFamily: 'Roboto',
+                                            fontSize: 18,
                                           ),
-                                          onPressed: () {
-                                            setState(() {
-                                              isExpanded = !isExpanded;
-                                            });
-                                          },
-                                          child: Text(
-                                            isExpanded
-                                                ? 'Lese weniger'
-                                                : 'Lese mehr',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontFamily: 'Roboto',
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
+                                        ),
+                                      )
+                                    ],
                                   ),
                                 ),
-                              ],
-                            );
-                          },
-                        ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
-                      SizedBox(height: 20),
-                      // You can add indicators or navigation buttons here if desired
-                    ],
-                  )
-                else
-                // Display a message if no data is found
-                  SelectableText(
-                    'Kein Ergebnis gefunden.',
-                    style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
-                  ),
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                )
+              else
+                SelectableText(
+                  'Kein Ergebnis gefunden.',
+                  style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
+                ),
               SizedBox(height: 20),
-              // Share button
+              // Teilen-Button
               Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -392,7 +400,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                           '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}.\n\nBeschreibung: ${data['finalCharacterDescription']}';
                       Share.share(shareText);
                     }
-                        : null, // Disable button if data is missing
+                        : null,
                     child: Text('Teilen',
                         style: TextStyle(
                             color: Colors.white, fontFamily: 'Roboto')),
@@ -428,5 +436,4 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
       ),
     );
   }
-
 }

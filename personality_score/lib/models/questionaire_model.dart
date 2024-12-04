@@ -703,7 +703,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       String finalCharacterDescription,
       String greetingText,
       int combinedTotalScore,
-      String videoStorageUrl
+      String videoStorageUrl,
       ) async {
     // Zustandsvariablen
     bool isExpanded = false;
@@ -714,14 +714,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
     // Controller für die E-Mail-Eingabe
     TextEditingController emailController = TextEditingController();
+    TextEditingController nameController = TextEditingController(); // Added nameController
 
-    // Prüfe, ob der Benutzer eingeloggt ist oder ein anonymer Benutzer ist
-    User? user = _auth.currentUser;
-
-    bool isAnonymous = user?.isAnonymous ?? true;
-    print("is anonymous");
-    print(isAnonymous);
-    // Video-URL vor dem Anzeigen des Dialogs abrufen
+    // Video-Controller initialisieren
     String videoUrl;
     try {
       final storage = FirebaseStorage.instance;
@@ -731,7 +726,6 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       videoUrl = ''; // Fehlerbehandlung
     }
 
-    // Video-Controller initialisieren
     _videoController = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
 
     await _videoController.initialize();
@@ -739,7 +733,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
     // Dialog anzeigen
     await showDialog(
-      context: context, // Changed from Navigator.of(context, rootNavigator: true).context
+      context: context,
       barrierDismissible: false, // Prevents closing by tapping outside
       builder: (BuildContext context) {
         // Dynamic sizes based on the screen
@@ -759,345 +753,366 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+          content: StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
+              User? user = snapshot.data;
 
-              // Start timer to show content after 14 seconds
-              Future.delayed(Duration(seconds: 14), () {
-                if (isDialogActive) {
-                  setState(() {
-                    showContent = true;
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  // Start timer to show content after 14 seconds
+                  Future.delayed(Duration(seconds: 14), () {
+                    if (isDialogActive) {
+                      setState(() {
+                        showContent = true;
+                      });
+                    }
                   });
-                }
-              });
 
-              return Container(
-                width: dialogWidth,
-                height: dialogHeight,
-                child: SingleChildScrollView(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Main content
-                      AnimatedOpacity(
-                        opacity: showContent ? 1.0 : 0.0,
-                        duration: Duration(milliseconds: 500),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (user?.displayName == null) ...[
-                              Icon(Icons.lock, size: 50, color: Colors.grey),
-                              SizedBox(height: 10),
-                              SelectableText(
-                                "Ergebnis gesperrt. Melde dich an, um es zu sehen.",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Roboto',
-                                  fontSize: 16,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              // Option 1: Direct login
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 12.0, horizontal: 32.0),
-                                  backgroundColor: Color(0xFFCB9935),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(8.0)),
+                  return Container(
+                    width: dialogWidth,
+                    height: dialogHeight,
+                    child: SingleChildScrollView(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Main content
+                          AnimatedOpacity(
+                            opacity: showContent ? 1.0 : 0.0,
+                            duration: Duration(milliseconds: 500),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (user == null || user.displayName == null) ...[
+                                  Icon(Icons.lock, size: 50, color: Colors.grey),
+                                  SizedBox(height: 10),
+                                  SelectableText(
+                                    "Ergebnis gesperrt. Melde dich an, um es zu sehen.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Roboto',
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                ),
-                                onPressed: () {
-                                  showSignInDialog(context); // Show the SignInDialog
-                                },
-                                child: Text(
-                                  'Einloggen',
-                                  style: TextStyle(fontFamily: 'Roboto'),
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              // Option 2: Enter email address
-                              SelectableText(
-                                "Ohne Login. Gebe jetzt deinen Namen und deine Email an, um das Testergebnis freizuschalten.",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Roboto',
-                                  fontSize: 16,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              TextField(
-                                controller: nameController,
-                                decoration: InputDecoration(
-                                  labelText: 'Dein Vorname',
-                                  border: OutlineInputBorder(),
-                                  contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 10),
-                                ),
-                              ),
-                              TextField(
-                                controller: emailController,
-                                decoration: InputDecoration(
-                                  labelText: 'E-Mail-Adresse eingeben',
-                                  border: OutlineInputBorder(),
-                                  contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 10),
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 12.0, horizontal: 32.0),
-                                  backgroundColor: Color(0xFFCB9935),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(8.0)),
+                                  SizedBox(height: 20),
+                                  // Option 1: Direct login
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 12.0, horizontal: 32.0),
+                                      backgroundColor: Color(0xFFCB9935),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.all(Radius.circular(8.0)),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      showSignInDialog(context); // Show the SignInDialog
+                                    },
+                                    child: Text(
+                                      'Einloggen',
+                                      style: TextStyle(fontFamily: 'Roboto'),
+                                    ),
                                   ),
-                                ),
-                                onPressed: () async {
-                                  if (emailController.text.isNotEmpty && isValidEmail(emailController.text)) {
-                                    setState(() {
-                                      isAnonymous = false;
-                                      showContent = true; // Update to show subscribed content
-                                    });
+                                  SizedBox(height: 10),
+                                  // Option 2: Enter email address
+                                  SelectableText(
+                                    "Ohne Login. Gebe jetzt deinen Namen und deine Email an, um das Testergebnis freizuschalten.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Roboto',
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  TextField(
+                                    controller: nameController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Dein Vorname',
+                                      border: OutlineInputBorder(),
+                                      contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 10),
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  TextField(
+                                    controller: emailController,
+                                    decoration: InputDecoration(
+                                      labelText: 'E-Mail-Adresse eingeben',
+                                      border: OutlineInputBorder(),
+                                      contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 10),
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 12.0, horizontal: 32.0),
+                                      backgroundColor: Color(0xFFCB9935),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.all(Radius.circular(8.0)),
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      if (emailController.text.isNotEmpty &&
+                                          isValidEmail(emailController.text) &&
+                                          nameController.text.isNotEmpty) {
+                                        setState(() {
+                                          showContent =
+                                          true; // Update to show subscribed content
+                                        });
 
-                                    try {
-                                      // Newsletter subscription (call Cloud Function)
-                                      final Uri cloudFunctionUrl = Uri.parse(
-                                        'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter',
-                                      );
+                                        try {
+                                          // Newsletter subscription (call Cloud Function)
+                                          final Uri cloudFunctionUrl = Uri.parse(
+                                            'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter',
+                                          );
 
-                                      final response = await http.get(
-                                        cloudFunctionUrl.replace(queryParameters: {
-                                          'email': emailController.text,
-                                          'first_name': nameController.text, // Hier den Vornamen hinzufügen
-                                          // 'list_name': 'Meine Liste', // Optional, falls benötigt
-                                        }),
-                                      );
+                                          final response = await http.get(
+                                            cloudFunctionUrl.replace(
+                                              queryParameters: {
+                                                'email': emailController.text,
+                                                'first_name':
+                                                nameController.text,
+                                              },
+                                            ),
+                                          );
 
-                                      if (response.statusCode == 200) {
-                                        print('Newsletter erfolgreich abonniert!');
+                                          if (response.statusCode == 200) {
+                                            print(
+                                                'Newsletter erfolgreich abonniert!');
+                                          } else {
+                                            print(
+                                                'Fehler beim Abonnieren des Newsletters: ${response.body}');
+                                          }
+                                        } catch (e) {
+                                          // Netzwerk- oder Serverfehler
+                                          print('Ein Fehler ist aufgetreten: $e');
+                                        }
                                       } else {
-                                        print('Fehler beim Abonnieren des Newsletters: ${response.body}');
+                                        // Ungültige Eingaben
+                                        print(
+                                            'Bitte gebe eine gültige E-Mail-Adresse und deinen Vornamen ein.');
                                       }
-                                    } catch (e) {
-                                      // Netzwerk- oder Serverfehler
-                                      print('Ein Fehler ist aufgetreten: $e');
-                                    }
-                                  } else {
-                                    // Ungültige Eingaben
-                                    print('Bitte gebe eine gültige E-Mail-Adresse und deinen Vornamen ein.');
-                                  }
-                                }
-
-                                ,
-                                child: Text(
-                                  'Ergebnis ansehen',
-                                  style: TextStyle(fontFamily: 'Roboto'),
-                                ),
-
-                              )
-                            ] else ...[
-                              // Content for logged-in users
-                              SelectableText(
-                                "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Roboto',
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Image.asset(
-                                'assets/$finalCharacter.webp',
-                                width: 200,
-                                height: 200,
-                              ),
-                              SizedBox(height: 10),
-                              // Expandable description
-                              isExpanded
-                                  ? Container(
-                                height: 150,
-                                child: SingleChildScrollView(
-                                  child: SelectableText(
-                                    finalCharacterDescription,
+                                    },
+                                    child: Text(
+                                      'Ergebnis ansehen',
+                                      style: TextStyle(fontFamily: 'Roboto'),
+                                    ),
+                                  )
+                                ] else ...[
+                                  // Content for logged-in users
+                                  SelectableText(
+                                    "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Image.asset(
+                                    'assets/$finalCharacter.webp',
+                                    width: 200,
+                                    height: 200,
+                                  ),
+                                  SizedBox(height: 10),
+                                  // Expandable description
+                                  isExpanded
+                                      ? Container(
+                                    height: 150,
+                                    child: SingleChildScrollView(
+                                      child: SelectableText(
+                                        finalCharacterDescription,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Roboto',
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                      : SelectableText(
+                                    finalCharacterDescription
+                                        .split(' ')
+                                        .take(15)
+                                        .join(' ') +
+                                        '...',
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontFamily: 'Roboto',
                                       fontSize: 18,
                                     ),
                                   ),
-                                ),
-                              )
-                                  : SelectableText(
-                                finalCharacterDescription
-                                    .split(' ')
-                                    .take(15)
-                                    .join(' ') +
-                                    '...',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Roboto',
-                                  fontSize: 18,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 12.0, horizontal: 32.0),
-                                  backgroundColor: isExpanded
-                                      ? Colors.black
-                                      : Color(0xFFCB9935),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(8.0)),
+                                  SizedBox(height: 10),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 12.0, horizontal: 32.0),
+                                      backgroundColor: isExpanded
+                                          ? Colors.black
+                                          : Color(0xFFCB9935),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.all(Radius.circular(8.0)),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        isExpanded = !isExpanded;
+                                      });
+                                    },
+                                    child: Text(
+                                      isExpanded ? 'Lese weniger' : 'Lese mehr',
+                                    ),
                                   ),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    isExpanded = !isExpanded;
-                                  });
-                                },
-                                child: Text(
-                                  isExpanded ? 'Lese weniger' : 'Lese mehr',
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                'Wie sehr identifizierst du dich mit diesem Ergebnis?',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Roboto',
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              RatingBar.builder(
-                                initialRating: rating,
-                                minRating: 1,
-                                direction: Axis.horizontal,
-                                allowHalfRating: false,
-                                itemCount: 5,
-                                itemPadding:
-                                EdgeInsets.symmetric(horizontal: 4.0),
-                                itemBuilder: (context, _) => Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                ),
-                                onRatingUpdate: (newRating) {
-                                  setState(() {
-                                    rating = newRating;
-                                  });
-                                },
-                              ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    'Wie sehr identifizierst du dich mit diesem Ergebnis?',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  RatingBar.builder(
+                                    initialRating: rating,
+                                    minRating: 1,
+                                    direction: Axis.horizontal,
+                                    allowHalfRating: false,
+                                    itemCount: 5,
+                                    itemPadding:
+                                    EdgeInsets.symmetric(horizontal: 4.0),
+                                    itemBuilder: (context, _) => Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                    ),
+                                    onRatingUpdate: (newRating) {
+                                      setState(() {
+                                        rating = newRating;
+                                      });
+                                    },
+                                  ),
 
-                              PDFListItem(
-                                pdfName: '$finalCharacter. Deine Beschreibung zum herunterladen!',
-                                onDownload: () => _downloadExistingPDF('auswertungen/$finalCharacter.pdf'),
-                              ),
-
-                            ],
-                            SizedBox(height: 20),
+                                  PDFListItem(
+                                    pdfName:
+                                    '$finalCharacter. Deine Beschreibung zum Herunterladen!',
+                                    onDownload: () => _downloadExistingPDF(
+                                        'auswertungen/$finalCharacter.pdf'),
+                                  ),
+                                ],
+                                SizedBox(height: 20),
                                 TextButton(
                                   style: TextButton.styleFrom(
                                     backgroundColor: Color(0xFFCB9935),
                                     padding: EdgeInsets.symmetric(horizontal: 20),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(8.0)),
                                     ),
                                   ),
                                   onPressed: () async {
                                     // Save rating
                                     await saveUserRating(rating);
                                     Navigator.of(context).pop();
-                                    _videoController?.dispose(); // Release video controller
+                                    _videoController
+                                        ?.dispose(); // Release video controller
                                   },
                                   child: Text(
                                     'Abschließen',
-                                    style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Roboto'),
                                   ),
                                 ),
-                          ],
-                        ),
-                      ),
-                      // Video Overlay
-                      IgnorePointer(
-                        ignoring: true, // Prevent interaction with the video
-                        child: AnimatedOpacity(
-                          opacity: showContent ? 0.0 : 1.0,
-                          duration: Duration(milliseconds: 500),
-                          child: Container(
-                            width: dialogWidth,
-                            height: dialogHeight * 0.9,
-                            color: Colors.transparent,
-                            child: _videoController != null && _videoController!.value.isInitialized
-                                ? ClipRect(
-                              child: OverflowBox(
-                                alignment: Alignment.center,
-                                minWidth: 0.0,
-                                minHeight: 0.0,
-                                maxWidth: double.infinity,
-                                maxHeight: double.infinity,
-                                child: FittedBox(
-                                  fit: BoxFit.cover,
-                                  child: SizedBox(
-                                    width: _videoController!.value.size.width,
-                                    height: _videoController!.value.size.height,
-                                    child: VideoPlayer(_videoController!),
-                                  ),
-                                ),
-                              ),
-                            )
-                                : SizedBox(), // Or any placeholder widget
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
+                          // Video Overlay
+                          IgnorePointer(
+                            ignoring: true, // Prevent interaction with the video
+                            child: AnimatedOpacity(
+                              opacity: showContent ? 0.0 : 1.0,
+                              duration: Duration(milliseconds: 500),
+                              child: Container(
+                                width: dialogWidth,
+                                height: dialogHeight * 0.9,
+                                color: Colors.transparent,
+                                child: _videoController != null &&
+                                    _videoController!.value.isInitialized
+                                    ? ClipRect(
+                                  child: OverflowBox(
+                                    alignment: Alignment.center,
+                                    minWidth: 0.0,
+                                    minHeight: 0.0,
+                                    maxWidth: double.infinity,
+                                    maxHeight: double.infinity,
+                                    child: FittedBox(
+                                      fit: BoxFit.cover,
+                                      child: SizedBox(
+                                        width: _videoController!
+                                            .value.size.width,
+                                        height: _videoController!
+                                            .value.size.height,
+                                        child:
+                                        VideoPlayer(_videoController!),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                    : SizedBox(), // Or any placeholder widget
+                              ),
+                            ),
+                          ),
 
-                      // Skip Button
-                      Positioned(
-                        bottom: 10,
-                        right: 10,
-                        child: AnimatedOpacity(
-                          opacity: showContent ? 0.0 : 1.0,
-                          duration: Duration(milliseconds: 500),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.all(12.0),
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
+                          // Skip Button
+                          Positioned(
+                            bottom: 10,
+                            right: 10,
+                            child: AnimatedOpacity(
+                              opacity: showContent ? 0.0 : 1.0,
+                              duration: Duration(milliseconds: 500),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.all(12.0),
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    showContent = true; // Show content
+                                  });
+                                  _videoController?.pause(); // Pause the video
+                                  _videoController?.setVolume(0); // Mute the video sound
+                                  Future.delayed(Duration(milliseconds: 500), () {
+                                    _videoController
+                                        ?.dispose(); // Dispose of the video completely
+                                    _videoController = null;
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.arrow_forward, // Arrow icon instead of text
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                showContent = true; // Show content
-                              });
-                              _videoController?.pause(); // Pause the video
-                              _videoController?.setVolume(0); // Mute the video sound
-                              Future.delayed(Duration(milliseconds: 500), () {
-                                _videoController?.dispose(); // Dispose of the video completely
-                                _videoController = null;
-                              });
-                            },
-                            child: Icon(
-                              Icons.arrow_forward, // Arrow icon instead of text
-                              color: Colors.white,
-                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               );
             },
           ),
