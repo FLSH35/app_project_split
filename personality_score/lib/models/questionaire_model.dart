@@ -785,7 +785,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (isAnonymous) ...[
+                            if (user?.displayName == null) ...[
                               Icon(Icons.lock, size: 50, color: Colors.grey),
                               SizedBox(height: 10),
                               SelectableText(

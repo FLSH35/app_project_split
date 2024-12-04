@@ -523,8 +523,15 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       String personalityType,
       String imagePath,
       ) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    // Dynamische Größen basierend auf der Bildschirmgröße
+    double cardWidth = screenWidth *0.25; // 25% der Bildschirmbreite
+    double imageSize = (cardWidth * 0.4); // 40% der Card-Breite, 25% kleiner
+
     return SizedBox(
-      width: 580, // Adjust width based on selection
+      width: cardWidth,
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 8.0),
         decoration: BoxDecoration(
@@ -541,56 +548,55 @@ class _DesktopLayoutState extends State<DesktopLayout> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 30),
+            SizedBox(height: 15),
             ClipRRect(
-              borderRadius: BorderRadius.circular(50.0), // Make the image circular
+              borderRadius: BorderRadius.circular(imageSize / 2),
               child: Image.asset(
                 imagePath,
-                width: 250, // Adjust image size for selected card
-                height: 250,
+                width: imageSize, // Verkleinertes Bild
+                height: imageSize,
                 fit: BoxFit.cover,
               ),
             ),
-            SizedBox(height: 12),
+            SizedBox(height: 6),
             Text(
               name,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 24, // Adjust font size
+                fontSize: screenHeight * 0.01875 * 1.35, // 25% größere Schriftgröße
                 fontFamily: 'Roboto',
                 color: Colors.black,
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 6),
+            SizedBox(height: 3),
             Text(
               personalityType,
               style: TextStyle(
-                fontSize: 22, // Adjust font size
+                fontSize: screenHeight * 0.0125 * 1.35, // 25% größere Schriftgröße
                 fontFamily: 'Roboto',
                 color: Colors.grey[600],
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 8),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: Text(
                 text,
                 style: TextStyle(
-                  fontSize: 20, // Adjust font size
+                  fontSize: screenHeight * 0.01 * 1.4, // 25% größere Schriftgröße
                   fontFamily: 'Roboto',
                   color: Colors.grey[800],
                 ),
                 textAlign: TextAlign.center,
               ),
-            )
+            ),
           ],
         ),
       ),
     );
   }
-
 
 
   Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {

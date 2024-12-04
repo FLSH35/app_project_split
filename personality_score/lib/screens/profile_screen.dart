@@ -8,6 +8,7 @@ import 'mobile_sidebar.dart'; // Import the mobile sidebar
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart'; // Import share package
 
+import 'package:firebase_auth/firebase_auth.dart';
 class ProfileScreen extends StatefulWidget {
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -21,73 +22,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool isSubscribedToNewsletter = false;
   bool isExpanded = false; // Add this line for expansion state
 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   void initState() {
     super.initState();
     fetchFinalCharacter();
     _initializeNewsletterStatus();
-  }
-
-  Future<void> _initializeNewsletterStatus() async {
-    try {
-      final status = await _newsletterService.fetchNewsletterStatus();
-      setState(() {
-        isSubscribedToNewsletter = status;
-      });
-    } catch (e) {
-      print('Error fetching newsletter status: $e');
-    }
-  }
-
-  Future<void> _toggleNewsletterSubscription(bool value) async {
-    try {
-      await _newsletterService.updateNewsletterStatus(value);
-      setState(() {
-        isSubscribedToNewsletter = value;
-      });
-    } catch (e) {
-      print('Error updating newsletter subscription: $e');
-    }
-  }
-
-  Future<void> fetchFinalCharacter() async {
-    final user = Provider.of<AuthService>(context, listen: false).user;
-    if (user != null) {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('results')
-          .doc('finalCharacter')
-          .get();
-
-      if (snapshot.exists) {
-        setState(() {
-          finalCharacterData = snapshot.data() as Map<String, dynamic>?;
-        });
-      }
-    }
-  }
-
-  Future<void> updateUserName() async {
-    final user = Provider.of<AuthService>(context, listen: false).user;
-
-    if (user != null && _nameController.text.isNotEmpty) {
-      // Update Firebase Authentication profile
-      await user.updateDisplayName(_nameController.text);
-      await user.reload();
-
-      // Update Firestore user document
-      FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-        'displayName': _nameController.text,
-      });
-
-      setState(() {
-        _isEditingName = false;
-      });
-
-      // Refresh the name displayed in the UI
-      _nameController.text = user.displayName ?? '';
-    }
   }
 
   @override
@@ -96,7 +37,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       mobile: _buildMobileLayout(context), // Mobile layout
       desktop: ProfileDesktopLayout(
         nameController: _nameController,
-        finalCharacterData: finalCharacterData,
         isEditingName: _isEditingName,
         onEditName: () {
           setState(() {
@@ -108,7 +48,82 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Mobile Layout
+
+  Future<String> getHighestResultCollection() async {
+    User? user = _auth.currentUser;
+    if (user == null) throw Exception("User not logged in");
+
+    try {
+      String userId = user.uid;
+      final userDocRef =
+      FirebaseFirestore.instance.collection('users').doc(userId);
+
+      int maxCollectionNumber = 0;
+      int currentCollectionNumber = 1;
+      int consecutiveMisses = 0;
+      int maxConsecutiveMisses = 5; // Adjust this threshold as needed
+
+      while (consecutiveMisses < maxConsecutiveMisses) {
+        final collectionName = 'results_$currentCollectionNumber';
+        final collectionRef = userDocRef.collection(collectionName);
+
+        // Check if 'finalCharacter' document exists in this collection
+        final docRef = collectionRef.doc('finalCharacter');
+        final docSnapshot = await docRef.get();
+
+        if (docSnapshot.exists) {
+          maxCollectionNumber = currentCollectionNumber;
+          consecutiveMisses = 0; // Reset consecutive misses since we found a valid collection
+        } else {
+          consecutiveMisses++;
+        }
+
+        currentCollectionNumber++;
+      }
+
+      if (maxCollectionNumber == 0) {
+        return 'results_1'; // Default to 'results_1' if no valid collections are found
+      }
+      return 'results_$maxCollectionNumber';
+    } catch (e) {
+      print('Error fetching highest result collection: $e');
+      return 'results_1'; // Return default in case of error
+    }
+  }
+
+  Future<void> fetchFinalCharacter() async {
+    try {
+      String highestResultCollection = await getHighestResultCollection();
+
+      final user = Provider.of<AuthService>(context, listen: false).user;
+      if (user != null) {
+        DocumentSnapshot snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection(highestResultCollection)
+            .doc('finalCharacter')
+            .get();
+
+        if (snapshot.exists) {
+          setState(() {
+            finalCharacterData = snapshot.data() as Map<String, dynamic>?;
+          });
+        } else {
+          setState(() {
+            finalCharacterData = null;
+          });
+        }
+      }
+    } catch (error) {
+      print("Error loading Profile Data: $error");
+      setState(() {
+        finalCharacterData = null;
+      });
+    }
+  }
+
+  // ... [Other methods remain the same]
+
   Widget _buildMobileLayout(BuildContext context) {
     final user = Provider.of<AuthService>(context).user;
 
@@ -143,11 +158,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CircleAvatar(
+                finalCharacterData != null
+                    ? CircleAvatar(
                   radius: 50,
                   backgroundImage: AssetImage(
-                      'assets/${finalCharacterData?['finalCharacter'] ?? ''}.webp'),
+                      'assets/${finalCharacterData!['finalCharacter']}.webp'),
                   backgroundColor: Colors.transparent,
+                )
+                    : CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.transparent,
+                  child: Icon(Icons.person, size: 50), // Placeholder image
                 ),
                 SizedBox(height: 20),
                 _isEditingName
@@ -201,46 +222,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SelectableText(
-                                '${finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${finalCharacterData?['finalCharacter']}!',
+                                '${finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${finalCharacterData!['finalCharacter']}!',
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: 'Roboto')),
                             SizedBox(height: 10),
-                            isExpanded
-                                ? Container(
-                              height: 350, // Set a fixed height for scrolling
-                              child: SingleChildScrollView(
-                                child: SelectableText(
-                                    finalCharacterData![
-                                    'finalCharacterDescription'],
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'Roboto',
-                                        fontSize: 18)),
-                              ),
-                            )
-                                : Container(
-                              height: 350,
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: SingleChildScrollView(
-                                  child:
-                                    SelectableText(
-                                      finalCharacterData![
-                                      'finalCharacterDescription']
-                                          .split('. ')
-                                          .take(4)
-                                          .join('. ') +
-                                          '...',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: 'Roboto',
-                                          fontSize: 18),
-                                    ),
 
-                                ),
-                              ),
-                            ),
                             // "Lese mehr" or "Lese weniger" button
                             TextButton(
                               style: ElevatedButton.styleFrom(
@@ -274,46 +261,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   )
                 else
                   SelectableText(
-                    'No final character found.',
+                    'Kein Ergebnis gefunden.',
                     style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
                   ),
                 SizedBox(height: 20), // Add spacing before buttons
-                // Finish and Share buttons
+                // Share button
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-
-                    SizedBox(width: 10),
                     TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Colors.transparent,
+                        backgroundColor: Color(0xFFCB9935),
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8.0)),
                         ),
                       ),
-                      onPressed: () {
-                        String shareText = '${finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${finalCharacterData!['finalCharacterDescription']}';
+                      onPressed: finalCharacterData != null
+                          ? () {
+                        String shareText =
+                            '${finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${finalCharacterData!['finalCharacterDescription']}';
                         Share.share(shareText);
-                      },
+                      }
+                          : null, // Disable button if no data
                       child: Text('Teilen',
                           style: TextStyle(
-                              color: Color(0xFFCB9935), fontFamily: 'Roboto')),
+                              color: Colors.white, fontFamily: 'Roboto')),
                     ),
-
-
                   ],
                 ),
-                Container(width: 400,
+                // Newsletter subscription switch
+                Container(
+                    width: 400,
                     child: SwitchListTile(
                       title: Text(
                         'Newsletter Anmeldung',
-                        style: TextStyle(
-                            fontSize: 18, fontFamily: 'Roboto'),
+                        style:
+                        TextStyle(fontSize: 18, fontFamily: 'Roboto'),
                       ),
                       value: isSubscribedToNewsletter,
-                      onChanged: (value) => _toggleNewsletterSubscription(value),
+                      onChanged: (value) =>
+                          _toggleNewsletterSubscription(value),
                       activeColor: Color(0xFFCB9935),
                     )),
               ],
@@ -322,6 +311,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> updateUserName() async {
+    final user = Provider.of<AuthService>(context, listen: false).user;
+
+    if (user != null && _nameController.text.isNotEmpty) {
+      // Update Firebase Authentication profile
+      await user.updateDisplayName(_nameController.text);
+      await user.reload();
+
+      // Update Firestore user document
+      FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+        'displayName': _nameController.text,
+      });
+
+      setState(() {
+        _isEditingName = false;
+      });
+
+      // Refresh the name displayed in the UI
+      _nameController.text = user.displayName ?? '';
+    }
+  }
+  Future<void> _initializeNewsletterStatus() async {
+    try {
+      final status = await _newsletterService.fetchNewsletterStatus();
+      setState(() {
+        isSubscribedToNewsletter = status;
+      });
+    } catch (e) {
+      print('Error fetching newsletter status: $e');
+    }
+  }
+
+  Future<void> _toggleNewsletterSubscription(bool value) async {
+    try {
+      await _newsletterService.updateNewsletterStatus(value);
+      setState(() {
+        isSubscribedToNewsletter = value;
+      });
+    } catch (e) {
+      print('Error updating newsletter subscription: $e');
+    }
   }
 
   // Mobile AppBar with a menu button to open the sidebar

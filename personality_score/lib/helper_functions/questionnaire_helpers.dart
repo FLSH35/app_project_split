@@ -4,11 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:personality_score/models/questionaire_model.dart'; // Adjust the path accordingly
 import 'package:personality_score/auth/auth_service.dart';
 
-import '../screens/signin_dialog.dart'; // Import AuthService to check authentication
-
-
-
-
 void handleTakeTest(BuildContext context) {
   final authService = Provider.of<AuthService>(context, listen: false);
   final model = Provider.of<QuestionnaireModel>(context, listen: false);

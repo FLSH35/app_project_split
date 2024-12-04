@@ -4,16 +4,17 @@ import 'package:personality_score/auth/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore access
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart'; // Import for FirebaseAuth
 
 class SignInDialog extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
-  final bool allowAnonymous; // New required parameter
+  final bool allowAnonymous;
 
   SignInDialog({
     required this.emailController,
     required this.passwordController,
-    required this.allowAnonymous, // Initialize the new parameter
+    required this.allowAnonymous,
   });
 
   @override
@@ -29,53 +30,50 @@ class _SignInDialogState extends State<SignInDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      backgroundColor: Color(0xFFEDE8DB),
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: SingleChildScrollView(
-          child: _isAnimating
-              ? Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.check_circle, color: Colors.green, size: 100),
-              SizedBox(height: 20),
-              Text(
-                'Erfolgreich angemeldet!',
-                style:
-                TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            ],
-          )
-              : Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _isSignUpMode ? _buildSignUpForm() : _buildSignInForm(),
-              SizedBox(height: 20),
-              // Switch between modes
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _isSignUpMode = !_isSignUpMode;
-                  });
-                },
-                child: Text(
-                  _isSignUpMode
-                      ? 'Hast du bereits einen Account? Hier anmelden!'
-                      : 'Noch keinen Account? Hier registrieren!',
-                  style: TextStyle(color: Colors.lightBlue),
+    return WillPopScope(
+      onWillPop: () async => false, // Prevents dismissing by back button
+      child: Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        backgroundColor: Color(0xFFEDE8DB),
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: SingleChildScrollView(
+            child: _isAnimating
+                ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_circle, color: Colors.green, size: 100),
+                SizedBox(height: 20),
+              ],
+            )
+                : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _isSignUpMode ? _buildSignUpForm() : _buildSignInForm(),
+                SizedBox(height: 20),
+                // Switch between modes
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isSignUpMode = !_isSignUpMode;
+                    });
+                  },
+                  child: Text(
+                    _isSignUpMode
+                        ? 'Hast du bereits einen Account? Hier anmelden!'
+                        : 'Noch keinen Account? Hier registrieren!',
+                    style: TextStyle(color: Colors.lightBlue),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-
   // Build Sign In Form
   Widget _buildSignInForm() {
     return Column(
@@ -320,91 +318,157 @@ class _SignInDialogState extends State<SignInDialog> {
 
   void _signIn() async {
     final authService = Provider.of<AuthService>(context, listen: false);
-    await authService.signInWithEmail(
-      widget.emailController.text,
-      widget.passwordController.text,
-    );
-    if (authService.user != null) {
-      setState(() {
-        _isAnimating = true;
-      });
-      // Wait for 2 seconds, then close the dialog
-      Future.delayed(Duration(seconds: 2), () {
-        Navigator.of(context).pop();
-        // Navigate to the next screen if needed
-        handleTakeTest(context); // Or any other navigation
-      });
-    } else {
-      // Show error
-      _showMessage(
-          authService.errorMessage ?? "Anmeldung fehlgeschlagen.", Colors.red);
-    }
-  }
+    try {
+      // Speichere den aktuellen Benutzer (vor dem Login)
+      User? previousUser = authService.user;
 
-  void _signUp() async {
-    if (widget.emailController.text.isNotEmpty &&
-        isValidEmail(widget.emailController.text)) {
-      final authService = Provider.of<AuthService>(context, listen: false);
-      await authService.signUpWithEmail(
+      // Melde den Benutzer mit E-Mail und Passwort an
+      await authService.signInWithEmail(
         widget.emailController.text,
         widget.passwordController.text,
       );
+
+      // Überprüfe, ob die Anmeldung erfolgreich war
       if (authService.user != null) {
-        // Update the user's display name
-        await authService.user!.updateDisplayName(nameController.text);
-        await authService.user!.reload();
+        // Wenn der vorherige Benutzer anonym war, mergen wir die Daten
+        if (previousUser != null && previousUser.isAnonymous) {
+          await mergeAnonymousDataWithUser(previousUser, authService.user!);
 
-        // Optionally save the user data in Firestore
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(authService.user!.uid)
-            .set({
-          'displayName': nameController.text,
-          'email': widget.emailController.text,
-        });
-
-        // Subscribe user to the newsletter
-        try {
-          final Uri cloudFunctionUrl = Uri.parse(
-            'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter',
-          );
-
-          final response = await http.get(
-            cloudFunctionUrl.replace(queryParameters: {
-              'email': widget.emailController.text,
-              'first_name': nameController.text,
-            }),
-          );
-
-          if (response.statusCode == 200) {
-            print('Newsletter erfolgreich abonniert!');
-          } else {
-            print(
-                'Fehler beim Abonnieren des Newsletters: ${response.body}');
-          }
-        } catch (e) {
-          print('Ein Fehler ist aufgetreten: $e');
+          // Lösche das anonyme Benutzerkonto
+          await previousUser.delete();
         }
 
         setState(() {
           _isAnimating = true;
         });
-        // Wait for 2 seconds, then close the dialog
         Future.delayed(Duration(seconds: 2), () {
           Navigator.of(context).pop();
-          // Navigate to next screen if needed
-          handleTakeTest(context); // Or any other navigation
         });
       } else {
-        // Show error
         _showMessage(
-            authService.errorMessage ?? "Registrierung fehlgeschlagen.",
-            Colors.red);
+          authService.errorMessage ?? "Anmeldung fehlgeschlagen.",
+          Colors.red,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      if (e.code == 'user-not-found') {
+        errorMessage = "Kein Benutzer mit dieser E-Mail gefunden.";
+      } else if (e.code == 'wrong-password') {
+        errorMessage = "Falsches Passwort.";
+      } else {
+        errorMessage = e.message ?? "Anmeldung fehlgeschlagen.";
+      }
+      _showMessage(errorMessage, Colors.red);
+    } catch (e) {
+      _showMessage("Ein Fehler ist aufgetreten.", Colors.red);
+    }
+  }
+
+
+  void _signUp() async {
+    if (widget.emailController.text.isNotEmpty &&
+        isValidEmail(widget.emailController.text)) {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      try {
+        // Speichere den aktuellen Benutzer (vor der Registrierung)
+        User? currentUser = authService.user;
+
+        // Erstelle Anmeldeinformationen mit E-Mail und Passwort
+        AuthCredential credential = EmailAuthProvider.credential(
+          email: widget.emailController.text,
+          password: widget.passwordController.text,
+        );
+
+        if (currentUser != null && currentUser.isAnonymous) {
+          // Verknüpfe das anonyme Konto mit dem E-Mail/Passwort-Konto
+          UserCredential userCredential = await currentUser.linkWithCredential(credential);
+
+          // Aktualisiere den Anzeigenamen des Benutzers
+          await userCredential.user!.updateDisplayName(nameController.text);
+          await userCredential.user!.reload();
+
+          // Speichere Benutzerdaten in Firestore
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .set({
+            'displayName': nameController.text,
+            'email': widget.emailController.text,
+          });
+
+          // Abonniere den Benutzer zum Newsletter
+          await subscribeToNewsletter(
+            widget.emailController.text,
+            nameController.text,
+          );
+
+          setState(() {
+            _isAnimating = true;
+          });
+
+          // Schließe den Dialog nach 2 Sekunden
+          Future.delayed(Duration(seconds: 2), () {
+            Navigator.of(context).pop();
+          });
+        } else {
+          // Kein anonymer Benutzer, normaler Registrierungsprozess
+          await authService.signUpWithEmail(
+            widget.emailController.text,
+            widget.passwordController.text,
+          );
+
+          // Aktualisiere den Anzeigenamen des Benutzers
+          await authService.user!.updateDisplayName(nameController.text);
+          await authService.user!.reload();
+
+          // Speichere Benutzerdaten in Firestore
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(authService.user!.uid)
+              .set({
+            'displayName': nameController.text,
+            'email': widget.emailController.text,
+          });
+
+          // Abonniere den Benutzer zum Newsletter
+          await subscribeToNewsletter(
+            widget.emailController.text,
+            nameController.text,
+          );
+
+          setState(() {
+            _isAnimating = true;
+          });
+
+          // Schließe den Dialog nach 2 Sekunden
+          Future.delayed(Duration(seconds: 2), () {
+            Navigator.of(context).pop();
+          });
+        }
+      } on FirebaseAuthException catch (e) {
+        String errorMessage;
+        if (e.code == 'email-already-in-use') {
+          errorMessage = "E-Mail ist bereits registriert.";
+        } else if (e.code == 'weak-password') {
+          errorMessage = "Das Passwort ist zu schwach.";
+        } else if (e.code == 'invalid-email') {
+          errorMessage = "Ungültige E-Mail-Adresse.";
+        } else if (e.code == 'credential-already-in-use') {
+          errorMessage = "Diese E-Mail ist bereits registriert.";
+        } else {
+          errorMessage = e.message ?? "Registrierung fehlgeschlagen.";
+        }
+        _showMessage(errorMessage, Colors.red);
+      } catch (e) {
+        _showMessage("Ein Fehler ist aufgetreten.", Colors.red);
       }
     } else {
       _showMessage('Bitte gebe eine gültige E-Mail-Adresse ein.', Colors.red);
     }
   }
+
+
 
   void _continueWithoutAccount() async {
     final authService = Provider.of<AuthService>(context, listen: false);
@@ -415,7 +479,6 @@ class _SignInDialogState extends State<SignInDialog> {
     // Wait for 2 seconds, then close the dialog
     Future.delayed(Duration(seconds: 2), () {
       Navigator.of(context).pop();
-      handleTakeTest(context); // Go to the test
     });
   }
 
@@ -439,5 +502,123 @@ class _SignInDialogState extends State<SignInDialog> {
   bool isValidEmail(String email) {
     final RegExp regex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
     return regex.hasMatch(email);
+  }
+
+  Future<void> mergeAnonymousDataWithUser(
+      User anonymousUser, User signedInUser) async {
+    if (!anonymousUser.isAnonymous) return;
+
+    final anonymousUserRef =
+    FirebaseFirestore.instance.collection('users').doc(anonymousUser.uid);
+    final signedInUserRef =
+    FirebaseFirestore.instance.collection('users').doc(signedInUser.uid);
+
+    // Get existing 'results' collections in signed-in user's data
+    List<String> signedInUserResultsCollections =
+    await getResultsCollections(signedInUserRef);
+
+    // Determine the highest 'results_x' number in the signed-in user's data
+    int maxResultNumber = 0;
+    for (String collectionId in signedInUserResultsCollections) {
+      if (collectionId == 'results') {
+        maxResultNumber = maxResultNumber > 1 ? maxResultNumber : 1;
+      } else if (collectionId.startsWith('results_')) {
+        int number =
+            int.tryParse(collectionId.substring('results_'.length)) ?? 0;
+        if (number > maxResultNumber) {
+          maxResultNumber = number;
+        }
+      }
+    }
+
+    // Get the anonymous user's 'results' collections
+    List<String> anonymousUserResultsCollections =
+    await getResultsCollections(anonymousUserRef);
+
+    // Now copy each of the anonymous user's 'results' subcollections
+    for (String collectionId in anonymousUserResultsCollections) {
+      // Increment the maxResultNumber
+      maxResultNumber += 1;
+      String newCollectionId = 'results_${maxResultNumber}';
+
+      // Copy documents from anonymous subcollection to the signed-in user's new subcollection
+      final anonymousCollectionRef = anonymousUserRef.collection(collectionId);
+      final anonymousDocs = await anonymousCollectionRef.get();
+      for (DocumentSnapshot doc in anonymousDocs.docs) {
+        final data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          await signedInUserRef
+              .collection(newCollectionId)
+              .doc(doc.id)
+              .set(data);
+        } else {
+          print('Document ${doc.id} has no data.');
+        }
+      }
+    }
+
+    // Optionally delete the anonymous user's data
+    await deleteUserData(anonymousUser.uid);
+  }
+
+  // Helper function to delete user data
+  Future<void> deleteUserData(String uid) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+
+    // Get the list of 'results' collections
+    List<String> resultsCollections = await getResultsCollections(userRef);
+
+    // Delete documents in each subcollection
+    for (String collectionId in resultsCollections) {
+      final collectionRef = userRef.collection(collectionId);
+      final snapshot = await collectionRef.get();
+      for (DocumentSnapshot doc in snapshot.docs) {
+        await collectionRef.doc(doc.id).delete();
+      }
+    }
+
+    // Delete the user document
+    await userRef.delete();
+  }
+
+  // Helper function to get 'results' collections from a user's document
+  Future<List<String>> getResultsCollections(DocumentReference userRef) async {
+    List<String> resultsCollections = [];
+
+    // Attempt to find collections named 'results', 'results_1', up to 'results_100'
+    for (int i = 0; i <= 100; i++) {
+      String collectionId = i == 0 ? 'results' : 'results_$i';
+      final collectionRef = userRef.collection(collectionId);
+      // Try to read a single document to see if the collection exists
+      final snapshot = await collectionRef.limit(1).get();
+      if (snapshot.docs.isNotEmpty) {
+        resultsCollections.add(collectionId);
+      }
+    }
+
+    return resultsCollections;
+  }
+
+  Future<void> subscribeToNewsletter(String email, String firstName) async {
+    try {
+      final Uri cloudFunctionUrl = Uri.parse(
+        'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter',
+      );
+
+      final response = await http.get(
+        cloudFunctionUrl.replace(queryParameters: {
+          'email': email,
+          'first_name': firstName,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Newsletter erfolgreich abonniert!');
+      } else {
+        print('Fehler beim Abonnieren des Newsletters: ${response.body}');
+      }
+    } catch (e) {
+      print('Ein Fehler ist aufgetreten: $e');
+    }
   }
 }

@@ -1,22 +1,20 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'custom_app_bar.dart'; // Import the custom AppBar
-import 'package:personality_score/models/newsletter_service.dart';
 import 'package:personality_score/screens/signin_dialog.dart'; // Import the SignInDialog
 
 class ProfileDesktopLayout extends StatefulWidget {
   final TextEditingController nameController;
-  final Map<String, dynamic>? finalCharacterData;
   final bool isEditingName;
   final VoidCallback onEditName;
   final VoidCallback onSaveName;
 
   ProfileDesktopLayout({
     required this.nameController,
-    required this.finalCharacterData,
     required this.isEditingName,
     required this.onEditName,
     required this.onSaveName,
@@ -27,17 +25,75 @@ class ProfileDesktopLayout extends StatefulWidget {
 }
 
 class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
-  final NewsletterService _newsletterService = NewsletterService();
-  bool isSubscribedToNewsletter = false;
   bool isExpanded = false;
-
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isAuthenticated = false;
   bool _hasDisplayName = false;
+
+  List<Map<String, dynamic>> validResults = [];
+  late PageController _pageController;
+  int selectedIndex = 0; // To keep track of the current page
+  int initialPage = 10000; // For infinite scrolling
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: initialPage);
     _initialize();
+    fetchFinalCharacters(); // Fetch results after sign-in
+  }
+
+  Future<void> fetchFinalCharacters() async {
+    try {
+      final user = Provider.of<AuthService>(context, listen: false).user;
+      if (user != null) {
+        final userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+        List<String> resultCollectionNames = ['results'];
+
+        for (int i = 1; i <= 100; i++) {
+          resultCollectionNames.add('results_$i');
+        }
+
+        List<Map<String, dynamic>> tempResults = [];
+
+        for (String collectionName in resultCollectionNames) {
+          final collectionRef = userDocRef.collection(collectionName);
+
+          final docSnapshot = await collectionRef.doc('finalCharacter').get();
+
+          if (docSnapshot.exists) {
+            var data = docSnapshot.data() as Map<String, dynamic>?;
+
+            if (data != null &&
+                data['combinedTotalScore'] != null &&
+                data['combinedTotalScore'] is num) {
+              // Check if 'completionDate' exists
+              if (data['completionDate'] != null) {
+                // Add the collection name to the data
+                data['collectionName'] = collectionName;
+                tempResults.add(data);
+              }
+            }
+          }
+        }
+
+        // Sort tempResults by 'completionDate' descending
+        tempResults.sort((a, b) {
+          Timestamp dateA = a['completionDate'];
+          Timestamp dateB = b['completionDate'];
+          return dateB.compareTo(dateA); // Sort in descending order
+        });
+
+        setState(() {
+          validResults = tempResults; // Update the state
+          selectedIndex = initialPage % validResults.length;
+        });
+      }
+    } catch (error) {
+      print("Error loading Profile Data: $error");
+    }
   }
 
   Future<void> _initialize() async {
@@ -48,25 +104,13 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await showDialog(
           context: context,
+          barrierDismissible: false, // Prevents dismissing by tapping outside
           builder: (context) => SignInDialog(
             emailController: TextEditingController(),
             passwordController: TextEditingController(),
             allowAnonymous: false, // Disallow anonymous sign-in
           ),
         );
-
-        // Check if the user is now authenticated and has a displayName
-        if (authService.user != null && authService.user?.displayName != null) {
-          setState(() {
-            _isAuthenticated = true;
-            _hasDisplayName = true;
-            widget.nameController.text = authService.user!.displayName!;
-          });
-          await _initializeNewsletterStatus();
-        } else {
-          // User did not sign in or set a displayName; navigate back
-          Navigator.of(context).pop(); // Close the profile screen
-        }
       });
     } else {
       // User is authenticated and has a displayName
@@ -75,35 +119,14 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
         _hasDisplayName = true;
         widget.nameController.text = authService.user!.displayName!;
       });
-      await _initializeNewsletterStatus();
-    }
-  }
-
-  Future<void> _initializeNewsletterStatus() async {
-    try {
-      final status = await _newsletterService.fetchNewsletterStatus();
-      setState(() {
-        isSubscribedToNewsletter = status;
-      });
-    } catch (e) {
-      print('Error fetching newsletter status: $e');
-    }
-  }
-
-  Future<void> _toggleNewsletterSubscription(bool value) async {
-    try {
-      await _newsletterService.updateNewsletterStatus(value);
-      setState(() {
-        isSubscribedToNewsletter = value;
-      });
-    } catch (e) {
-      print('Error updating newsletter subscription: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (!_isAuthenticated || !_hasDisplayName) {
+
+      fetchFinalCharacters(); // Fetch results after sign-in
       // Show a loading indicator while authentication is in progress
       return Scaffold(
         appBar: CustomAppBar(
@@ -124,199 +147,267 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
         title: 'Personality Score',
       ),
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 100,
-              backgroundImage: AssetImage(
-                  'assets/${widget.finalCharacterData?['finalCharacter']}.webp'),
-              backgroundColor: Colors.transparent,
-            ),
-            SizedBox(height: 20),
-            widget.isEditingName
-                ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: widget.nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Display Name',
-                      border: OutlineInputBorder(),
+        child: SingleChildScrollView(
+          // Added to prevent overflow in smaller screens
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              widget.isEditingName
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 200,
+                    child: TextField(
+                      controller: widget.nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Display Name',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.check),
-                  onPressed: widget.onSaveName,
-                ),
-              ],
-            )
-                : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SelectableText(
-                  widget.nameController.text,
-                  style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontFamily: 'Roboto'),
-                ),
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: widget.onEditName,
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            if (widget.finalCharacterData != null)
-              Card(
-                color: Color(0xFFF7F5EF),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SelectableText(
-                            '${widget.finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${widget.finalCharacterData?['finalCharacter']}!',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Roboto')),
-                        SizedBox(height: 10),
-                        isExpanded
-                            ? Container(
-                          height: 300, // Set a fixed height for scrolling
-                          child: SingleChildScrollView(
-                            child: SelectableText(
-                                widget.finalCharacterData![
-                                'finalCharacterDescription'],
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Roboto',
-                                    fontSize: 18)),
-                          ),
-                        )
-                            : Container(
-                          height: 250,
-                          child: Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: SingleChildScrollView(
-                              child: SelectableText(
-                                widget.finalCharacterData![
-                                'finalCharacterDescription']
-                                    .split('. ')
-                                    .take(4)
-                                    .join('. ') +
-                                    '...',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Roboto',
-                                    fontSize: 18),
-                              ),
-
-                            ),
-                          ),
-                        ),
-                        // "Lese mehr" or "Lese weniger" button
-                        TextButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 32.0),
-                            backgroundColor: isExpanded
-                                ? Colors.black
-                                : Color(0xFFCB9935),
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(8.0)),
-                            ),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              isExpanded = !isExpanded;
-                            });
-                          },
-                          child: Text(
-                            isExpanded ? 'Lese weniger' : 'Lese mehr',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Roboto',
-                              fontSize: 18,
-                            ),
-                          ),
-                        )
-                    ],
+                  IconButton(
+                    icon: Icon(Icons.check),
+                    onPressed: widget.onSaveName,
                   ),
-                ),
-              ))
-            else
-              SelectableText(
-                'No final character found.',
-                style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
+                ],
+              )
+                  : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SelectableText(
+                    widget.nameController.text,
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontFamily: 'Roboto'),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: widget.onEditName,
+                  ),
+                ],
               ),
-            SizedBox(height: 20),
-            SizedBox(height: 20), // Add spacing before buttons
-            // Finish and Share buttons
+              SizedBox(height: 20),
+              if (validResults.isNotEmpty)
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 700, // Adjust height as needed
+                      child: PageView.builder(
+                        controller: _pageController,
+                        onPageChanged: (index) {
+                          setState(() {
+                            selectedIndex = index % validResults.length;
+                            isExpanded = false; // Reset expansion when page changes
+                          });
+                        },
+                        // Set itemCount to null for infinite scrolling
+                        itemBuilder: (context, index) {
+                          int adjustedIndex = index % validResults.length;
+                          Map<String, dynamic> data = validResults[adjustedIndex];
 
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-    TextButton(
-    style: TextButton.styleFrom(
-    backgroundColor: Color(0xFFCB9935),
-    padding: EdgeInsets.symmetric(horizontal: 20),
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(8.0)),
-    ),),
-                  onPressed: () {
-                    String shareText = '${widget.finalCharacterData!['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${widget.finalCharacterData!['finalCharacter']}.\n\nBeschreibung: ${widget.finalCharacterData!['finalCharacterDescription']}';
-                    Share.share(shareText);
-                  },
-                  child: Text('Teilen',
-                      style: TextStyle(
-                          color: Colors.white, fontFamily: 'Roboto')),
+                          String completionDate = '';
+                          if (data['completionDate'] != null) {
+                            Timestamp timestamp = data['completionDate'];
+                            DateTime date = timestamp.toDate();
+                            completionDate =
+                            '${date.day}.${date.month}.${date.year}';
+                          }
+
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Title with left and right arrows
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.arrow_left),
+                                    onPressed: () {
+                                      _pageController.previousPage(
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.ease);
+                                    },
+                                  ),
+                                  Text('Test abgeschlossen am: $completionDate',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Roboto')),
+                                  IconButton(
+                                    icon: Icon(Icons.arrow_right),
+                                    onPressed: () {
+                                      _pageController.nextPage(
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.ease);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              CircleAvatar(
+                                radius: 100,
+                                backgroundImage: AssetImage(
+                                    'assets/${data['finalCharacter']}.webp'),
+                                backgroundColor: Colors.transparent,
+                              ),
+                              SizedBox(height: 20),
+                              Card(
+                                color: Color(0xFFF7F5EF),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SelectableText(
+                                          '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}!',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontFamily: 'Roboto')),
+                                      SizedBox(height: 10),
+                                      isExpanded
+                                          ? Container(
+                                        height:
+                                        300, // Set a fixed height for scrolling
+                                        child: SingleChildScrollView(
+                                          child: SelectableText(
+                                            data[
+                                            'finalCharacterDescription'] ??
+                                                'Beschreibung nicht verfügbar.',
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontFamily: 'Roboto',
+                                                fontSize: 18),
+                                          ),
+                                        ),
+                                      )
+                                          : Container(
+                                        height: 250,
+                                        child: Padding(
+                                          padding:
+                                          const EdgeInsets.all(20.0),
+                                          child: SingleChildScrollView(
+                                            child: SelectableText(
+                                              data['finalCharacterDescription'] !=
+                                                  null
+                                                  ? data['finalCharacterDescription']
+                                                  .split('. ')
+                                                  .take(4)
+                                                  .join('. ') +
+                                                  '...'
+                                                  : 'Beschreibung nicht verfügbar.',
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontFamily: 'Roboto',
+                                                  fontSize: 18),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      // "Lese mehr" or "Lese weniger" button
+                                      TextButton(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 32.0),
+                                          backgroundColor: isExpanded
+                                              ? Colors.black
+                                              : Color(0xFFCB9935),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8.0)),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            isExpanded = !isExpanded;
+                                          });
+                                        },
+                                        child: Text(
+                                          isExpanded
+                                              ? 'Lese weniger'
+                                              : 'Lese mehr',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontFamily: 'Roboto',
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    // You can add indicators or navigation buttons here if desired
+                  ],
+                )
+              else
+                SelectableText(
+                  'Kein Ergebnis gefunden.',
+                  style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
                 ),
-
-              ],
-            ),
-            Container(width: 400,
-            child: SwitchListTile(
-              title: Text(
-                'Newsletter Anmeldung',
-                style: TextStyle(
-                    fontSize: 18, fontFamily: 'Roboto'),
+              SizedBox(height: 20),
+              // Share button
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Color(0xFFCB9935),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      ),
+                    ),
+                    onPressed: validResults.isNotEmpty
+                        ? () {
+                      Map<String, dynamic> data =
+                      validResults[selectedIndex];
+                      String shareText =
+                          '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}.\n\nBeschreibung: ${data['finalCharacterDescription']}';
+                      Share.share(shareText);
+                    }
+                        : null, // Disable button if data is missing
+                    child: Text('Teilen',
+                        style: TextStyle(
+                            color: Colors.white, fontFamily: 'Roboto')),
+                  ),
+                ],
               ),
-              value: isSubscribedToNewsletter,
-              onChanged: (value) => _toggleNewsletterSubscription(value),
-              activeColor: Color(0xFFCB9935),
-            )),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await authService.logout(context);
-              },
-              style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  await authService.logout(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  padding:
+                  EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
                   backgroundColor: Colors.grey,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   ),
-
-              ),
-              child: Text(
-                'Abmelden',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Roboto',
-                  fontSize: 18,
+                ),
+                child: Text(
+                  'Abmelden',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Roboto',
+                    fontSize: 18,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
