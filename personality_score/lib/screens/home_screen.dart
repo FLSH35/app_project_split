@@ -153,23 +153,35 @@ class _HomeScreenState extends State<HomeScreen> {
     {
       "name": "Andrés",
       "text": "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
-      "image": "https://via.placeholder.com/150",
+      "image": "assets/testimonials/Andres.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Jana",
       "text": "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
-      "image": "https://via.placeholder.com/150",
+      "image": "assets/testimonials/Jana.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Christoph",
       "text": "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
-      "image": "https://via.placeholder.com/150",
+      "image": "assets/testimonials/Christoph.jpg",
       "personalityType": "Individual",
     },
-    // Add more testimonials if needed for infinite scrolling
+    {
+      "name": "Alex",
+      "text": "Endlich ein Persönlichkeitstest, der mir weiterhilft.",
+      "image": "assets/testimonials/Alex.jpg",
+      "personalityType": "Traveller",
+    },
+    {
+      "name": "Klaus",
+      "text": "Woher kennt er mich so gut?",
+      "image": "assets/testimonials/Klaus.jpg",
+      "personalityType": "Individual",
+    },
   ];
+
 
   Widget _buildTestimonialSection() {
     // Set a high initialPage for infinite scrolling simulation
