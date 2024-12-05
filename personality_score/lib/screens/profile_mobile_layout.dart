@@ -59,7 +59,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     try {
       final user = Provider.of<AuthService>(context, listen: false).user;
       if (user != null) {
-        final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+        final userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
         List<String> resultCollectionNames = ['results'];
 
         for (int i = 1; i <= 100; i++) {
@@ -134,6 +135,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
       appBar: _buildAppBar(context), // AppBar for Mobile
+      endDrawer: MobileSidebar(), // Sidebar for mobile navigation
       body: Center(
         child: SingleChildScrollView(
           // Prevent overflow on smaller screens
@@ -248,8 +250,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                 // Character Image
                                 CircleAvatar(
                                   radius: 60, // Reduced radius for mobile
-                                  backgroundImage: AssetImage(
-                                      'assets/${data['finalCharacter']}.webp'),
+                                  backgroundImage:
+                                  AssetImage('assets/${data['finalCharacter']}.webp'),
                                   backgroundColor: Colors.transparent,
                                 ),
                                 SizedBox(height: 10),
@@ -418,6 +420,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       ),
     );
   }
+
   // AppBar for Mobile with Menu Button
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
@@ -432,7 +435,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
             onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // Open the Sidebar
+              Scaffold.of(context).openEndDrawer(); // Open the End Drawer (right side)
+
             },
           ),
         ),
