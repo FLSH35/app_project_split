@@ -46,7 +46,7 @@ class MobileSidebar extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  title: Text('STUFEN'),
+                  title: Text('EINSTUFUNG'),
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).pushNamed('/personality_types');

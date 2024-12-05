@@ -1,13 +1,15 @@
+// home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'home_desktop_layout.dart';
+import 'package:personality_score/screens/home_desktop_layout.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'mobile_sidebar.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'custom_footer.dart'; // Import for the custom footer
 import 'package:video_player/video_player.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:math'; // For transformations
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -78,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _videoController1?.dispose();
     _videoController2?.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -102,27 +105,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
+    bool isDesktop = getValueForScreenType<bool>(
+      context: context,
+      mobile: false,
+      tablet: false,
+      desktop: true,
+    );
 
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
       endDrawer: MobileSidebar(),
-      appBar: getValueForScreenType<bool>(
-        context: context,
-        mobile: false,
-        desktop: true,
-      )
-          ? null
-          : _buildAppBar(context),
+      appBar: isDesktop ? null : _buildAppBar(context),
       body: ScreenTypeLayout(
-        mobile: _buildMobileLayout(screenHeight, screenWidth),
+        mobile: _buildMobileLayout(context),
+        tablet: _buildMobileLayout(context), // Assuming tablet uses mobile layout
         desktop: DesktopLayout(),
       ),
     );
   }
 
-  Widget _buildMobileLayout(double screenHeight, double screenWidth) {
+  Widget _buildMobileLayout(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return SingleChildScrollView(
       controller: _scrollController,
       child: Column(
@@ -143,6 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
   final List<Map<String, String>> testimonials = [
     {
       "name": "Andrés",
@@ -162,12 +168,14 @@ class _HomeScreenState extends State<HomeScreen> {
       "image": "https://via.placeholder.com/150",
       "personalityType": "Individual",
     },
+    // Add more testimonials if needed for infinite scrolling
   ];
 
-
   Widget _buildTestimonialSection() {
-    PageController _pageController = PageController(viewportFraction: 0.4);
-    int selectedIndex = 0;
+    // Set a high initialPage for infinite scrolling simulation
+    int initialPage = testimonials.length * 1000;
+    PageController _pageController = PageController(initialPage: initialPage, viewportFraction: 0.8);
+    int selectedIndex = initialPage % testimonials.length;
 
     return StatefulBuilder(
       builder: (context, setState) {
@@ -180,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 "Was unsere Nutzer sagen",
                 style: TextStyle(
-                  fontSize: 28, // Larger font size for the section title
+                  fontSize: 24, // Adjusted for mobile
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Roboto',
                   color: Colors.black,
@@ -196,18 +204,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _pageController,
                       onPageChanged: (index) {
                         setState(() {
-                          selectedIndex = index;
+                          selectedIndex = index % testimonials.length;
                         });
                       },
-                      itemCount: testimonials.length,
                       itemBuilder: (context, index) {
-                        final isSelected = index == selectedIndex;
+                        int adjustedIndex = index % testimonials.length;
+                        bool isSelected = adjustedIndex == selectedIndex;
                         return Transform.scale(
-                          scale: isSelected ? 1.15 : 0.85,
+                          scale: isSelected ? 1.1 : 0.9,
                           child: _buildTestimonialCard(
-                            testimonials[index]['name']!,
-                            testimonials[index]['text']!,
-                            testimonials[index]['personalityType']!,
+                            testimonials[adjustedIndex]['name']!,
+                            testimonials[adjustedIndex]['text']!,
+                            testimonials[adjustedIndex]['personalityType']!,
+                            testimonials[adjustedIndex]['image']!,
                             isSelected,
                           ),
                         );
@@ -256,10 +265,14 @@ class _HomeScreenState extends State<HomeScreen> {
       String name,
       String text,
       String personalityType,
+      String imagePath,
       bool isSelected,
       ) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Container(
-      width: isSelected ? 140 : 100, // Adjust width based on selection
+      width: screenWidth * 0.7, // Adjusted for mobile
       margin: EdgeInsets.symmetric(horizontal: 8.0),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -276,17 +289,21 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(height: 20),
-          Icon(
-            Icons.person, // Placeholder icon
-            size: isSelected ? 90 : 70, // Adjust icon size for selected card
-            color: Colors.grey[700],
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50), // Circular image
+            child: Image.network(
+              imagePath,
+              width: isSelected ? 90 : 70,
+              height: isSelected ? 90 : 70,
+              fit: BoxFit.cover,
+            ),
           ),
           SizedBox(height: 16),
           Text(
             name,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: isSelected ? 20 : 16, // Adjust font size
+              fontSize: isSelected ? 18 : 16,
               fontFamily: 'Roboto',
               color: Colors.black,
             ),
@@ -296,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             personalityType,
             style: TextStyle(
-              fontSize: isSelected ? 18 : 14, // Adjust font size
+              fontSize: isSelected ? 16 : 14,
               fontFamily: 'Roboto',
               color: Colors.grey[600],
             ),
@@ -308,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text(
               text,
               style: TextStyle(
-                fontSize: isSelected ? 16 : 12, // Adjust font size
+                fontSize: isSelected ? 14 : 12,
                 fontFamily: 'Roboto',
                 color: Colors.grey[800],
               ),
@@ -320,7 +337,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 
   Widget _buildHeaderSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
@@ -412,29 +428,51 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           SizedBox(height: 20),
           _videoController1 != null && _videoController1!.value.isInitialized
-              ? Center(
-            child: AspectRatio(
-              aspectRatio: _videoController1!.value.aspectRatio,
-              child: VideoPlayer(_videoController1!),
-            ),
+              ? Column(
+            children: [
+              AspectRatio(
+                aspectRatio: _videoController1!.value.aspectRatio,
+                child: VideoPlayer(_videoController1!),
+              ),
+              VideoControls(controller: _videoController1!),
+            ],
           )
               : CircularProgressIndicator(),
-          IconButton(
-            icon: Icon(
-              _videoController1?.value.isPlaying ?? false ? Icons.pause : Icons.play_arrow,
-            ),
-            onPressed: () {
-              if (_videoController1?.value.isPlaying ?? false) {
-                _videoController1?.pause();
-              } else {
-                _videoController1?.play();
-              }
-            },
-          ),
         ],
       ),
     );
   }
+
+  Widget _buildVideoSection2() {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            "Starte Hier",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          _videoController2 != null && _videoController2!.value.isInitialized
+              ? Column(
+            children: [
+              AspectRatio(
+                aspectRatio: _videoController2!.value.aspectRatio,
+                child: VideoPlayer(_videoController2!),
+              ),
+              VideoControls(controller: _videoController2!),
+            ],
+          )
+              : CircularProgressIndicator(),
+        ],
+      ),
+    );
+  }
+
   Widget _buildQuestionsList(BuildContext context) {
     int start = currentPage * questionsPerPage;
     int end = start + questionsPerPage;
@@ -662,18 +700,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(height: 40),
-              SizedBox(
-                width: screenWidth * 0.7,
-                height: screenHeight * 0.35,
-                child: Image.asset('assets/adventurer_front.png'),
-              ),
+              AdventurerImage(screenWidth: screenWidth, screenHeight: screenHeight),
             ],
           ),
         ),
       ],
     );
   }
-
 
   Widget _buildTutorialSection(BuildContext context) {
     return Container(
@@ -691,41 +724,99 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 
-  Widget _buildVideoSection2() {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "Starte Hier",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+// Reusable Video Controls Widget
+class VideoControls extends StatefulWidget {
+  final VideoPlayerController controller;
+
+  VideoControls({required this.controller});
+
+  @override
+  _VideoControlsState createState() => _VideoControlsState();
+}
+
+class _VideoControlsState extends State<VideoControls> {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        widget.controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+        size: 30,
+        color: Color(0xFFCB9935),
+      ),
+      onPressed: () {
+        setState(() {
+          widget.controller.value.isPlaying
+              ? widget.controller.pause()
+              : widget.controller.play();
+        });
+      },
+    );
+  }
+}
+
+// Adventurer Image with Tap Animation
+class AdventurerImage extends StatefulWidget {
+  final double screenWidth;
+  final double screenHeight;
+
+  AdventurerImage({required this.screenWidth, required this.screenHeight});
+
+  @override
+  _AdventurerImageState createState() => _AdventurerImageState();
+}
+
+class _AdventurerImageState extends State<AdventurerImage> with SingleTickerProviderStateMixin {
+  bool isTapped = false;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 0, end: pi / 8).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  void _handleTap() {
+    setState(() {
+      isTapped = !isTapped;
+      isTapped
+          ? _animationController.forward()
+          : _animationController.reverse();
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _handleTap,
+      child: AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          return Transform(
+            transform: Matrix4.identity()
+              ..rotateY(isTapped ? _animation.value : 0),
+            alignment: Alignment.center,
+            child: Container(
+              width: isTapped ? widget.screenWidth * 0.5 : widget.screenWidth * 0.4,
+              height: isTapped ? widget.screenHeight * 0.5 : widget.screenHeight * 0.4,
+              child: Image.asset('assets/adventurer_front.png'),
             ),
-          ),
-          SizedBox(height: 20),
-          _videoController2 != null && _videoController2!.value.isInitialized
-              ? Center(
-            child: AspectRatio(
-              aspectRatio: _videoController2!.value.aspectRatio,
-              child: VideoPlayer(_videoController2!),
-            ),
-          )
-              : CircularProgressIndicator(),
-          IconButton(
-            icon: Icon(
-              _videoController2?.value.isPlaying ?? false ? Icons.pause : Icons.play_arrow,
-            ),
-            onPressed: () {
-              if (_videoController2?.value.isPlaying ?? false) {
-                _videoController2?.pause();
-              } else {
-                _videoController2?.play();
-              }
-            },
-          ),
-        ],
+          );
+        },
       ),
     );
   }

@@ -1,11 +1,14 @@
 // personality_types_page.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Für rootBundle
+import 'package:flutter/services.dart'; // For rootBundle
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import '../helper_functions/questionnaire_helpers.dart';
-import 'personality_types_desktop_layout.dart'; // Importiere das Desktop-Layout
-import 'mobile_sidebar.dart'; // Importiere die mobile Sidebar
+import 'personality_types_desktop_layout.dart'; // Import the Desktop Layout
+import 'mobile_sidebar.dart'; // Import the mobile Sidebar
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:video_player/video_player.dart';
+import '../helper_functions/video_helper.dart'; // Import the VideoWidget helper
 
 class PersonalityTypesPage extends StatefulWidget {
   @override
@@ -13,6 +16,9 @@ class PersonalityTypesPage extends StatefulWidget {
 }
 
 class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
+  // Video player controller
+  VideoPlayerController? _videoController1;
+
   final List<Map<String, String>> personalityTypes = [
     {
       "name": "Stufe 1: Anonymous",
@@ -50,22 +56,23 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
       "descriptionPath": "assets/auswertungen/Adventurer.txt",
     },
     {
-      "name": "Stufe 8: Life Artist",
+      "name": "Stufe 8: LifeArtist",
       "image": "assets/LifeArtist.webp",
-      "descriptionPath": "assets/auswertungen/Life Artist.txt",
+      "descriptionPath": "assets/auswertungen/LifeArtist.txt",
     },
   ];
 
-  // Map zum Speichern der geladenen Beschreibungen
+  // Map to hold the loaded descriptions
   Map<String, String> loadedDescriptions = {};
 
   @override
   void initState() {
     super.initState();
-    _loadDescriptions(); // Beschreibungen laden
+    _loadDescriptions(); // Load descriptions
+    _initializeVideos(); // Initialize video
   }
 
-  // Methode zum Laden der Beschreibungen aus den .txt-Dateien
+  // Method to load descriptions from .txt files
   Future<void> _loadDescriptions() async {
     for (var type in personalityTypes) {
       String name = type['name']!;
@@ -84,15 +91,33 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
     }
   }
 
+  // Initialize video from Firebase Storage
+  Future<void> _initializeVideos() async {
+    final storage = FirebaseStorage.instance;
+    final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 2.mov';
+    try {
+      // Initialize the video controller
+      String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
+      _videoController1 =
+      VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
+        ..setLooping(true)
+        ..initialize().then((_) {
+          setState(() {});
+        });
+    } catch (e) {
+      print('Error loading video: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScreenTypeLayout(
-      mobile: _buildMobileLayout(context), // Mobiles Layout
-      desktop: PersonalityTypesDesktopLayout(), // Desktop-Layout
+      mobile: _buildMobileLayout(context), // Mobile layout
+      desktop: PersonalityTypesDesktopLayout(), // Desktop layout
     );
   }
 
-  // Mobiles Layout
+  // Mobile layout
   Widget _buildMobileLayout(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
@@ -100,13 +125,12 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
       endDrawer: MobileSidebar(), // Mobile Sidebar
-      appBar: _buildAppBar(context), // AppBar für Mobile
+      appBar: _buildAppBar(context), // AppBar for Mobile
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header-Bereich
+            // Header Section
             Container(
-              height: MediaQuery.of(context).size.height / 3,
               decoration: BoxDecoration(
                 color: Colors.transparent,
               ),
@@ -117,11 +141,18 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                     "Die 8 Persönlichkeitsstufen",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 40, // Angepasste Schriftgröße für Mobile
+                      fontSize: 40, // Adjusted font size for Mobile
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                       fontFamily: 'Roboto',
                     ),
+                  ),
+                  SizedBox(height: 20),
+                  VideoWidget(
+                    videoController: _videoController1,
+                    screenHeight: screenHeight,
+                    headerText: "Was bedeuten die einzelnen Stufen?",
+                    subHeaderText: "Erfahre es im Video!",
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -129,7 +160,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                       "Lerne das Modell kennen.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 18, // Angepasste Schriftgröße für Mobile
+                        fontSize: 18, // Adjusted font size for Mobile
                         color: Colors.black,
                         fontFamily: 'Roboto',
                       ),
@@ -138,13 +169,12 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                 ],
               ),
             ),
-            // Persönlichkeits-Typen
+            // Personality Types Section
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 10),
                   Column(
                     children: personalityTypes.asMap().entries.map((entry) {
                       int index = entry.key;
@@ -156,7 +186,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                       return PersonalityTypeCard(
                         name: name,
                         image: image,
-                        description: description ?? 'Lädt...', // Zeige 'Lädt...' wenn noch nicht geladen
+                        description: description ?? 'Lädt...', // Show 'Loading...' if not yet loaded
                       );
                     }).toList(),
                   ),
@@ -164,7 +194,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
               ),
             ),
             SizedBox(height: 50),
-            // Footer mit Hintergrundbild und Button
+            // Footer Section with Background Image and Button
             Stack(
               children: [
                 Positioned.fill(
@@ -182,7 +212,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                         SelectableText(
                           "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                           style: TextStyle(
-                            fontSize: screenHeight * 0.035, // Angepasst für Mobile
+                            fontSize: screenHeight * 0.035, // Adjusted for Mobile
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                             fontFamily: 'Roboto',
@@ -190,12 +220,11 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                         ),
                         SizedBox(height: 50),
                         ElevatedButton(
-
-
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFCB9935),
-                            shape: RoundedRectangleBorder( // Create square corners
-                              borderRadius: BorderRadius.all(Radius.circular(8.0)), // No rounded corners
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(8.0)),
                             ),
                             padding: EdgeInsets.symmetric(
                               horizontal: screenWidth * 0.07,
@@ -227,7 +256,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
     );
   }
 
-  // AppBar für Mobile mit Menü-Button
+  // AppBar for Mobile with Menu Button
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: SelectableText(
@@ -241,15 +270,20 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
             onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // Öffne die Sidebar
+              Scaffold.of(context).openEndDrawer(); // Open the Sidebar
             },
           ),
         ),
       ],
-      automaticallyImplyLeading: false, // Entferne den Zurück-Button für Mobile
+      automaticallyImplyLeading: false, // Remove back button for Mobile
     );
   }
 
+  @override
+  void dispose() {
+    _videoController1?.dispose();
+    super.dispose();
+  }
 }
 
 class PersonalityTypeCard extends StatefulWidget {
@@ -276,16 +310,16 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
     if (isExpanded) {
       displayDescription = widget.description;
     } else {
-      // Zeige nur die ersten 30 Wörter
+      // Show only the first 45 words
       List<String> words = widget.description.split(' ');
-      if (words.length > 30) {
-        displayDescription = words.sublist(0, 30).join(' ') + '...';
+      if (words.length > 45) {
+        displayDescription = words.sublist(0, 45).join(' ') + '...';
       } else {
         displayDescription = widget.description;
       }
     }
 
-    // Definiere den Button-Stil
+    // Define the button style
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
       backgroundColor: isExpanded ? Colors.black : Color(0xFFCB9935),
       side: BorderSide(color: Color(0xFFCB9935)),
@@ -313,21 +347,21 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
               SelectableText(
                 widget.name,
                 style: TextStyle(
-                  fontSize: 30, // Angepasste Schriftgröße für Mobile
+                  fontSize: 30, // Adjusted font size for Mobile
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
               SizedBox(height: 20),
-              // Scrollbarer Bereich für die Beschreibung
+              // Scrollable area for the description
               isExpanded
                   ? Container(
-                height: 200, // Festgelegte Höhe für den scrollbaren Bereich
+                height: 200, // Fixed height for scrollable area
                 child: SingleChildScrollView(
                   child: SelectableText(
                     displayDescription,
                     style: TextStyle(
-                      fontSize: 18, // Angepasste Schriftgröße für Mobile
+                      fontSize: 18, // Adjusted font size for Mobile
                       color: Colors.black,
                     ),
                     textAlign: TextAlign.center,
@@ -337,7 +371,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
                   : SelectableText(
                 displayDescription,
                 style: TextStyle(
-                  fontSize: 18, // Angepasste Schriftgröße für Mobile
+                  fontSize: 18, // Adjusted font size for Mobile
                   color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
