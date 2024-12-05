@@ -1,3 +1,4 @@
+// lib/screens/home_screen.dart
 // home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ import 'custom_footer.dart'; // Import for the custom footer
 import 'package:video_player/video_player.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:math'; // For transformations
+import 'package:personality_score/helper_functions/video_helper.dart'; // Import VideoWidget
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -18,38 +20,97 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   // Controllers and Keys
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
   final GlobalKey _tutorialKey = GlobalKey();
 
   // State variables
   bool isLoading = true;
   int currentPage = 0;
-  int questionsPerPage = 7;
-  List<String> tutorialQuestions = [
+  final int questionsPerPage = 7;
+  final List<String> tutorialQuestions = [
     'Mit dem Schieberegler kann ich 10 verschiedene Stufen einstellen.',
     'Die Test-Fragen beantworte ich schnell, ohne lange nachzudenken.',
     'Ich antworte ehrlich und gewissenhaft.',
   ];
-  Map<int, int> answers = {};
+  final Map<int, int> answers = {};
 
   // Video player controllers
   VideoPlayerController? _videoController1;
   VideoPlayerController? _videoController2;
+
+  // Testimonial PageController
+  late PageController _testimonialPageController;
+  int initialTestimonialPage = 0;
+  late int selectedTestimonialIndex;
+
+  // Testimonials Data
+  final List<Map<String, String>> testimonials = [
+    {
+      "name": "Andrés",
+      "text":
+      "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
+      "image": "assets/testimonials/Andres.jpg",
+      "personalityType": "Traveller",
+    },
+    {
+      "name": "Jana",
+      "text":
+      "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
+      "image": "assets/testimonials/Jana.jpg",
+      "personalityType": "Traveller",
+    },
+    {
+      "name": "Christoph",
+      "text":
+      "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
+      "image": "assets/testimonials/Christoph.jpg",
+      "personalityType": "Individual",
+    },
+    {
+      "name": "Alex",
+      "text": "Endlich ein Persönlichkeitstest, der mir weiterhilft.",
+      "image": "assets/testimonials/Alex.jpg",
+      "personalityType": "Traveller",
+    },
+    {
+      "name": "Klaus",
+      "text": "Woher kennt er mich so gut?",
+      "image": "assets/testimonials/Klaus.jpg",
+      "personalityType": "Individual",
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
     _initializeVideos();
     _loadTutorialQuestions();
+
+    // Initialize testimonial PageController for infinite scrolling
+    initialTestimonialPage = testimonials.length * 1000;
+    selectedTestimonialIndex = initialTestimonialPage % testimonials.length;
+    _testimonialPageController = PageController(
+      initialPage: initialTestimonialPage,
+      viewportFraction: 0.8,
+    );
+  }
+
+  @override
+  void dispose() {
+    _videoController1?.dispose();
+    _videoController2?.dispose();
+    _testimonialPageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeVideos() async {
     final storage = FirebaseStorage.instance;
     final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 3.mov';
-    final gsUrl2 = 'gs://personality-score.appspot.com/Personality Score 1.mov';
+    final gsUrl2 = 'gs://personality-score.appspot.com/Personality Score 1.mov'; // Replace with the correct URL if different
 
     try {
-      // Load the first video
+      // Initialize the first video controller
       String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
       _videoController1 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
         ..setLooping(true)
@@ -57,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {});
         });
 
-      // Load the second video
+      // Initialize the second video controller
       String downloadUrl2 = await storage.refFromURL(gsUrl2).getDownloadURL();
       _videoController2 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl2))
         ..setLooping(true)
@@ -65,37 +126,37 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {});
         });
     } catch (e) {
-      print('Error loading videos: $e');
+      print('Error loading video: $e');
     }
   }
 
   Future<void> _loadTutorialQuestions() async {
+    // Simulate loading delay
     await Future.delayed(Duration(milliseconds: 500));
     setState(() {
       isLoading = false;
     });
   }
-
-  @override
-  void dispose() {
-    _videoController1?.dispose();
-    _videoController2?.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   // Mobile AppBar (grey background, button for right drawer)
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('PERSONALITY SCORE'),
+      title: Text(
+        'PERSONALITY SCORE',
+        style: TextStyle(
+          fontFamily: 'Roboto',
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+      ),
       backgroundColor: Color(0xFFF7F5EF),
       actions: [
         Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
+            icon: Icon(Icons.menu, color: Colors.black),
             onPressed: () {
               Scaffold.of(context).openEndDrawer();
             },
+            tooltip: 'Menü öffnen',
           ),
         ),
       ],
@@ -149,127 +210,88 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  final List<Map<String, String>> testimonials = [
-    {
-      "name": "Andrés",
-      "text": "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
-      "image": "assets/testimonials/Andres.jpg",
-      "personalityType": "Traveller",
-    },
-    {
-      "name": "Jana",
-      "text": "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
-      "image": "assets/testimonials/Jana.jpg",
-      "personalityType": "Traveller",
-    },
-    {
-      "name": "Christoph",
-      "text": "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
-      "image": "assets/testimonials/Christoph.jpg",
-      "personalityType": "Individual",
-    },
-    {
-      "name": "Alex",
-      "text": "Endlich ein Persönlichkeitstest, der mir weiterhilft.",
-      "image": "assets/testimonials/Alex.jpg",
-      "personalityType": "Traveller",
-    },
-    {
-      "name": "Klaus",
-      "text": "Woher kennt er mich so gut?",
-      "image": "assets/testimonials/Klaus.jpg",
-      "personalityType": "Individual",
-    },
-  ];
-
-
   Widget _buildTestimonialSection() {
-    // Set a high initialPage for infinite scrolling simulation
-    int initialPage = testimonials.length * 1000;
-    PageController _pageController = PageController(initialPage: initialPage, viewportFraction: 0.8);
-    int selectedIndex = initialPage % testimonials.length;
-
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Container(
-          padding: EdgeInsets.all(16.0),
-          color: Color(0xFFF7F5EF),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Was unsere Nutzer sagen",
-                style: TextStyle(
-                  fontSize: 24, // Adjusted for mobile
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Roboto',
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                height: 360, // Adjust height based on design
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    PageView.builder(
-                      controller: _pageController,
-                      onPageChanged: (index) {
-                        setState(() {
-                          selectedIndex = index % testimonials.length;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        int adjustedIndex = index % testimonials.length;
-                        bool isSelected = adjustedIndex == selectedIndex;
-                        return Transform.scale(
-                          scale: isSelected ? 1.1 : 0.9,
-                          child: _buildTestimonialCard(
-                            testimonials[adjustedIndex]['name']!,
-                            testimonials[adjustedIndex]['text']!,
-                            testimonials[adjustedIndex]['personalityType']!,
-                            testimonials[adjustedIndex]['image']!,
-                            isSelected,
-                          ),
-                        );
-                      },
-                    ),
-                    Positioned(
-                      left: 0,
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios),
-                        onPressed: () {
-                          if (_pageController.hasClients) {
-                            _pageController.previousPage(
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_forward_ios),
-                        onPressed: () {
-                          if (_pageController.hasClients) {
-                            _pageController.nextPage(
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-            ],
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      color: Color(0xFFF7F5EF),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            "Was unsere Nutzer sagen",
+            style: TextStyle(
+              fontSize: 24, // Adjusted for mobile
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Roboto',
+              color: Colors.black,
+            ),
           ),
-        );
-      },
+          SizedBox(height: 20),
+          SizedBox(
+            height: 360, // Adjust height based on design
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                PageView.builder(
+                  controller: _testimonialPageController,
+                  onPageChanged: (index) {
+                    if (mounted) {
+                      setState(() {
+                        selectedTestimonialIndex = index % testimonials.length;
+                      });
+                    }
+                  },
+                  itemBuilder: (context, index) {
+                    int adjustedIndex = index % testimonials.length;
+                    bool isSelected = adjustedIndex == selectedTestimonialIndex;
+                    return Transform.scale(
+                      scale: isSelected ? 1.1 : 0.9,
+                      child: _buildTestimonialCard(
+                        testimonials[adjustedIndex]['name']!,
+                        testimonials[adjustedIndex]['text']!,
+                        testimonials[adjustedIndex]['personalityType']!,
+                        testimonials[adjustedIndex]['image']!,
+                        isSelected,
+                      ),
+                    );
+                  },
+                ),
+                Positioned(
+                  left: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back_ios),
+                    onPressed: () {
+                      if (_testimonialPageController.hasClients) {
+                        _testimonialPageController.previousPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    tooltip: 'Vorherige Bewertung',
+                  ),
+                ),
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_forward_ios),
+                    onPressed: () {
+                      if (_testimonialPageController.hasClients) {
+                        _testimonialPageController.nextPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    tooltip: 'Nächste Bewertung',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+        ],
+      ),
     );
   }
 
@@ -281,7 +303,11 @@ class _HomeScreenState extends State<HomeScreen> {
       bool isSelected,
       ) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    // Adjust font sizes based on selection and screen size
+    double nameFontSize = isSelected ? 18 : 16;
+    double typeFontSize = isSelected ? 16 : 14;
+    double textFontSize = isSelected ? 14 : 12;
+    double imageSize = isSelected ? 110 : 85;
 
     return Container(
       width: screenWidth * 0.7, // Adjusted for mobile
@@ -302,12 +328,19 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           SizedBox(height: 20),
           ClipRRect(
-            borderRadius: BorderRadius.circular(50), // Circular image
-            child: Image.network(
+            borderRadius: BorderRadius.circular(imageSize / 2), // Circular image
+            child: Image.asset(
               imagePath,
-              width: isSelected ? 90 : 70,
-              height: isSelected ? 90 : 70,
+              width: imageSize,
+              height: imageSize,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return CircleAvatar(
+                  radius: imageSize / 2,
+                  backgroundColor: Colors.grey[300],
+                  child: Icon(Icons.person, size: imageSize / 2, color: Colors.white),
+                );
+              },
             ),
           ),
           SizedBox(height: 16),
@@ -315,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
             name,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: isSelected ? 18 : 16,
+              fontSize: nameFontSize,
               fontFamily: 'Roboto',
               color: Colors.black,
             ),
@@ -325,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             personalityType,
             style: TextStyle(
-              fontSize: isSelected ? 16 : 14,
+              fontSize: typeFontSize,
               fontFamily: 'Roboto',
               color: Colors.grey[600],
             ),
@@ -337,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text(
               text,
               style: TextStyle(
-                fontSize: isSelected ? 14 : 12,
+                fontSize: textFontSize,
                 fontFamily: 'Roboto',
                 color: Colors.grey[800],
               ),
@@ -401,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _scrollToTutorialSection();
                   },
                   child: Text(
-                    'Beginne den Test',
+                    'Zum Test',
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Roboto',
@@ -426,62 +459,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildVideoSection1() {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "Wieso MUSST du den Personality Score ausfüllen?",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 20),
-          _videoController1 != null && _videoController1!.value.isInitialized
-              ? Column(
-            children: [
-              AspectRatio(
-                aspectRatio: _videoController1!.value.aspectRatio,
-                child: VideoPlayer(_videoController1!),
-              ),
-              VideoControls(controller: _videoController1!),
-            ],
-          )
-              : CircularProgressIndicator(),
-        ],
-      ),
+    return VideoWidget(
+      videoController: _videoController1,
+      screenHeight: MediaQuery.of(context).size.height,
+      headerText: "Wieso MUSST du den Personality Score ausfüllen?",
+      subHeaderText: "Erfahre es im Video!",
     );
   }
 
   Widget _buildVideoSection2() {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "Starte Hier",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 20),
-          _videoController2 != null && _videoController2!.value.isInitialized
-              ? Column(
-            children: [
-              AspectRatio(
-                aspectRatio: _videoController2!.value.aspectRatio,
-                child: VideoPlayer(_videoController2!),
-              ),
-              VideoControls(controller: _videoController2!),
-            ],
-          )
-              : CircularProgressIndicator(),
-        ],
-      ),
+    return VideoWidget(
+      videoController: _videoController2,
+      screenHeight: MediaQuery.of(context).size.height,
+      headerText: "Starte Hier",
+      subHeaderText: "10 Minuten. 120 Fragen. Bis zu deinem Ergebnis!",
     );
   }
 
@@ -553,9 +544,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   Slider(
                     value: (answers[questionIndex] ?? 5).toDouble(),
                     onChanged: (val) {
-                      setState(() {
-                        answers[questionIndex] = val.toInt();
-                      });
+                      if (mounted) {
+                        setState(() {
+                          answers[questionIndex] = val.toInt();
+                        });
+                      }
                     },
                     min: 0,
                     max: 10,
@@ -566,50 +559,53 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'NEIN',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'NEIN',
+                      style: TextStyle(
+                        color: Colors.grey[900],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'EHER NEIN',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
+                    Text(
+                      'EHER NEIN',
+                      style: TextStyle(
+                        color: Colors.grey[900],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'NEUTRAL',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
+                    Text(
+                      'NEUTRAL',
+                      style: TextStyle(
+                        color: Colors.grey[900],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'EHER JA',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
+                    Text(
+                      'EHER JA',
+                      style: TextStyle(
+                        color: Colors.grey[900],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'JA',
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
+                    Text(
+                      'JA',
+                      style: TextStyle(
+                        color: Colors.grey[900],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -736,39 +732,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
 }
 
-// Reusable Video Controls Widget
-class VideoControls extends StatefulWidget {
-  final VideoPlayerController controller;
 
-  VideoControls({required this.controller});
 
-  @override
-  _VideoControlsState createState() => _VideoControlsState();
-}
 
-class _VideoControlsState extends State<VideoControls> {
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(
-        widget.controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-        size: 30,
-        color: Color(0xFFCB9935),
-      ),
-      onPressed: () {
-        setState(() {
-          widget.controller.value.isPlaying
-              ? widget.controller.pause()
-              : widget.controller.play();
-        });
-      },
-    );
-  }
-}
-
-// Adventurer Image with Tap Animation
+// AdventurerImage Widget with hover effect
 class AdventurerImage extends StatefulWidget {
   final double screenWidth;
   final double screenHeight;
@@ -779,56 +749,36 @@ class AdventurerImage extends StatefulWidget {
   _AdventurerImageState createState() => _AdventurerImageState();
 }
 
-class _AdventurerImageState extends State<AdventurerImage> with SingleTickerProviderStateMixin {
-  bool isTapped = false;
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = Tween<double>(begin: 0, end: pi / 8).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-  }
-
-  void _handleTap() {
-    setState(() {
-      isTapped = !isTapped;
-      isTapped
-          ? _animationController.forward()
-          : _animationController.reverse();
-    });
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
+class _AdventurerImageState extends State<AdventurerImage> {
+  bool isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return Transform(
-            transform: Matrix4.identity()
-              ..rotateY(isTapped ? _animation.value : 0),
-            alignment: Alignment.center,
-            child: Container(
-              width: isTapped ? widget.screenWidth * 0.5 : widget.screenWidth * 0.4,
-              height: isTapped ? widget.screenHeight * 0.5 : widget.screenHeight * 0.4,
-              child: Image.asset('assets/adventurer_front.png'),
-            ),
-          );
-        },
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          isHovered = true;
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          isHovered = false;
+        });
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        child: Transform(
+          transform: !isHovered ? Matrix4.identity() : Matrix4.identity()
+            ..setEntry(3, 2, 0.000)
+            ..rotateY(pi / 1),
+          alignment: FractionalOffset.center,
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            width: !isHovered ? widget.screenWidth * 0.7 : widget.screenWidth * 0.8,
+            height: !isHovered ? widget.screenHeight * 0.35 : widget.screenHeight * 0.4,
+            child: Image.asset('assets/adventurer_front.png'),
+          ),
+        ),
       ),
     );
   }
