@@ -114,6 +114,7 @@ class QuestionnaireScreen extends StatelessWidget {
               children: [
                 SizedBox(height: 40),
                 _buildQuestionsList(context, model),
+                SizedBox(height: 10),
                 _buildNavigationButtons(context, model),
                 SizedBox(height: 40),
               ],
@@ -164,7 +165,7 @@ class QuestionnaireScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (question.backgroundInfo != "empty") ...[
+                  if (question.backgroundInfo != "empty" && false) ...[
                     SizedBox(width: 8.0),
                     GestureDetector(
                       onTap: () {
