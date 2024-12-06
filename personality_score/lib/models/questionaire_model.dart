@@ -468,9 +468,6 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
     List<String> teamCharacters;
     String nextSet;
 
-    int possibleScore = _questions.length *
-        10; // Calculate possible score for the current set
-
     double threshold = (_questions.first.set == 'BewussteKompetenz') ? 675 : 540;
     final firstScore = await fetchScoreAndCount('Kompetenz');
 
@@ -518,7 +515,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         return AlertDialog(
           backgroundColor: Color(0xFFC7C7C7),
           title: SelectableText(
-            '$progressScore von $possibleScore Punkte erreicht',
+            '$progressScore von 850 Punkte erreicht',
             style: TextStyle(fontFamily: 'Roboto'),
           ),
           content: SingleChildScrollView(
