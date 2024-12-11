@@ -648,7 +648,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
     String greetingText = 'Gratulation';
 
-    final gsUrl1 = 'gs://personality-score.appspot.com/IYC Acoustic Jingle.mp4';
+    final gsUrl1 = 'gs://personality-score.appspot.com/JingleKomprimiert.mp4';
     showFinalResultDialog(
         context, finalCharacter, finalCharacterDescription, greetingText,
         combinedTotalScore, gsUrl1);
