@@ -8,8 +8,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'signin_dialog.dart'; // Ensure this import is correct
-import 'mobile_sidebar.dart'; // Ensure this import is correct
+import 'signin_dialog.dart';
+import 'mobile_sidebar.dart';
 
 class ProfileMobileLayout extends StatefulWidget {
   final TextEditingController nameController;
@@ -34,7 +34,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
 
   List<Map<String, dynamic>> validResults = [];
   late PageController _pageController;
-  int selectedIndex = 0; // Current page index
+  int selectedIndex = 0; // Aktuelle Seite
 
   @override
   void initState() {
@@ -50,7 +50,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     super.dispose();
   }
 
-  /// Fetch all valid final character results from Firestore
   Future<void> fetchFinalCharacters() async {
     setState(() {
       _isLoading = true;
@@ -59,8 +58,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     try {
       final user = Provider.of<AuthService>(context, listen: false).user;
       if (user != null) {
-        final userDocRef =
-        FirebaseFirestore.instance.collection('users').doc(user.uid);
+        final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
         List<String> resultCollectionNames = ['results'];
 
         for (int i = 1; i <= 100; i++) {
@@ -85,16 +83,31 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
           }
         }
 
-        // Sort by completion date descending
+        // Sortieren nach Abschlussdatum absteigend (neueste zuerst)
         tempResults.sort((a, b) {
           Timestamp dateA = a['completionDate'];
           Timestamp dateB = b['completionDate'];
           return dateB.compareTo(dateA);
         });
 
+        // Umkehren, damit das älteste Ergebnis an Index 0 steht
+        validResults = tempResults.reversed.toList();
+
         setState(() {
-          validResults = tempResults;
-          selectedIndex = 0;
+          _isLoading = false;
+          // Wir wollen beim neuesten Ergebnis starten, das sich jetzt am Ende der Liste befindet
+          selectedIndex = validResults.length - 1;
+        });
+
+        // Nach dem Bauen der Widgets auf die letzte Seite springen:
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (validResults.isNotEmpty) {
+            _pageController.jumpToPage(validResults.length - 1);
+          }
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
         });
       }
     } catch (error) {
@@ -102,14 +115,12 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Fehler beim Laden der Profildaten.')),
       );
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
-  /// Format the timestamp to German date and time
   String _formatTimestamp(Timestamp timestamp) {
     DateTime date = timestamp.toDate();
     final berlin = tz.getLocation('Europe/Berlin');
@@ -118,7 +129,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     return dateFormat.format(dateInGermany) + ' Uhr';
   }
 
-  /// Truncate the description to the first 4 sentences
   String _truncateDescription(String description) {
     List<String> sentences = description.split('. ');
     if (sentences.length <= 4) {
@@ -134,16 +144,14 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
 
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
-      appBar: _buildAppBar(context), // AppBar for Mobile
-      endDrawer: MobileSidebar(), // Sidebar for mobile navigation
+      appBar: _buildAppBar(context),
+      endDrawer: MobileSidebar(),
       body: Center(
         child: SingleChildScrollView(
-          // Prevent overflow on smaller screens
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Column(
               children: [
-                // Name Editing Section
                 widget.isEditingName
                     ? Row(
                   children: [
@@ -182,25 +190,24 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                 ),
                 SizedBox(height: 20),
 
-                // Loading Indicator or Results
                 if (_isLoading)
                   Center(child: CircularProgressIndicator())
                 else if (validResults.isNotEmpty)
                   Column(
                     children: [
                       SizedBox(
-                        height: 550, // Reduced height for mobile
+                        height: 550,
                         child: PageView.builder(
                           controller: _pageController,
                           onPageChanged: (index) {
                             setState(() {
-                              selectedIndex = index % validResults.length;
+                              selectedIndex = index;
                               isExpanded = false;
                             });
                           },
+                          itemCount: validResults.length,
                           itemBuilder: (context, index) {
-                            int adjustedIndex = index % validResults.length;
-                            Map<String, dynamic> data = validResults[adjustedIndex];
+                            Map<String, dynamic> data = validResults[index];
 
                             String completionDate = '';
                             if (data['completionDate'] != null) {
@@ -208,25 +215,29 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                               completionDate = _formatTimestamp(timestamp);
                             }
 
+                            // Ergebnisnummer: Da das älteste bei 0 steht, ist index 0 = Ergebnis 1.
+                            int resultNumber = index + 1;
+
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 SizedBox(height: 10),
-                                // Title with navigation arrows
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     IconButton(
                                       icon: Icon(Icons.arrow_left),
-                                      onPressed: () {
+                                      onPressed: index > 0
+                                          ? () {
                                         _pageController.previousPage(
                                             duration: Duration(milliseconds: 300),
                                             curve: Curves.ease);
-                                      },
+                                      }
+                                          : null,
                                     ),
                                     Expanded(
                                       child: Text(
-                                        'Ergebnis ${adjustedIndex + 1}: abgeschlossen am $completionDate',
+                                        'Ergebnis $resultNumber: abgeschlossen am $completionDate',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontSize: 16,
@@ -237,26 +248,25 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                     ),
                                     IconButton(
                                       icon: Icon(Icons.arrow_right),
-                                      onPressed: () {
+                                      onPressed: index < validResults.length - 1
+                                          ? () {
                                         _pageController.nextPage(
                                             duration: Duration(milliseconds: 300),
                                             curve: Curves.ease);
-                                      },
+                                      }
+                                          : null,
                                     ),
                                   ],
                                 ),
                                 SizedBox(height: 10),
 
-                                // Character Image
                                 CircleAvatar(
-                                  radius: 60, // Reduced radius for mobile
-                                  backgroundImage:
-                                  AssetImage('assets/${data['finalCharacter']}.webp'),
+                                  radius: 60,
+                                  backgroundImage: AssetImage('assets/${data['finalCharacter']}.webp'),
                                   backgroundColor: Colors.transparent,
                                 ),
                                 SizedBox(height: 10),
 
-                                // Description Card
                                 Card(
                                   color: Color(0xFFF7F5EF),
                                   child: Padding(
@@ -275,7 +285,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                         isExpanded
                                             ? Container(
                                           constraints: BoxConstraints(
-                                            maxHeight: 240, // Constrained height
+                                            maxHeight: 240,
                                           ),
                                           child: SingleChildScrollView(
                                             child: SelectableText(
@@ -291,7 +301,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                         )
                                             : Container(
                                           constraints: BoxConstraints(
-                                            maxHeight: 100, // Smaller height when collapsed
+                                            maxHeight: 100,
                                           ),
                                           child: SingleChildScrollView(
                                             child: SelectableText(
@@ -317,8 +327,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                                   ? Colors.black
                                                   : Color(0xFFCB9935),
                                               shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                BorderRadius.all(Radius.circular(8.0)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(8.0)),
                                               ),
                                             ),
                                             onPressed: () {
@@ -343,7 +353,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                               ],
                             );
                           },
-                          itemCount: validResults.length,
                         ),
                       ),
                     ],
@@ -358,7 +367,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                   ),
                 SizedBox(height: 10),
 
-                // Share Button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -391,7 +399,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                 ),
                 SizedBox(height: 20),
 
-                // Logout Button
                 ElevatedButton(
                   onPressed: () async {
                     await authService.logout(context);
@@ -421,7 +428,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     );
   }
 
-  // AppBar for Mobile with Menu Button
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: SelectableText(
@@ -435,13 +441,12 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
             onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // Open the End Drawer (right side)
-
+              Scaffold.of(context).openEndDrawer();
             },
           ),
         ),
       ],
-      automaticallyImplyLeading: false, // Remove back button for Mobile
+      automaticallyImplyLeading: false,
     );
   }
 }

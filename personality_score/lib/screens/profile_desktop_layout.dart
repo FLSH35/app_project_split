@@ -34,12 +34,11 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
   List<Map<String, dynamic>> validResults = [];
   late PageController _pageController;
   int selectedIndex = 0; // Aktuelle Seite
-  int initialPage = 10000; // Für unendliches Scrollen
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: initialPage);
+    _pageController = PageController(initialPage: 0);
     _initialize();
   }
 
@@ -48,8 +47,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
     try {
       final user = Provider.of<AuthService>(context, listen: false).user;
       if (user != null) {
-        final userDocRef =
-        FirebaseFirestore.instance.collection('users').doc(user.uid);
+        final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
 
         List<String> resultCollectionNames = ['results'];
 
@@ -61,33 +59,32 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
 
         for (String collectionName in resultCollectionNames) {
           final collectionRef = userDocRef.collection(collectionName);
-
           final docSnapshot = await collectionRef.doc('finalCharacter').get();
 
           if (docSnapshot.exists) {
             var data = docSnapshot.data() as Map<String, dynamic>?;
-
             if (data != null &&
                 data['combinedTotalScore'] != null &&
-                data['combinedTotalScore'] is num) {
-              if (data['completionDate'] != null) {
-                data['collectionName'] = collectionName;
-                tempResults.add(data);
-              }
+                data['combinedTotalScore'] is num &&
+                data['completionDate'] != null) {
+              data['collectionName'] = collectionName;
+              tempResults.add(data);
             }
           }
         }
 
-        // Sortieren nach Abschlussdatum absteigend
+        // Sortieren nach Abschlussdatum absteigend (neueste zuerst)
         tempResults.sort((a, b) {
           Timestamp dateA = a['completionDate'];
           Timestamp dateB = b['completionDate'];
           return dateB.compareTo(dateA);
         });
 
+        // Umkehren, damit ältestes Ergebnis an Index 0 steht
+        validResults = tempResults.reversed.toList();
+
         setState(() {
-          validResults = tempResults;
-          selectedIndex = initialPage % validResults.length;
+          selectedIndex = 0; // Wir starten bei Seite 0
         });
       }
     } catch (error) {
@@ -112,10 +109,8 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
           ),
         );
 
-        final updatedAuthService =
-        Provider.of<AuthService>(context, listen: false);
-        if (updatedAuthService.user != null &&
-            updatedAuthService.user!.displayName != null) {
+        final updatedAuthService = Provider.of<AuthService>(context, listen: false);
+        if (updatedAuthService.user != null && updatedAuthService.user!.displayName != null) {
           setState(() {
             widget.nameController.text = updatedAuthService.user!.displayName!;
           });
@@ -163,7 +158,6 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
       ),
       body: Center(
         child: SingleChildScrollView(
-          // Hinzugefügt, um Überlauf auf kleineren Bildschirmen zu verhindern
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -212,64 +206,63 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                 Column(
                   children: [
                     SizedBox(
-                      height: 700, // Höhe nach Bedarf anpassen
+                      height: 700,
                       child: PageView.builder(
                         controller: _pageController,
                         onPageChanged: (index) {
                           setState(() {
-                            selectedIndex = index % validResults.length;
+                            selectedIndex = index;
                             isExpanded = false;
                           });
                         },
+                        itemCount: validResults.length,
                         itemBuilder: (context, index) {
-                          int adjustedIndex = index % validResults.length;
-                          Map<String, dynamic> data =
-                          validResults[adjustedIndex];
+                          Map<String, dynamic> data = validResults[index];
 
                           String completionDate = '';
                           if (data['completionDate'] != null) {
                             Timestamp timestamp = data['completionDate'];
                             DateTime date = timestamp.toDate();
 
-                            // Berechne deutsche Zeit
                             int offset = _calculateGermanOffset(date);
-                            DateTime dateInGermany =
-                            date.add(Duration(hours: offset));
-
-                            // Formatierung des Datums und der Uhrzeit
-                            DateFormat dateFormat =
-                            DateFormat('dd.MM.yyyy HH:mm', 'de_DE');
-                            completionDate =
-                                dateFormat.format(dateInGermany) + ' Uhr';
+                            DateTime dateInGermany = date.add(Duration(hours: offset));
+                            DateFormat dateFormat = DateFormat('dd.MM.yyyy HH:mm', 'de_DE');
+                            completionDate = dateFormat.format(dateInGermany) + ' Uhr';
                           }
+
+                          int resultNumber = index + 1;
 
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Titel mit Pfeilen und Nummerierung
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
                                     icon: Icon(Icons.arrow_left),
                                     onPressed: () {
-                                      _pageController.previousPage(
-                                          duration: Duration(milliseconds: 300),
-                                          curve: Curves.ease);
+                                      if (index > 0) {
+                                        _pageController.previousPage(
+                                            duration: Duration(milliseconds: 300),
+                                            curve: Curves.ease);
+                                      }
                                     },
                                   ),
                                   Text(
-                                      'Ergebnis ${adjustedIndex + 1}: abgeschlossen am $completionDate',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Roboto')),
+                                    'Ergebnis $resultNumber: abgeschlossen am $completionDate',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Roboto'),
+                                  ),
                                   IconButton(
                                     icon: Icon(Icons.arrow_right),
                                     onPressed: () {
-                                      _pageController.nextPage(
-                                          duration: Duration(milliseconds: 300),
-                                          curve: Curves.ease);
+                                      if (index < validResults.length - 1) {
+                                        _pageController.nextPage(
+                                            duration: Duration(milliseconds: 300),
+                                            curve: Curves.ease);
+                                      }
                                     },
                                   ),
                                 ],
@@ -277,8 +270,8 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                               SizedBox(height: 20),
                               CircleAvatar(
                                 radius: 100,
-                                backgroundImage: AssetImage(
-                                    'assets/${data['finalCharacter']}.webp'),
+                                backgroundImage:
+                                AssetImage('assets/${data['finalCharacter']}.webp'),
                                 backgroundColor: Colors.transparent,
                               ),
                               SizedBox(height: 20),
@@ -290,10 +283,10 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       SelectableText(
-                                          '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}!',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontFamily: 'Roboto')),
+                                        '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}!',
+                                        style: TextStyle(
+                                            color: Colors.black, fontFamily: 'Roboto'),
+                                      ),
                                       SizedBox(height: 10),
                                       isExpanded
                                           ? Container(
@@ -312,14 +305,11 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                           : Container(
                                         height: 250,
                                         child: Padding(
-                                          padding:
-                                          const EdgeInsets.all(20.0),
+                                          padding: const EdgeInsets.all(20.0),
                                           child: SingleChildScrollView(
                                             child: SelectableText(
-                                              data['finalCharacterDescription'] !=
-                                                  null
-                                                  ? data[
-                                              'finalCharacterDescription']
+                                              data['finalCharacterDescription'] != null
+                                                  ? data['finalCharacterDescription']
                                                   .split('. ')
                                                   .take(4)
                                                   .join('. ') +
@@ -335,14 +325,13 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                       ),
                                       TextButton(
                                         style: ElevatedButton.styleFrom(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 32.0),
+                                          padding: EdgeInsets.symmetric(horizontal: 32.0),
                                           backgroundColor: isExpanded
                                               ? Colors.black
                                               : Color(0xFFCB9935),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(8.0)),
+                                            borderRadius:
+                                            BorderRadius.all(Radius.circular(8.0)),
                                           ),
                                         ),
                                         onPressed: () {
@@ -351,9 +340,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                           });
                                         },
                                         child: Text(
-                                          isExpanded
-                                              ? 'Lese weniger'
-                                              : 'Lese mehr',
+                                          isExpanded ? 'Lese weniger' : 'Lese mehr',
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontFamily: 'Roboto',
@@ -379,7 +366,6 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                   style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
                 ),
               SizedBox(height: 20),
-              // Teilen-Button
               Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -394,16 +380,15 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                     ),
                     onPressed: validResults.isNotEmpty
                         ? () {
-                      Map<String, dynamic> data =
-                      validResults[selectedIndex];
+                      Map<String, dynamic> data = validResults[selectedIndex];
                       String shareText =
                           '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}.\n\nBeschreibung: ${data['finalCharacterDescription']}';
                       Share.share(shareText);
                     }
                         : null,
                     child: Text('Teilen',
-                        style: TextStyle(
-                            color: Colors.white, fontFamily: 'Roboto')),
+                        style:
+                        TextStyle(color: Colors.white, fontFamily: 'Roboto')),
                   ),
                 ],
               ),
@@ -413,8 +398,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                   await authService.logout(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  padding:
-                  EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                  padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
                   backgroundColor: Colors.grey,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(

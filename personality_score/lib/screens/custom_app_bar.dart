@@ -25,14 +25,38 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 Consumer<AuthService>(
                   builder: (context, authService, child) {
-                    return IconButton(
-                      icon: Icon(Icons.person, color: _getIconColor(context, '/profile')),
-                      onPressed: () {
+                    // Check if user is logged in
+                    if (authService.user != null && authService.user!.displayName != null) {
+                      // User is logged in -> show profile icon
+                      return IconButton(
+                        icon: Icon(Icons.person, color: _getIconColor(context, '/profile')),
+                        onPressed: () {
                           Navigator.of(context).pushNamed('/profile');
-                      },
-                    );
+                        },
+                      );
+                    } else {
+                      // User is not logged in -> show login button
+                      return Padding(padding: EdgeInsets.all(6.0), child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          side: BorderSide(color: Color(0xFFCB9935)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('/profile');
+                        },
+                        child: Text(
+                          'Einloggen',
+                          style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                        ),
+                      ),);
+
+                    }
                   },
                 ),
+                // Test-Button (Beginne den Test)
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFCB9935),
@@ -86,7 +110,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight + 30);
 
@@ -127,7 +150,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         emailController: emailController,
         passwordController: passwordController,
         allowAnonymous: false,
-
       ),
     ).then((_) {
       // Dispose controllers when the dialog is closed
@@ -135,5 +157,4 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       passwordController.dispose();
     });
   }
-
 }
