@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/question.dart';
 
+import 'package:personality_score/models/result.dart';
 
 
 /// Creates the next results collection in Firestore and logs the attempt in BigQuery.
@@ -270,5 +271,39 @@ Future<void> exportUserAnswers(
     // Network or parsing error
     print("Error exporting answers: $e");
     // Optionally, show an error message to the user
+  }
+}
+
+
+Future<Result> fetchResultSummary(String userUUID, String resultsX) async {
+  // Construct the URI with query parameters
+  final uri = Uri.https(
+    'us-central1-personality-score.cloudfunctions.net',
+    '/get_result_summary',
+    {
+      'User-UUID': userUUID,
+      'ResultsX': resultsX,
+    },
+  );
+
+  try {
+    // Make the HTTP GET request
+    final response = await http.get(uri);
+
+    // Check if the request was successful
+    if (response.statusCode == 200) {
+      // Decode the JSON response
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+      // Create and return a Result object from JSON
+      return Result.fromJson(jsonResponse);
+    } else {
+      // Handle non-200 responses
+      throw Exception(
+          'Failed to load result summary. Status Code: ${response.statusCode}');
+    }
+  } catch (e) {
+    // Handle any errors that occur during the request
+    throw Exception('Error fetching result summary: $e');
   }
 }

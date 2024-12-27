@@ -1,7 +1,7 @@
 class Result {
   final String userUUID;
   final String resultsX;
-  final int combinedTotalScore;
+  final double combinedTotalScore; // Changed from int to double
   final DateTime completionDate;
   final String finalCharacter;
   final String finalCharacterDescription;
@@ -78,7 +78,7 @@ class Result {
     return Result(
       userUUID: json['User-UUID'] as String,
       resultsX: json['ResultsX'] as String,
-      combinedTotalScore: json['CombinedTotalScore'] as int,
+      combinedTotalScore: (json['CombinedTotalScore'] as num).toDouble(),
       completionDate: DateTime.parse(json['CompletionDate'] as String),
       finalCharacter: json['FinalCharacter'] as String,
       finalCharacterDescription: json['FinalCharacterDescription'] as String,
