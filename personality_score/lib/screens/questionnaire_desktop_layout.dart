@@ -1,3 +1,5 @@
+// questionnaire_desktop_layout.dart
+
 import 'package:flutter/material.dart';
 import 'package:personality_score/screens/signin_dialog.dart';
 import 'package:provider/provider.dart';
@@ -12,11 +14,13 @@ class QuestionnaireDesktopLayout extends StatefulWidget {
   QuestionnaireDesktopLayout({required this.scrollController});
 
   @override
-  _QuestionnaireDesktopLayoutState createState() => _QuestionnaireDesktopLayoutState();
+  _QuestionnaireDesktopLayoutState createState() =>
+      _QuestionnaireDesktopLayoutState();
 }
 
-class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout> {
-  bool isLoading = true;
+class _QuestionnaireDesktopLayoutState
+    extends State<QuestionnaireDesktopLayout> {
+  bool isLoading = true; // Initially set to true to indicate loading
   bool _isAuthenticated = false; // Track authentication status
 
   @override
@@ -35,23 +39,25 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
         if (authService.user != null) {
           setState(() {
             _isAuthenticated = true;
+            isLoading = true; // Start loading questions
           });
           // Load questions after authentication
-          _loadQuestions();
+          await _loadQuestions();
         } else {
-          // User did not sign in; you can handle this case as needed
-          // For example, navigate back or show a message
+          // User did not sign in; handle accordingly
           Navigator.of(context).pop(); // Close the questionnaire screen
         }
       } else {
         // User is already authenticated
         setState(() {
           _isAuthenticated = true;
+          isLoading = true; // Start loading questions
         });
-        _loadQuestions();
+        await _loadQuestions();
       }
     });
   }
+
   Future<void> showSignInDialog(BuildContext context) async {
     await showDialog(
       context: context,
@@ -62,22 +68,35 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
       ),
     );
   }
+
   Future<void> _loadQuestions() async {
     final model = Provider.of<QuestionnaireModel>(context, listen: false);
 
-    if (model.questions.isEmpty) {
-      await model.loadQuestions('Kompetenz');
-    }
+    try {
+      if (model.questions.isEmpty) {
+        await model.loadQuestions('Kompetenz');
+      }
 
-    setState(() {
-      isLoading = false;
-    });
+      setState(() {
+        isLoading = false; // Data loading complete
+      });
+    } catch (e) {
+      // Handle any errors during data loading
+      setState(() {
+        isLoading = false; // Stop loading indicator
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Fehler beim Laden der Fragen: $e'),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // If not authenticated, show a loading indicator or placeholder
-    if (!_isAuthenticated) {
+    // Show loading indicator if either authentication or data loading is in progress
+    if (!_isAuthenticated || isLoading) {
       return Scaffold(
         appBar: CustomAppBar(
           title: 'Personality Score',
@@ -90,9 +109,7 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
       appBar: CustomAppBar(
         title: 'Personality Score',
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Stack(
+      body: Stack(
         children: [
           Positioned.fill(
             child: Container(
@@ -172,20 +189,21 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
                     ),
                   ),
                   SizedBox(width: 8.0),
-                  if(question.backgroundInfo != "empty" && false) Tooltip(
-                        message: question.backgroundInfo, // Add background info to the Question model
-                        padding: EdgeInsets.all(8.0),
-                        textStyle: TextStyle(color: Colors.white, fontSize: 14),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
+                  if (question.backgroundInfo != "empty" && false) // Adjust condition as needed
+                    Tooltip(
+                      message: question.backgroundInfo, // Add background info to the Question model
+                      padding: EdgeInsets.all(8.0),
+                      textStyle: TextStyle(color: Colors.white, fontSize: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
                       child: Icon(
                         Icons.help_outline, // Use a question mark icon
                         color: Colors.grey[700],
                         size: 24.0,
                       ),
-                      ),
+                    ),
                 ],
               ),
               SizedBox(height: 8.0),
@@ -265,7 +283,6 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
     );
   }
 
-
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
     int questionsPerPage = 7; // Number of questions per page
     int start = model.currentPage * questionsPerPage;
@@ -314,68 +331,72 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
             ),
           ),
 
-        // "Fertigstellen" button for the first test
-        if (end >= model.questions.length && !model.isFirstTestCompleted)
-          ElevatedButton(
+        // "Fertigstellen" button for completing tests
+        if (end >= model.questions.length)
+          isLoading
+              ? SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              valueColor:
+              AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+              strokeWidth: 2.0,
+            ),
+          )
+              : ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
-              backgroundColor: Color(0xFFCB9935),
+              padding:
+              EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
+              backgroundColor:
+              model.isFirstTestCompleted && model.isSecondTestCompleted
+                  ? Color(0xFFCB9935) // Final test button color
+                  : Color(0xFFCB9935), // Other test button colors can be adjusted
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
-            onPressed: () {
-              model.completeFirstTest(context);
-              _scrollToFirstQuestion(context);
-            },
-            child: Text(
-              'Fertigstellen',
-              style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
-            ),
-          ),
+            onPressed: isLoading
+                ? null
+                : () async {
+              setState(() {
+                isLoading = true;
+              });
 
-        // "Fertigstellen" button for the second test
-        if (end >= model.questions.length &&
-            model.isFirstTestCompleted &&
-            !model.isSecondTestCompleted)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
-              backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              ),
-            ),
-            onPressed: () {
-              model.completeSecondTest(context);
-              _scrollToFirstQuestion(context);
-            },
-            child: Text(
-              'Fertigstellen',
-              style: TextStyle(
-                  color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
-            ),
-          ),
+              try {
+                // Determine which test to complete based on the current state
+                if (!model.isFirstTestCompleted) {
+                  model.completeFirstTest(context);
+                } else if (!model.isSecondTestCompleted) {
+                  model.completeSecondTest(context);
+                } else if (model.isSecondTestCompleted) {
+                  model.completeFinalTest(context);
+                }
 
-        // Final "Fertigstellen" button for the last test
-        if (end >= model.questions.length && model.isSecondTestCompleted)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
-              backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              ),
-            ),
-            onPressed: () {
-              model.completeFinalTest(context);
-              _scrollToFirstQuestion(context);
+                // Optionally, add any additional logic here
+                _scrollToFirstQuestion(context);
+              } catch (e) {
+                // Check if the widget is still mounted before showing SnackBar
+                if (!mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Ein Fehler ist aufgetreten: $e'),
+                  ),
+                );
+              } finally {
+                if (mounted) {
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
+              }
             },
             child: Text(
               'Fertigstellen',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+                  color: Colors.white,
+                  fontFamily: 'Roboto',
+                  fontSize: 18),
             ),
           ),
       ],
@@ -391,7 +412,6 @@ class _QuestionnaireDesktopLayoutState extends State<QuestionnaireDesktopLayout>
   }
 }
 
-
 class CustomProgressBar extends StatelessWidget {
   final int totalSteps;
   final int currentStep;
@@ -401,7 +421,8 @@ class CustomProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 80.0),
+      padding:
+      const EdgeInsets.symmetric(vertical: 20.0, horizontal: 80.0),
       child: Row(
         children: List.generate(totalSteps, (index) {
           return Expanded(
@@ -410,11 +431,15 @@ class CustomProgressBar extends StatelessWidget {
               children: [
                 Container(
                   height: 8,
-                  color: index <= currentStep ? Color(0xFFCB9935) : Colors.grey,
+                  color: index <= currentStep
+                      ? Color(0xFFCB9935)
+                      : Colors.grey,
                 ),
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: index < currentStep ? Color(0xFFCB9935) : Colors.grey,
+                  backgroundColor: index < currentStep
+                      ? Color(0xFFCB9935)
+                      : Colors.grey,
                   child: index < currentStep
                       ? Icon(
                     Icons.check,

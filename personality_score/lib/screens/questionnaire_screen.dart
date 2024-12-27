@@ -1,3 +1,5 @@
+// questionnaire_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:personality_score/screens/signin_dialog.dart';
 import 'package:provider/provider.dart';
@@ -8,8 +10,14 @@ import 'mobile_sidebar.dart'; // Mobile sidebar
 import '../auth/auth_service.dart';
 import '../models/question.dart';
 
-class QuestionnaireScreen extends StatelessWidget {
+class QuestionnaireScreen extends StatefulWidget {
+  @override
+  _QuestionnaireScreenState createState() => _QuestionnaireScreenState();
+}
+
+class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   final ScrollController _scrollController = ScrollController();
+  bool isLoading = false; // Loading state
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +41,13 @@ class QuestionnaireScreen extends StatelessWidget {
               color: Color(0xFFEDE8DB),
             ),
           ),
-          
+
           // Inside your Consumer2 widget
           Consumer2<AuthService, QuestionnaireModel>(
             builder: (context, authService, model, child) {
               if (authService.user == null) {
                 Future.microtask(() {
-                   showSignInDialog(context); // Show the SignInDialog;
+                  showSignInDialog(context); // Show the SignInDialog;
                 });
                 return SizedBox.shrink();
               }
@@ -57,6 +65,7 @@ class QuestionnaireScreen extends StatelessWidget {
       ),
     );
   }
+
   void showSignInDialog(BuildContext context) {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
@@ -98,7 +107,7 @@ class QuestionnaireScreen extends StatelessWidget {
 
   // Build the questionnaire for mobile layout
   Widget _buildQuestionnaire(BuildContext context, QuestionnaireModel model) {
-    int totalSteps = (model.questions.length / 7).ceil(); // 3 questions per page
+    int totalSteps = (model.questions.length / 7).ceil(); // 7 questions per page
     int currentStep = model.currentPage;
 
     return Column(
@@ -285,6 +294,25 @@ class QuestionnaireScreen extends StatelessWidget {
     int start = model.currentPage * questionsPerPage;
     int end = start + questionsPerPage;
 
+    // Determine if "Fertigstellen" button should be shown
+    bool showCompleteButton = false;
+    String completeButtonAction = '';
+    String completeButtonLabel = 'Fertigstellen';
+    bool isBlackButton = false;
+
+    if (end >= model.questions.length) {
+      if (!model.isFirstTestCompleted) {
+        showCompleteButton = true;
+        completeButtonAction = 'first';
+      } else if (!model.isSecondTestCompleted) {
+        showCompleteButton = true;
+        completeButtonAction = 'second';
+      } else if (model.isSecondTestCompleted) {
+        showCompleteButton = true;
+        completeButtonAction = 'final';
+      }
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -324,63 +352,64 @@ class QuestionnaireScreen extends StatelessWidget {
                   color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
             ),
           ),
-        if (end >= model.questions.length && !model.isFirstTestCompleted)
-          ElevatedButton(
+        if (showCompleteButton)
+          isLoading
+              ? SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+              strokeWidth: 2.0,
+            ),
+          )
+              : ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
-              backgroundColor: Color(0xFFCB9935),
+              backgroundColor: isBlackButton ? Colors.black : Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
-            onPressed: () {
-              model.completeFirstTest(context);
-              _scrollToFirstQuestion(context);
+            onPressed: isLoading
+                ? null
+                : () async {
+              setState(() {
+                isLoading = true;
+              });
+
+              try {
+                // Perform the appropriate action based on completeButtonAction
+                if (completeButtonAction == 'first') {
+                  await model.completeFirstTest(context);
+                } else if (completeButtonAction == 'second') {
+                  await model.completeSecondTest(context);
+                } else if (completeButtonAction == 'final') {
+                  await model.completeFinalTest(context);
+                }
+
+                // Optionally, you can add any additional logic here
+                _scrollToFirstQuestion(context);
+              } catch (e) {
+                // Handle any errors here
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Ein Fehler ist aufgetreten: $e'),
+                  ),
+                );
+              } finally {
+                if (mounted) {
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
+              }
             },
             child: Text(
-              'Fertigstellen',
+              completeButtonLabel,
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
-            ),
-          ),
-        if (end >= model.questions.length &&
-            model.isFirstTestCompleted &&
-            !model.isSecondTestCompleted)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
-              backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              ),
-            ),
-            onPressed: () {
-              model.completeSecondTest(context);
-              _scrollToFirstQuestion(context);
-            },
-            child: Text(
-              'Fertigstellen',
-              style: TextStyle(
-                  color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
-            ),
-          ),
-        if (end >= model.questions.length && model.isSecondTestCompleted)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
-              backgroundColor: Color(0xFFCB9935),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              ),
-            ),
-            onPressed: () {
-              model.completeFinalTest(context);
-              _scrollToFirstQuestion(context);
-            },
-            child: Text(
-              'Fertigstellen',
-              style: TextStyle(
-                  color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+                  color: isBlackButton ? Colors.white : Colors.black,
+                  fontFamily: 'Roboto',
+                  fontSize: 18),
             ),
           ),
       ],

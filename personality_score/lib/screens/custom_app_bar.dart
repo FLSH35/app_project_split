@@ -1,3 +1,5 @@
+// custom_app_bar.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
@@ -5,10 +7,20 @@ import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:personality_score/screens/signin_dialog.dart'; // Import the SignInDialog
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
 
   CustomAppBar({required this.title});
+
+  @override
+  _CustomAppBarState createState() => _CustomAppBarState();
+
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + 30);
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  bool isLoading = false; // Loading state
 
   @override
   Widget build(BuildContext context) {
@@ -36,28 +48,40 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       );
                     } else {
                       // User is not logged in -> show login button
-                      return Padding(padding: EdgeInsets.all(6.0), child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          side: BorderSide(color: Color(0xFFCB9935)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      return Padding(
+                        padding: EdgeInsets.all(6.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            side: BorderSide(color: Color(0xFFCB9935)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pushNamed('/profile');
+                          },
+                          child: Text(
+                            'Einloggen',
+                            style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                           ),
                         ),
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/profile');
-                        },
-                        child: Text(
-                          'Einloggen',
-                          style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-                        ),
-                      ),);
-
+                      );
                     }
                   },
                 ),
-                // Test-Button (Beginne den Test)
-                ElevatedButton(
+                SizedBox(height: 10), // Add some spacing between buttons
+                // Test-Button (Beginne den Test) or CircularProgressIndicator
+                isLoading
+                    ? SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                    strokeWidth: 2.0,
+                  ),
+                )
+                    : ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFCB9935),
                     elevation: 0,
@@ -65,8 +89,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       borderRadius: BorderRadius.all(Radius.circular(8.0)),
                     ),
                   ),
-                  onPressed: () {
-                    handleTakeTest(context); // Your button action
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    await handleTakeTest(context);
+                    setState(() {
+                      isLoading = false;
+                    });
                   },
                   child: Text(
                     'Beginne den Test',
@@ -109,9 +141,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-
-  @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight + 30);
 
   Widget _buildNavButton(BuildContext context, String label, String route) {
     bool isSelected = ModalRoute.of(context)?.settings.name == route;

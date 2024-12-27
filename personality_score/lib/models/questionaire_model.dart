@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:html' as html;
@@ -12,6 +14,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 
+import '../helper_functions/endpoints.dart';
 import '../screens/pdf_viewer_screen.dart';
 import '../screens/signin_dialog.dart';
 
@@ -51,6 +54,7 @@ class QuestionnaireModel with ChangeNotifier {
   bool get isLoading => _isLoading; // Expose loading state to the UI
   int get currentQuestionIndex => _currentQuestionIndex;
 
+
   int get totalScore => _totalScore;
 
   int get currentPage => _currentPage;
@@ -69,51 +73,9 @@ class QuestionnaireModel with ChangeNotifier {
 
   String? get finalCharacterDescription => _finalCharacterDescription;
 
-
   TextEditingController nameController = TextEditingController();
 
-
-  Future<String> getHighestResultCollection() async {
-    User? user = _auth.currentUser;
-    if (user == null) throw Exception("User not logged in");
-
-    try {
-      String userId = user.uid;
-      final userDocRef = FirebaseFirestore.instance.collection('users').doc(userId);
-
-      int maxCollectionNumber = 0;
-
-      // Try accessing collections in sequence
-      while (true) {
-        final collectionName = 'results_${maxCollectionNumber + 1}';
-        final collectionRef = userDocRef.collection(collectionName);
-
-        try {
-          // Attempt to get a document from the collection to check if it exists
-          final snapshot = await collectionRef.limit(1).get();
-          if (snapshot.docs.isNotEmpty) {
-            maxCollectionNumber++;
-          } else {
-            break; // Exit loop if the collection doesn't exist
-          }
-        } catch (e) {
-          // Break the loop if accessing the collection causes an error
-          break;
-        }
-      }
-
-      // Return the highest results collection found
-      if (maxCollectionNumber == 0) {
-        return 'results_1'; // Default to 'results_1' if no results exist
-      }
-      return 'results_$maxCollectionNumber';
-    } catch (e) {
-      print('Error fetching highest result collection: $e');
-      return 'results_1'; // Return default in case of error
-    }
-  }
-
-
+  String? highestResultCollection = null;
 
 
   Future<void> saveProgress() async {
@@ -123,8 +85,6 @@ class QuestionnaireModel with ChangeNotifier {
     User? user = _auth.currentUser;
     if (user != null) {
       try {
-        // Fetch the highest result collection name
-        String? highestResultCollection = await getHighestResultCollection();
 
         if (highestResultCollection == null) {
           throw Exception("No results collection found for the user.");
@@ -144,7 +104,7 @@ class QuestionnaireModel with ChangeNotifier {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .collection(highestResultCollection)
+            .collection(highestResultCollection!)
             .doc(_currentSet)
             .set({
           'set': _currentSet,
@@ -173,14 +133,14 @@ class QuestionnaireModel with ChangeNotifier {
     if (user != null) {
       try {
         // Get the highest result collection
-        String? highestResultCollection = await getHighestResultCollection();
+        highestResultCollection = await getHighestResultCollection(user.uid);
 
         if (highestResultCollection != null) {
           // Fetch the data from the highest result collection
           DocumentSnapshot resultSnapshot = await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
-              .collection(highestResultCollection)
+              .collection(highestResultCollection!)
               .doc(_currentSet)
               .get();
 
@@ -218,59 +178,20 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
 
-  Future<String> createNextResultsCollection() async {
-    User? user = _auth.currentUser;
-    if (user == null) throw Exception("User not logged in");
-
-    try {
-      // Get the highest result collection
-      String? highestResultCollection = await getHighestResultCollection();
-
-      // Determine the next collection number
-      int nextResultNumber = 1; // Default to 1 if no results exist
-      if (highestResultCollection != null) {
-        final match = RegExp(r'results_(\d+)').firstMatch(highestResultCollection);
-        if (match != null) {
-          nextResultNumber = int.parse(match.group(1)!) + 1;
-        }
-      }
-
-      // Create the new collection
-      String newCollectionName = 'results_$nextResultNumber';
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection(newCollectionName)
-          .doc('finalCharacter') // Initial document
-          .set({
-        'createdAt': FieldValue.serverTimestamp(),
-        'status': 'initialized',
-      });
-
-      return newCollectionName;
-    } catch (error) {
-      print("Error creating next results collection: $error");
-      throw Exception("Failed to create next results collection");
-    }
-  }
-
-
-
-
-
-
-
 
   /// Loading questions from the service
   Future<void> loadQuestions(String set) async {
+    User? user = _auth.currentUser;
     _isLoading = true; // Set loading to true while fetching data
     notifyListeners(); // Notify listeners to update the UI
 
     _currentSet = set;
 
+    // Get the highest result collection
+    highestResultCollection = await getHighestResultCollection(user!.uid);
     try {
       // Load questions from the service
-      List<Question> loadedQuestions = await _questionService.loadQuestions(
+      List<Question> loadedQuestions = await _questionService.fetchFilteredQuestions(
           set);
 
       // Create a Set to store unique questions
@@ -294,14 +215,6 @@ class QuestionnaireModel with ChangeNotifier {
       notifyListeners(); // Notify listeners to update the UI
     }
   }
-
-
-
-
-
-
-
-
 
 
   void answerQuestion(int index, int value) {
@@ -368,41 +281,48 @@ class QuestionnaireModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void completeFirstTest(BuildContext context) {
-    score_factor += _questions.length;
+  Future<void> completeFirstTest(BuildContext context) async {
 
+      User? user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
 
-    String message;
-    List<String> teamCharacters;
-    String nextSet;
+      // Await the export operation if it's asynchronous
+      await exportUserAnswers(user.uid, highestResultCollection!, _questions, _answers);
 
-    int possibleScore = _questions.length *
-        10; // Calculate possible score for the current set
+      _totalScore += _questions.length;
 
-    if (_totalScore > 275) { // Check if total score is more than 50% of possible score
-      message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
+      String message;
+      List<String> teamCharacters;
+      String nextSet;
+
+      int possibleScore = _questions.length * 10; // Calculate possible score for the current set
+
+      if (_totalScore > 275) { // Example condition
+        message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
 Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 8. Damit hast du bereits echte „Lebenskompetenz“ erreicht und gehörst damit bereits zu einer kleinen Minderheit. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 im Bereich der „Inkompetenz“ zu verorten sind. Für deine bisherige Entwicklung also schonmal ein dickes Lob.
 Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
 """;
-      teamCharacters = [
-        "LifeArtist.webp",
-        "Individual.webp",
-        "Adventurer.webp",
-        "Traveller.webp"
-      ];
-      nextSet = 'BewussteKompetenz';
-    } else {
-      message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
-      Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 1 und Stufe 4. Noch hast du wahre „Lebenskompetenz“ (diese beginnt ab Stufe 5) nicht erreicht, sondern befindest dich auf dem Weg dahin. Das ist aber überhaupt nicht schlimm, sondern völlig normal. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 zu verorten sind.
-    Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
-    """;
+        teamCharacters = [
+          "LifeArtist.webp",
+          "Individual.webp",
+          "Adventurer.webp",
+          "Traveller.webp"
+        ];
+        nextSet = 'BewussteKompetenz';
+      } else {
+        message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
+Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 1 und Stufe 4. Noch hast du wahre „Lebenskompetenz“ (diese beginnt ab Stufe 5) nicht erreicht, sondern befindest dich auf dem Weg dahin. Das ist aber überhaupt nicht schlimm, sondern völlig normal. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 zu verorten sind.
+Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
+""";
 
-      teamCharacters =
-      ["Resident.webp", "Explorer.webp", "Reacher.webp", "Anonymous.webp"];
-      nextSet = 'BewussteInkompetenz';
-    }
+        teamCharacters = ["Resident.webp", "Explorer.webp", "Reacher.webp", "Anonymous.webp"];
+        nextSet = 'BewussteInkompetenz';
+      }
 
-    showDialog(
+
+      showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -462,6 +382,9 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
 
 
   Future<void> completeSecondTest(BuildContext context) async {
+    User? user = _auth.currentUser;
+    exportUserAnswers(user!.uid, highestResultCollection!, _questions, _answers);
+
     score_factor += _questions.length;
 
     String message;
@@ -584,7 +507,10 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
   }
 
 
-  void completeFinalTest(BuildContext context) async {
+  Future<void> completeFinalTest(BuildContext context) async {
+    User? user = _auth.currentUser;
+    exportUserAnswers(user!.uid, highestResultCollection!, _questions, _answers);
+
     String finalCharacter;
 
     final firstScore = await fetchScoreAndCount('Kompetenz');
@@ -607,8 +533,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     }
 
     // Load the final character's description
-    String finalCharacterDescription = await loadFinalCharacterDescription(
-        finalCharacter);
+    String finalCharacterDescription = await loadFinalCharacterDescription(finalCharacter);
 
     // Update final character and description in the model
     _finalCharacter = finalCharacter;
@@ -617,20 +542,19 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
 
     try {
-      // Get the highest result collection
-      String? highestResultCollection = await getHighestResultCollection();
+      // Save final character and description to Firestore
+      User? user = _auth.currentUser;
+
 
       if (highestResultCollection == null) {
         print("No result collections found.");
         return;
       }
-      // Save final character and description to Firestore
-      User? user = _auth.currentUser;
       if (user != null) {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .collection(highestResultCollection)
+            .collection(highestResultCollection!)
             .doc('finalCharacter')
             .set({
           'finalCharacter': _finalCharacter,
@@ -638,17 +562,24 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
           // Add the combined total score here
           'completionDate': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+
+
+        await calculateCombinedTotalScore(user.uid,highestResultCollection!);
+
+        await exportUserResults(finalCharacter: _finalCharacter!, userUuid: user.uid, resultsX: highestResultCollection!, combinedTotalScore: combinedTotalScore, finalCharacterDescription: _finalCharacterDescription!);
       }
+
     } catch (error) {
       print("Error saving final character to highest result collection: $error");
     }
 
-
-  await calculateCombinedTotalScore();
+    await aggregateLebensbereiche(userUuid: user.uid, resultsX: highestResultCollection!);
 
     String greetingText = 'Gratulation';
 
     final gsUrl1 = 'gs://personality-score.appspot.com/JingleKomprimiert.mp4';
+
+
     showFinalResultDialog(
         context, finalCharacter, finalCharacterDescription, greetingText,
         combinedTotalScore, gsUrl1);
@@ -1135,14 +1066,13 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     User? user = _auth.currentUser;
     if (user != null) {
       try {
-        // Get the highest result collection
-        final highestResultCollection = await getHighestResultCollection();
+
 
         if (highestResultCollection != null) {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .collection(highestResultCollection)
+            .collection(highestResultCollection!)
             .doc('finalCharacter')
             .set({
           'userRating': rating,
@@ -1162,14 +1092,12 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     User? user = _auth.currentUser;
     if (user != null) {
       try {
-        // Get the highest result collection
-        final highestResultCollection = await getHighestResultCollection();
 
         if (highestResultCollection != null) {
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
-              .collection(highestResultCollection)
+              .collection(highestResultCollection!)
               .doc('finalCharacter')
               .set({
             'certificatePath': path, // Save only the certificate path
@@ -1192,15 +1120,14 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
     if (user != null) {
       try {
-        // Get the highest result collection
-        final highestResultCollection = await getHighestResultCollection();
+
 
         if (highestResultCollection != null) {
           // Retrieve the document
           final docSnapshot = await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
-              .collection(highestResultCollection)
+              .collection(highestResultCollection!)
               .doc('finalCharacter')
               .get();
 
@@ -1255,15 +1182,14 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     User? user = _auth.currentUser;
     if (user != null) {
       try {
-        // Get the highest result collection
-        final highestResultCollection = await getHighestResultCollection();
+
 
         if (highestResultCollection != null) {
           // Fetch the highest result collection for the "Kompetenz" test
           final firstTestDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
-              .collection(highestResultCollection)
+              .collection(highestResultCollection!)
               .doc('Kompetenz') // Assuming "Kompetenz" is a fixed test name
               .get();
 
@@ -1285,8 +1211,6 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     if (user == null) return {'score': 0, 'questions': 0};
 
 
-        // Get the highest result collection
-    final highestResultCollection = await getHighestResultCollection();
 
     final doc = await FirebaseFirestore.instance
         .collection('users')
@@ -1307,7 +1231,8 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
 
 
-  Future<void> calculateCombinedTotalScore() async {
+  Future<void> calculateCombinedTotalScore(
+  String userUuid,String resultCollectionName) async {
     User? user = _auth.currentUser;
     if (user == null) return;
 
@@ -1337,15 +1262,13 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
           ? ((totalScore / totalQuestions) * 10).round()
           : 0;
 
-      // Get the highest result collection
-      final highestResultCollection = await getHighestResultCollection();
 
       if (highestResultCollection != null) {
         // Save combined score to Firebase
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .collection(highestResultCollection)
+            .collection(highestResultCollection!)
             .doc('finalCharacter')
             .set({
           'combinedTotalScore': combinedTotalScore,
@@ -1359,6 +1282,159 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     } catch (error, stackTrace) {
       print("Error calculating combined total score: $error");
       print(stackTrace);
+    }
+  }
+
+
+  /// Funktion zum Exportieren von Benutzerergebnissen.
+  ///
+  /// [userUuid] ist die UUID des Benutzers.
+  /// [resultsX] ist der Name der Ergebnisse.
+  /// [combinedTotalScore] ist der kombinierte Gesamtscore.
+  /// [completionDate] ist das Abschlussdatum im ISO-Format.
+  /// [finalCharacter] ist der finale Charakter.
+  /// [finalCharacterDescription] ist die Beschreibung des finalen Charakters.
+  ///
+  /// Gibt eine Map zurück, die die Antwort der Cloud-Funktion enthält,
+  /// oder wirft eine Ausnahme bei Fehlern.
+  Future<Map<String, dynamic>> exportUserResults({
+    required String userUuid,
+    required String resultsX,
+    required int combinedTotalScore,
+    required String finalCharacter,
+    required String finalCharacterDescription,
+  }) async {
+    // Die URL deiner Cloud-Funktion
+    final String url =
+        'https://us-central1-personality-score.cloudfunctions.net/export_user_results';
+
+    // Generiere das Abschlussdatum als ISO 8601-String in UTC
+    final String completionDate = DateTime.now().toUtc().toIso8601String();
+
+    // Die zu sendenden Daten
+    final Map<String, dynamic> requestBody = {
+      'user_uuid': userUuid,
+      'results_x': resultsX,
+      'combined_total_score': combinedTotalScore,
+      'completion_date': completionDate,
+      'final_character': finalCharacter,
+      'final_character_description': finalCharacterDescription,
+    };
+
+    try {
+      // Sende eine POST-Anfrage mit JSON-Körper
+      final http.Response response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      // Überprüfe den Statuscode der Antwort
+      if (response.statusCode == 200) {
+        // Parse die JSON-Antwort
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return responseData;
+      } else {
+        // Versuche, die Fehlernachricht aus der Antwort zu extrahieren
+        String errorMessage = 'Fehler: ${response.statusCode}';
+
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(response.body);
+          if (errorData.containsKey('error')) {
+            errorMessage = errorData['error'];
+          }
+        } catch (_) {
+          // Ignoriere das Parsen, wenn es fehlschlägt
+        }
+
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      // Fange alle anderen Fehler ab
+      throw Exception('Fehler beim Exportieren der Benutzerergebnisse: $e');
+    }
+  }
+
+  /// Beispielaufruf der Funktion
+  void sendUserResults() async {
+    try {
+      Map<String, dynamic> response = await exportUserResults(
+        userUuid: 'user-1234-uuid',
+        resultsX: 'results_special',
+        combinedTotalScore: 50,
+        finalCharacter: 'Resident',
+        finalCharacterDescription: '',
+      );
+      print('Erfolg: $response');
+    } catch (e) {
+      print('Fehler: $e');
+    }
+  }
+  Map<String, dynamic> prepareData(String resultsX, String userUuid) {
+    List<Map<String, dynamic>> answersWithIds = [];
+
+    for (int i = 0; i < _questions.length; i++) {
+      String frageId = _questions[i].id as String; // Ensure each question has a unique 'id'
+      int? answer = _answers[i];
+
+      if (frageId.isNotEmpty && answer != null) {
+        answersWithIds.add({
+          'FrageID': frageId,
+          'Answer': answer.toString(), // Convert to string if needed
+        });
+      }
+    }
+
+    return {
+      'resultsX': resultsX,
+      'userUuid': userUuid,
+      'answers': answersWithIds,
+    };
+  }
+
+  // Inside your QuestionnaireModel class
+  Future<void> exportAnswersToBigQuery(String resultsX) async {
+    User? user = _auth.currentUser;
+
+    if (user == null) {
+      throw Exception("User not authenticated.");
+    }
+
+    String userUuid = user.uid;
+
+    // Prepare the data payload
+    Map<String, dynamic> data = prepareData(resultsX, userUuid);
+
+    // Cloud Function URL (replace with your actual endpoint)
+    final String cloudFunctionUrl = 'https://us-central1-personality-score.cloudfunctions.net/exportAnswersToBigQuery';
+
+    try {
+      // Send POST request to the Cloud Function
+      final response = await http.post(
+        Uri.parse(cloudFunctionUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authentication headers if your Cloud Function requires them
+          // 'Authorization': 'Bearer YOUR_AUTH_TOKEN',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        // Successfully inserted into BigQuery
+        print('Successfully exported answers to BigQuery.');
+      } else {
+        // Handle server errors
+        print('Failed to export answers. Status Code: ${response.statusCode}');
+        print('Response Body: ${response.body}');
+        throw Exception('Failed to export answers to BigQuery.');
+      }
+    } catch (e) {
+      // Handle network or other errors
+      print('Error exporting answers to BigQuery: $e');
+      throw Exception('Error exporting answers to BigQuery: $e');
     }
   }
 

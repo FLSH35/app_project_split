@@ -1,13 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:intl/intl.dart'; // Import für Datum und Zeitformatierung
-import 'custom_app_bar.dart'; // Import der benutzerdefinierten AppBar
-import 'package:personality_score/screens/signin_dialog.dart'; // Import des Anmelde-Dialogs
+import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'custom_app_bar.dart';
+import 'package:personality_score/screens/signin_dialog.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:developer' as logging;
 
 class ProfileDesktopLayout extends StatefulWidget {
   final TextEditingController nameController;
@@ -33,7 +35,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
 
   List<Map<String, dynamic>> validResults = [];
   late PageController _pageController;
-  int selectedIndex = 0; // Aktuelle Seite
+  int selectedIndex = 0; // Current page index
 
   @override
   void initState() {
@@ -42,59 +44,67 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
     _initialize();
   }
 
-  Future<void> fetchFinalCharacters() async {
-    _isLoading = true;
+  Future<void> fetchFinalCharactersFromCloudFunction() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final user = Provider.of<AuthService>(context, listen: false).user;
       if (user != null) {
-        final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+        final uuid = user.uid;
+        final url = Uri.parse(
+            'https://us-central1-personality-score.cloudfunctions.net/get_user_results?uuid=$uuid');
 
-        List<String> resultCollectionNames = ['results'];
+        logging.log("Fetching data from Cloud Function for UUID: $uuid");
 
-        for (int i = 1; i <= 100; i++) {
-          resultCollectionNames.add('results_$i');
+        final response = await http.get(url);
+
+        if (response.statusCode == 200) {
+          List<dynamic> data = json.decode(response.body);
+
+          // Validate and map the data
+          List<Map<String, dynamic>> tempResults = data.map((item) {
+            return {
+              "combinedTotalScore": item['CombinedTotalScore'],
+              "finalCharacter": item['FinalCharacter'],
+              "finalCharacterDescription": item['FinalCharacterDescription'],
+              "completionDate": item['CompletionDate'],
+              "collectionName": item['ResultsX'], // Entspricht 'collectionName'
+            };
+          }).toList();
+
+          // Sort the results by completionDate ascending (ältestes zuerst)
+          tempResults.sort((a, b) {
+            DateTime dateA = DateTime.parse(a['completionDate']);
+            DateTime dateB = DateTime.parse(b['completionDate']);
+            return dateA.compareTo(dateB); // Ascending order
+          });
+
+          validResults = tempResults;
+
+          setState(() {
+            selectedIndex = validResults.length -1; // Start bei letztem Ergebnis
+            _pageController = PageController(initialPage: 0);
+          });
+
+          logging.log("Successfully fetched and processed ${validResults.length} results.");
+        } else {
+          logging.log("Failed to fetch data from Cloud Function. Status Code: ${response.statusCode}");
         }
-
-        List<Map<String, dynamic>> tempResults = [];
-
-        for (String collectionName in resultCollectionNames) {
-          final collectionRef = userDocRef.collection(collectionName);
-          final docSnapshot = await collectionRef.doc('finalCharacter').get();
-
-          if (docSnapshot.exists) {
-            var data = docSnapshot.data() as Map<String, dynamic>?;
-            if (data != null &&
-                data['combinedTotalScore'] != null &&
-                data['combinedTotalScore'] is num &&
-                data['completionDate'] != null) {
-              data['collectionName'] = collectionName;
-              tempResults.add(data);
-            }
-          }
-        }
-
-        // Sortieren nach Abschlussdatum absteigend (neueste zuerst)
-        tempResults.sort((a, b) {
-          Timestamp dateA = a['completionDate'];
-          Timestamp dateB = b['completionDate'];
-          return dateB.compareTo(dateA);
-        });
-
-        // Umkehren, damit ältestes Ergebnis an Index 0 steht
-        validResults = tempResults.reversed.toList();
-
-        setState(() {
-          selectedIndex = 0; // Wir starten bei Seite 0
-        });
       }
     } catch (error) {
+      logging.log("Error fetching data from Cloud Function: $error");
       print("Fehler beim Laden der Profildaten: $error");
     }
-    _isLoading = false;
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _initialize() async {
-    await initializeDateFormatting('de_DE', null); // Lokalisierungsdaten initialisieren
+    await initializeDateFormatting('de_DE', null); // Localization
     final authService = Provider.of<AuthService>(context, listen: false);
 
     if (authService.user == null || authService.user?.displayName == null) {
@@ -114,16 +124,16 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
           setState(() {
             widget.nameController.text = updatedAuthService.user!.displayName!;
           });
-          fetchFinalCharacters();
+          await fetchFinalCharactersFromCloudFunction();
         } else {
-          // Handle fehlgeschlagene Anmeldung
+          // Handle failed login
         }
       });
     } else {
       setState(() {
         widget.nameController.text = authService.user!.displayName!;
       });
-      fetchFinalCharacters();
+      await fetchFinalCharactersFromCloudFunction();
     }
   }
 
@@ -134,9 +144,9 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
     dstEnd = DateTime(date.year, 10, dstEnd.day, 3);
 
     if (date.isAfter(dstStart) && date.isBefore(dstEnd)) {
-      return 2; // Sommerzeit (MESZ)
+      return 2; // Daylight Saving Time (CEST)
     } else {
-      return 1; // Winterzeit (MEZ)
+      return 1; // Standard Time (CET)
     }
   }
 
@@ -150,6 +160,11 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final user = Provider.of<AuthService>(context, listen: false).user;
+    String uuid = "";
+    if (user != null) {
+      uuid = user.uid;
+    }
 
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
@@ -209,28 +224,29 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                       height: 700,
                       child: PageView.builder(
                         controller: _pageController,
+                        reverse: true, // Neueste zuerst anzeigen
                         onPageChanged: (index) {
                           setState(() {
-                            selectedIndex = index;
+                            selectedIndex = validResults.length - 1 - index;
                             isExpanded = false;
                           });
                         },
                         itemCount: validResults.length,
                         itemBuilder: (context, index) {
-                          Map<String, dynamic> data = validResults[index];
+                          // Index umdrehen, da reverse = true
+                          int sortedIndex = validResults.length - 1 - index;
+                          Map<String, dynamic> data = validResults[sortedIndex];
 
                           String completionDate = '';
-                          if (data['completionDate'] != null) {
-                            Timestamp timestamp = data['completionDate'];
-                            DateTime date = timestamp.toDate();
-
+                          if (data['completionDate'] != null && data['completionDate'] != '') {
+                            DateTime date = DateTime.parse(data['completionDate']);
                             int offset = _calculateGermanOffset(date);
                             DateTime dateInGermany = date.add(Duration(hours: offset));
                             DateFormat dateFormat = DateFormat('dd.MM.yyyy HH:mm', 'de_DE');
                             completionDate = dateFormat.format(dateInGermany) + ' Uhr';
                           }
 
-                          int resultNumber = index + 1;
+                          int resultNumber = sortedIndex + 1; // Älteste = 1
 
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -241,8 +257,8 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                   IconButton(
                                     icon: Icon(Icons.arrow_left),
                                     onPressed: () {
-                                      if (index > 0) {
-                                        _pageController.previousPage(
+                                      if (index < validResults.length - 1) {
+                                        _pageController.nextPage(
                                             duration: Duration(milliseconds: 300),
                                             curve: Curves.ease);
                                       }
@@ -258,8 +274,8 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                   IconButton(
                                     icon: Icon(Icons.arrow_right),
                                     onPressed: () {
-                                      if (index < validResults.length - 1) {
-                                        _pageController.nextPage(
+                                      if (index > 0) {
+                                        _pageController.previousPage(
                                             duration: Duration(milliseconds: 300),
                                             curve: Curves.ease);
                                       }
@@ -290,7 +306,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                       SizedBox(height: 10),
                                       isExpanded
                                           ? Container(
-                                        height: 300,
+                                        height: 250,
                                         child: SingleChildScrollView(
                                           child: SelectableText(
                                             data['finalCharacterDescription'] ??
@@ -362,10 +378,14 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                 )
               else
                 SelectableText(
-                  'Kein Ergebnis gefunden.',
+                  'Kein Ergebnis gefunden. $uuid',
                   style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
                 ),
               SizedBox(height: 20),
+
+              // ------------------------------------
+              //  TEILEN-BUTTON
+              // ------------------------------------
               Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -380,19 +400,54 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                     ),
                     onPressed: validResults.isNotEmpty
                         ? () {
-                      Map<String, dynamic> data = validResults[selectedIndex];
+                      // Aktuelles PageView-Item ermitteln
+                      int sortedIndex = validResults.length - 1 - selectedIndex;
+                      Map<String, dynamic> data = validResults[sortedIndex];
                       String shareText =
                           '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}.\n\nBeschreibung: ${data['finalCharacterDescription']}';
                       Share.share(shareText);
                     }
                         : null,
-                    child: Text('Teilen',
-                        style:
-                        TextStyle(color: Colors.white, fontFamily: 'Roboto')),
+                    child: Text(
+                      'Teilen',
+                      style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                    ),
+                  ),
+
+                  // NEU: UPSELLING-/PAYWALL-BUTTON
+                  SizedBox(width: 10),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.lock, color: Colors.white), // Schloss-Icon
+                    label: Text(
+                      'Details freischalten',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Roboto'
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      ),
+                    ),
+                    onPressed: () {
+                      // TODO: Hier Paywall-/Upselling-Logik einfügen
+                      // 1. Paywall zeigen oder Payment-Flow starten
+                      // 2. Bei Erfolg -> zusätzliche Inhalte/Analyse freischalten
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Upselling/Paywall geöffnet.'),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
+
               SizedBox(height: 20),
+
               ElevatedButton(
                 onPressed: () async {
                   await authService.logout(context);

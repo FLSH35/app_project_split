@@ -2,10 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/models/questionaire_model.dart'; // Adjust the path accordingly
-import 'package:personality_score/auth/auth_service.dart';
+import 'package:personality_score/helper_functions/endpoints.dart';
 
-void handleTakeTest(BuildContext context) {
-  final authService = Provider.of<AuthService>(context, listen: false);
+Future<void> handleTakeTest(BuildContext context) async {
   final model = Provider.of<QuestionnaireModel>(context, listen: false);
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -13,18 +12,18 @@ void handleTakeTest(BuildContext context) {
 
   if (user == null) {
     Navigator.of(context).pushNamed('/questionnaire');
+    return;
   }
 
   // If the total score is zero, navigate directly to the questionnaire
   if (model.totalScore == 0) {
-    model.createNextResultsCollection().then((_) {
-      Navigator.of(context).pushNamed('/questionnaire');
-    });
+    await createNextResultsCollection(user.uid);
+    Navigator.of(context).pushNamed('/questionnaire');
     return;
   }
 
   // If the total score is not zero, show the dialog
-  showDialog(
+  await showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
@@ -57,7 +56,7 @@ void handleTakeTest(BuildContext context) {
             onPressed: () {
               // Reset the model and create a new results collection
               model.reset();
-              model.createNextResultsCollection().then((_) {
+              createNextResultsCollection(user.uid).then((_) {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushNamed('/questionnaire'); // Start fresh
               });
@@ -92,4 +91,3 @@ void handleTakeTest(BuildContext context) {
     },
   );
 }
-

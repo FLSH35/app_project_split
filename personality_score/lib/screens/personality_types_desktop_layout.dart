@@ -310,7 +310,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
     }
 
     // Set a fixed height for the card
-    double cardHeight = 600; // Adjust this value as needed
+    double cardHeight = isExpanded? 600: 400; // Adjust this value as needed
 
     // Define the button style
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(

@@ -8,7 +8,7 @@ class Question {
   final int value;
   final int relevancy;
   final String set;
-  final String backgroundInfo; // Add this field
+  final String backgroundInfo;
   final int id;
 
   Question({
@@ -17,7 +17,7 @@ class Question {
     required this.relevancy,
     required this.set,
     required this.backgroundInfo,
-    required this.id
+    required this.id,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) => _$QuestionFromJson(json);
