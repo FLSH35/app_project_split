@@ -167,6 +167,7 @@ class Result {
     };
   }
 }
+
 String cleanDateString(String dateStr) {
   // Entfernt die zusätzlichen Millisekunden und das "+" vor "Z"
   return dateStr.replaceAllMapped(
@@ -462,11 +463,13 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
         title: 'Personality Score',
       ),
       body: Center(
-        child: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          constraints: BoxConstraints(maxWidth: 1200), // Optional: Begrenzung der Maximalbreite
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Name Editing Widgets
               widget.isEditingName
                   ? Row(
                 mainAxisSize: MainAxisSize.min,
@@ -508,236 +511,240 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
               if (_isLoading)
                 Center(child: CircularProgressIndicator())
               else if (validResults.isNotEmpty)
-                Column(
-                  children: [
-                    SizedBox(
-                      height: 700,
-                      child: PageView.builder(
-                        controller: _pageController,
-                        reverse: true, // Neueste zuerst anzeigen
-                        onPageChanged: (index) {
-                          setState(() {
-                            selectedIndex = validResults.length - 1 - index;
-                          });
-                        },
-                        itemCount: validResults.length,
-                        itemBuilder: (context, index) {
-                          // Index umdrehen, da reverse = true
-                          int sortedIndex = validResults.length - 1 - index;
-                          UserResult userResult = validResults[sortedIndex];
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: PageView.builder(
+                          controller: _pageController,
+                          reverse: true, // Neueste zuerst anzeigen
+                          onPageChanged: (index) {
+                            setState(() {
+                              selectedIndex = validResults.length - 1 - index;
+                            });
+                          },
+                          itemCount: validResults.length,
+                          itemBuilder: (context, index) {
+                            // Index umdrehen, da reverse = true
+                            int sortedIndex = validResults.length - 1 - index;
+                            UserResult userResult = validResults[sortedIndex];
 
-                          String completionDate = '';
-                          if (userResult.completionDate.isNotEmpty) {
-                            DateTime date = DateTime.parse(userResult.completionDate);
-                            int offset = _calculateGermanOffset(date);
-                            DateTime dateInGermany = date.add(Duration(hours: offset));
-                            DateFormat dateFormat = DateFormat('dd.MM.yyyy HH:mm', 'de_DE');
-                            completionDate = dateFormat.format(dateInGermany) + ' Uhr';
-                          }
+                            String completionDate = '';
+                            if (userResult.completionDate.isNotEmpty) {
+                              DateTime date = DateTime.parse(userResult.completionDate);
+                              int offset = _calculateGermanOffset(date);
+                              DateTime dateInGermany = date.add(Duration(hours: offset));
+                              DateFormat dateFormat = DateFormat('dd.MM.yyyy HH:mm', 'de_DE');
+                              completionDate = dateFormat.format(dateInGermany) + ' Uhr';
+                            }
 
-                          int resultNumber = sortedIndex + 1; // Älteste = 1
+                            int resultNumber = sortedIndex + 1; // Älteste = 1
 
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
+                            return SingleChildScrollView(
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  IconButton(
-                                    icon: Icon(Icons.arrow_left),
-                                    onPressed: () {
-                                      if (index < validResults.length - 1) {
-                                        _pageController.nextPage(
-                                            duration: Duration(milliseconds: 300),
-                                            curve: Curves.ease);
-                                      }
-                                    },
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.arrow_left),
+                                        onPressed: () {
+                                          if (index < validResults.length - 1) {
+                                            _pageController.nextPage(
+                                                duration: Duration(milliseconds: 300),
+                                                curve: Curves.ease);
+                                          }
+                                        },
+                                      ),
+                                      Text(
+                                        'Ergebnis $resultNumber: abgeschlossen am $completionDate',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Roboto'),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.arrow_right),
+                                        onPressed: () {
+                                          if (index > 0) {
+                                            _pageController.previousPage(
+                                                duration: Duration(milliseconds: 300),
+                                                curve: Curves.ease);
+                                          }
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    'Ergebnis $resultNumber: abgeschlossen am $completionDate',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Roboto'),
+                                  SizedBox(height: 20),
+                                  CircleAvatar(
+                                    radius: 100,
+                                    backgroundImage:
+                                    AssetImage('assets/${userResult.finalCharacter}.webp'),
+                                    backgroundColor: Colors.transparent,
                                   ),
-                                  IconButton(
-                                    icon: Icon(Icons.arrow_right),
-                                    onPressed: () {
-                                      if (index > 0) {
-                                        _pageController.previousPage(
-                                            duration: Duration(milliseconds: 300),
-                                            curve: Curves.ease);
-                                      }
-                                    },
+                                  SizedBox(height: 20),
+                                  Card(
+                                    color: Color(0xFFF7F5EF),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SelectableText(
+                                            '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!',
+                                            style: TextStyle(
+                                                color: Colors.black, fontFamily: 'Roboto'),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          SizedBox(height: 10),
+                                          // Beschreibung ausklappen
+                                          userResult.isExpanded
+                                              ? Container(
+                                            child: Column(
+                                              children: [
+                                                SelectableText(
+                                                  userResult.finalCharacterDescription.isNotEmpty
+                                                      ? userResult.finalCharacterDescription
+                                                      : 'Beschreibung nicht verfügbar.',
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontFamily: 'Roboto',
+                                                      fontSize: 18),
+                                                ),
+                                                SizedBox(height: 10),
+                                              ],
+                                            ),
+                                          )
+                                              : Container(
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(20.0),
+                                              child: SelectableText(
+                                                userResult.finalCharacterDescription.isNotEmpty
+                                                    ? userResult.finalCharacterDescription
+                                                    .split('. ')
+                                                    .take(4)
+                                                    .join('. ') +
+                                                    '...'
+                                                    : 'Beschreibung nicht verfügbar.',
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 18),
+                                              ),
+                                            ),
+                                          ),
+                                          TextButton(
+                                            style: ElevatedButton.styleFrom(
+                                              padding: EdgeInsets.symmetric(horizontal: 32.0),
+                                              backgroundColor: userResult.isExpanded
+                                                  ? Colors.black
+                                                  : Color(0xFFCB9935),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                BorderRadius.all(Radius.circular(8.0)),
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                userResult.isExpanded = !userResult.isExpanded;
+                                              });
+                                            },
+                                            child: Text(
+                                              userResult.isExpanded ? 'Lese weniger' : 'Lese mehr',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontFamily: 'Roboto',
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(height: 10),
+                                          // ------------------- Mehr Details Button -------------------
+                                          if (userResult.isExpanded)
+                                            Column(
+                                              children: [
+                                                userResult.detailedResult != null
+                                                    ? _buildDetailedResultUI(userResult.detailedResult!)
+                                                    : userResult.isLoadingDetails
+                                                    ? CircularProgressIndicator()
+                                                    : userResult.errorLoadingDetails != null
+                                                    ? Text(
+                                                  'Fehler: ${userResult.errorLoadingDetails}',
+                                                  style:
+                                                  TextStyle(color: Colors.red),
+                                                )
+                                                    : ElevatedButton(
+                                                  onPressed: () async {
+                                                    setState(() {
+                                                      userResult.isLoadingDetails = true;
+                                                      userResult.errorLoadingDetails = null;
+                                                    });
+                                                    try {
+                                                      // Fetch detailed result
+                                                      Result detailedResult =
+                                                      await fetchResultSummary(
+                                                        uuid,
+                                                        userResult.collectionName,
+                                                      );
+                                                      if (!mounted) return;
+                                                      setState(() {
+                                                        userResult.detailedResult =
+                                                            detailedResult;
+                                                      });
+                                                    } catch (e) {
+                                                      if (!mounted) return;
+                                                      setState(() {
+                                                        userResult.errorLoadingDetails =
+                                                            e.toString();
+                                                      });
+                                                    } finally {
+                                                      if (mounted) {
+                                                        setState(() {
+                                                          userResult.isLoadingDetails =
+                                                          false;
+                                                        });
+                                                      }
+                                                    }
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                    Color(0xFFCB9935),
+                                                    padding: EdgeInsets.symmetric(
+                                                        horizontal: 20,
+                                                        vertical: 12),
+                                                    shape:
+                                                    RoundedRectangleBorder(
+                                                      borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(8.0)),
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    'Mehr Details laden',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontFamily: 'Roboto',
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          // ------------------- End Mehr Details Button -------------------
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 20),
-                              CircleAvatar(
-                                radius: 100,
-                                backgroundImage:
-                                AssetImage('assets/${userResult.finalCharacter}.webp'),
-                                backgroundColor: Colors.transparent,
-                              ),
-                              SizedBox(height: 20),
-                              Card(
-                                color: Color(0xFFF7F5EF),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SelectableText(
-                                        '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!',
-                                        style: TextStyle(
-                                            color: Colors.black, fontFamily: 'Roboto'),
-                                      ),
-                                      SizedBox(height: 10),
-                                      // Beschreibung ausklappen
-                                      userResult.isExpanded
-                                          ? Container(
-                                        height: 150,
-                                        child: SingleChildScrollView(
-                                          child: SelectableText(
-                                            userResult.finalCharacterDescription.isNotEmpty
-                                                ? userResult.finalCharacterDescription
-                                                : 'Beschreibung nicht verfügbar.',
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontFamily: 'Roboto',
-                                                fontSize: 18),
-                                          ),
-                                        ),
-                                      )
-                                          : Container(
-                                        height: 150,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(20.0),
-                                          child: SingleChildScrollView(
-                                            child: SelectableText(
-                                              userResult.finalCharacterDescription.isNotEmpty
-                                                  ? userResult.finalCharacterDescription
-                                                  .split('. ')
-                                                  .take(4)
-                                                  .join('. ') +
-                                                  '...'
-                                                  : 'Beschreibung nicht verfügbar.',
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontFamily: 'Roboto',
-                                                  fontSize: 18),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      TextButton(
-                                        style: ElevatedButton.styleFrom(
-                                          padding: EdgeInsets.symmetric(horizontal: 32.0),
-                                          backgroundColor: userResult.isExpanded
-                                              ? Colors.black
-                                              : Color(0xFFCB9935),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                            BorderRadius.all(Radius.circular(8.0)),
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            userResult.isExpanded = !userResult.isExpanded;
-                                          });
-                                        },
-                                        child: Text(
-                                          userResult.isExpanded ? 'Lese weniger' : 'Lese mehr',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontFamily: 'Roboto',
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 10),
-                                      // ------------------- Mehr Details Button -------------------
-                                      if (userResult.isExpanded)
-                                        Column(
-                                          children: [
-                                            userResult.detailedResult != null
-                                                ? _buildDetailedResultUI(userResult.detailedResult!)
-                                                : userResult.isLoadingDetails
-                                                ? CircularProgressIndicator()
-                                                : userResult.errorLoadingDetails != null
-                                                ? Text(
-                                              'Fehler: ${userResult.errorLoadingDetails}',
-                                              style: TextStyle(
-                                                  color: Colors.red),
-                                            )
-                                                : ElevatedButton(
-                                              onPressed: () async {
-                                                setState(() {
-                                                  userResult.isLoadingDetails = true;
-                                                  userResult.errorLoadingDetails = null;
-                                                });
-                                                try {
-                                                  // Fetch detailed result
-                                                  Result detailedResult =
-                                                  await fetchResultSummary(
-                                                    uuid,
-                                                    userResult.collectionName,
-                                                  );
-                                                  if (!mounted) return;
-                                                  setState(() {
-                                                    userResult.detailedResult =
-                                                        detailedResult;
-                                                  });
-                                                } catch (e) {
-                                                  if (!mounted) return;
-                                                  setState(() {
-                                                    userResult.errorLoadingDetails =
-                                                        e.toString();
-                                                  });
-                                                } finally {
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      userResult.isLoadingDetails =
-                                                      false;
-                                                    });
-                                                  }
-                                                }
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                Color(0xFFCB9935),
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: 20, vertical: 12),
-                                                shape:
-                                                RoundedRectangleBorder(
-                                                  borderRadius:
-                                                  BorderRadius.all(
-                                                      Radius.circular(8.0)),
-                                                ),
-                                              ),
-                                              child: Text(
-                                                'Mehr Details laden',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontFamily: 'Roboto',
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      // ------------------- End Mehr Details Button -------------------
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                  ],
+                      SizedBox(height: 20),
+                    ],
+                  ),
                 )
               else
                 SelectableText(
@@ -783,10 +790,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                     icon: Icon(Icons.lock, color: Colors.white), // Schloss-Icon
                     label: Text(
                       'Details freischalten',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Roboto'
-                      ),
+                      style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
@@ -838,5 +842,4 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
       ),
     );
   }
-
 }
