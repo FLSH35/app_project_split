@@ -48,6 +48,33 @@ class _MobileSidebarState extends State<MobileSidebar> {
                 ),
               ),
 
+
+              // Ab hier die restlichen ListTiles
+              ListTile(
+                title: const Text('ALLGEMEIN'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushNamed('/home');
+                },
+              ),
+              ListTile(
+                title: const Text('EINSTUFUNG'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushNamed('/personality_types');
+                },
+              ),
+              Consumer<AuthService>(
+                builder: (context, authService, child) {
+                  return ListTile(
+                    title: const Text('PROFIL'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushNamed('/profile');
+                    },
+                  );
+                },
+              ),
               // Hier kommt der Bereich: entweder "Anmelden"-Button oder User-Icon + Name
               Consumer<AuthService>(
                 builder: (context, authService, child) {
@@ -129,32 +156,6 @@ class _MobileSidebarState extends State<MobileSidebar> {
                 },
               ),
 
-              // Ab hier die restlichen ListTiles
-              ListTile(
-                title: const Text('ALLGEMEIN'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed('/home');
-                },
-              ),
-              ListTile(
-                title: const Text('EINSTUFUNG'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed('/personality_types');
-                },
-              ),
-              Consumer<AuthService>(
-                builder: (context, authService, child) {
-                  return ListTile(
-                    title: const Text('PROFIL'),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushNamed('/profile');
-                    },
-                  );
-                },
-              ),
             ],
           ),
         ),

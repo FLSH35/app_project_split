@@ -8,7 +8,6 @@ import 'firebase_options.dart'; // Ensure you have this file generated
 import 'package:personality_score/screens/profile_screen.dart';
 import 'package:personality_score/models/questionaire_model.dart';
 import 'package:personality_score/screens/personality_type_screen.dart'; // Import the new screen
-import 'package:personality_score/screens/questionnaire_tutorial_screen.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:html' as html;
@@ -66,7 +65,6 @@ class MyApp extends StatelessWidget {
           '/': (context) => HomeScreen(),
           '/home': (context) => HomeScreen(),
           '/questionnaire': (context) => QuestionnaireScreen(),
-          '/questionnaire_tutorial': (context) => QuestionnaireTutorialScreen(), // New route
           '/profile': (context) => ProfileScreen(),
           '/personality_types': (context) => PersonalityTypesPage(),
           '/impressum': (context) => ImpressumPage(),
