@@ -193,15 +193,9 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _scrollController,
       child: Column(
         children: [
-          SizedBox(height: 200),
-          Positioned.fill(
-            child: Image.asset(
-              'assets/ps_background_ai.jpg',
-              fit: BoxFit.cover,
-              width: screenWidth,
-            ),
-          ),
+          SizedBox(height: 50),
           _buildHeaderSection(context, screenHeight, screenWidth),
+          SizedBox(height: 50),
           SizedBox(height: 200),
           _buildVideoSection1(),
           SizedBox(height: 200),
@@ -398,6 +392,14 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Center(
             child: Column(
               children: [
+
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/ps_background_ai.jpg',
+                    fit: BoxFit.cover,
+                    width: screenWidth,
+                  ),
+                ),
                 SelectableText(
                   "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
