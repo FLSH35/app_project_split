@@ -617,6 +617,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
         emailController: emailController,
         passwordController: passwordController,
         allowAnonymous: false,
+        nextRoute: '/questionnaire',
       ),
     ).then((_) {
       // Dispose controllers when the dialog is closed

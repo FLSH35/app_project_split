@@ -62,7 +62,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                             Navigator.of(context).pushNamed('/profile');
                           },
                           child: Text(
-                            'Einloggen',
+                            'Anmelden',
                             style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
                           ),
                         ),

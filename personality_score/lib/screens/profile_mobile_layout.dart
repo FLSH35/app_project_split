@@ -297,6 +297,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
           emailController: TextEditingController(),
           passwordController: TextEditingController(),
           allowAnonymous: false,
+          nextRoute: '/profile',
         ),
       );
 

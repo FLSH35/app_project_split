@@ -73,6 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             emailController: TextEditingController(),
             passwordController: TextEditingController(),
             allowAnonymous: false,
+            nextRoute: '/profile',
           ),
         );
 

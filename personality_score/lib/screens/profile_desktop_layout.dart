@@ -160,6 +160,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
             emailController: TextEditingController(),
             passwordController: TextEditingController(),
             allowAnonymous: false,
+            nextRoute: '/profile'
           ),
         );
 

@@ -5,8 +5,8 @@ import 'package:personality_score/screens/signin_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import '../models/questionaire_model.dart';
-import 'questionnaire_desktop_layout.dart'; // Desktop layout
-import 'mobile_sidebar.dart'; // Mobile sidebar
+import 'questionnaire_desktop_layout.dart'; // Desktop Layout
+import 'mobile_sidebar.dart';              // Mobile Sidebar
 import '../auth/auth_service.dart';
 import '../models/question.dart';
 
@@ -17,104 +17,166 @@ class QuestionnaireScreen extends StatefulWidget {
 
 class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   final ScrollController _scrollController = ScrollController();
-  bool isLoading = false; // Loading state
+
+  /// Zeigt an, ob gerade geladen wird (z.B. Fragen werden geholt) oder
+  /// wichtige Aktionen (z.B. Login) im Gange sind.
+  bool isLoading = true;
+
+  /// Gibt an, ob ein:e User:in überhaupt eingeloggt ist.
+  bool _isAuthenticated = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Nach dem ersten Frame prüfen, ob ein User eingeloggt ist;
+    // ggf. SignIn-Dialog anzeigen und Fragen laden.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final authService = Provider.of<AuthService>(context, listen: false);
+
+      // Ist noch niemand eingeloggt?
+      if (authService.user == null) {
+        // Sign-In-Dialog anzeigen
+        await showSignInDialog(context);
+
+        // Prüfen, ob sich jemand eingeloggt hat; wenn nein, Seite schließen:
+        if (authService.user == null) {
+          Navigator.of(context).pop();
+          return; // Abbrechen
+        }
+      }
+
+      // Falls wir hier ankommen, ist jemand eingeloggt:
+      setState(() {
+        _isAuthenticated = true;
+        isLoading = true; // Startet das Laden der Fragen
+      });
+
+      // Fragen laden
+      await _loadQuestions();
+    });
+  }
+
+  /// Lädt die Fragen (z.B. aus Firestore).
+  Future<void> _loadQuestions() async {
+    final model = Provider.of<QuestionnaireModel>(context, listen: false);
+
+    try {
+      if (model.questions.isEmpty) {
+        // Nur laden, wenn noch keine Fragen im Modell vorhanden sind
+        await model.loadQuestions('Kompetenz');
+      }
+    } catch (e) {
+      // Fehlermeldung anzeigen
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fehler beim Laden der Fragen: $e'),
+          ),
+        );
+      }
+    } finally {
+      // Wir sind fertig (Erfolg oder Fehler), daher Ladezustand beenden
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  /// Zeigt den SignInDialog an, um sich einzuloggen.
+  Future<void> showSignInDialog(BuildContext context) async {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) => SignInDialog(
+        emailController: emailController,
+        passwordController: passwordController,
+        allowAnonymous: true,
+        nextRoute: '/questionnaire',
+      ),
+    );
+
+    // Nach dem Schließen des Dialogs die Controller entsorgen
+    emailController.dispose();
+    passwordController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Zeige einen Ladekreisel, solange nicht authentifiziert oder noch geladen wird
+    if (!_isAuthenticated || isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Fragen'),
+          backgroundColor: Color(0xFFF7F5EF),
+        ),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Layout für Mobile vs. Desktop
     return ScreenTypeLayout(
       mobile: _buildMobileLayout(context),
       desktop: QuestionnaireDesktopLayout(
         scrollController: _scrollController,
-      ), // Desktop layout
+      ),
     );
   }
 
-  // Mobile Layout
+  /// Erzeugt das Layout für Mobile
   Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(context), // Add AppBar with a menu button
-      endDrawer: MobileSidebar(), // Mobile sidebar for navigation
+      appBar: _buildAppBar(context),
+      endDrawer: MobileSidebar(),
       body: Stack(
         children: [
           Positioned.fill(
-            child: Container(
-              color: Color(0xFFEDE8DB),
-            ),
+            child: Container(color: Color(0xFFEDE8DB)),
           ),
-
-          // Inside your Consumer2 widget
-          Consumer2<AuthService, QuestionnaireModel>(
-            builder: (context, authService, model, child) {
-              if (authService.user == null) {
-                Future.microtask(() {
-                  showSignInDialog(context); // Show the SignInDialog;
-                });
-                return SizedBox.shrink();
-              }
-
-              if (model.questions.isEmpty) {
-                model.loadQuestions('Kompetenz');
-                return Center(child: CircularProgressIndicator());
-              }
-
+          // Nachdem Auth + Fragen geladen wurden, zeigen wir den Fragebogen an
+          Consumer<QuestionnaireModel>(
+            builder: (context, model, child) {
               return _buildQuestionnaire(context, model);
             },
           ),
-
         ],
       ),
     );
   }
 
-  void showSignInDialog(BuildContext context) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => SignInDialog(
-        emailController: emailController,
-        passwordController: passwordController,
-
-        allowAnonymous: true,
-      ),
-    ).then((_) {
-      // Dispose controllers when the dialog is closed
-      emailController.dispose();
-      passwordController.dispose();
-    });
-  }
-
-
-  // Mobile AppBar with a menu button to open the sidebar
+  /// AppBar mit Menü-Button für Mobile
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text('FRAGEN'),
-      backgroundColor: Color(0xFFF7F5EF), // Light grey for mobile
+      backgroundColor: Color(0xFFF7F5EF),
       actions: [
         Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu), // Menu icon to open the sidebar
+            icon: Icon(Icons.menu),
             onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // Open the sidebar for mobile
+              Scaffold.of(context).openEndDrawer();
             },
           ),
         ),
       ],
-      automaticallyImplyLeading: false, // Remove back button for mobile
+      automaticallyImplyLeading: false, // Kein Zurück-Button automatisch
     );
   }
 
-  // Build the questionnaire for mobile layout
+  /// Baut den eigentlichen Fragebogen-Body für Mobile
   Widget _buildQuestionnaire(BuildContext context, QuestionnaireModel model) {
-    int totalSteps = (model.questions.length / 7).ceil(); // 7 questions per page
+    int totalSteps = (model.questions.length / 7).ceil();
     int currentStep = model.currentPage;
 
     return Column(
       children: [
-        // Progress bar stays on top and does not scroll
+        // Fortschrittsbalken oben
         CustomProgressBar(totalSteps: totalSteps, currentStep: currentStep),
-        // Scrollable content
+        // Scrollbarer Bereich mit den Fragen + Buttons
         Expanded(
           child: SingleChildScrollView(
             controller: _scrollController,
@@ -135,19 +197,22 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   }
 
   Widget _buildQuestionsList(BuildContext context, QuestionnaireModel model) {
-    int questionsPerPage = 7; // Only show 7 questions per page
+    int questionsPerPage = 7;
     int start = model.currentPage * questionsPerPage;
     int end = start + questionsPerPage;
 
-    // Ensure end does not go beyond the number of questions
+    // Unterliste der Fragen für die aktuelle Seite
     List<Question> currentQuestions = model.questions.sublist(
-        start, end > model.questions.length ? model.questions.length : end);
+      start,
+      end > model.questions.length ? model.questions.length : end,
+    );
 
     return Column(
       children: currentQuestions.map((question) {
         int questionIndex = start + currentQuestions.indexOf(question);
+
         return Container(
-          margin: EdgeInsets.only(bottom: 40.0), // Margin between questions
+          margin: EdgeInsets.only(bottom: 40.0),
           height: MediaQuery.of(context).size.height / 4,
           padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
           decoration: BoxDecoration(
@@ -157,6 +222,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Frage-Text
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -174,6 +240,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                       ),
                     ),
                   ),
+                  // Beispiel: Hintergrundinfo via Tooltip oder Dialog
                   if (question.backgroundInfo != "empty" && false) ...[
                     SizedBox(width: 8.0),
                     GestureDetector(
@@ -181,7 +248,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                         _showInfoDialog(context, question.backgroundInfo);
                       },
                       child: Icon(
-                        Icons.help_outline, // Question mark icon
+                        Icons.help_outline,
                         color: Colors.grey[700],
                         size: 24.0,
                       ),
@@ -190,14 +257,15 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                 ],
               ),
               SizedBox(height: 8.0),
+
+              // Slider (mit Ticks im Hintergrund)
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Row of vertical lines with margin to align with slider divisions
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(width: 12.0), // Adjust width to match desired margin
+                      SizedBox(width: 12.0),
                       Expanded(
                         child: Container(
                           margin: EdgeInsets.symmetric(horizontal: 12.0),
@@ -206,8 +274,8 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                             children: List.generate(11, (index) {
                               return Container(
                                 width: 1,
-                                height: 20, // Height of the tick mark
-                                color: Colors.grey, // Color of the tick mark
+                                height: 20,
+                                color: Colors.grey,
                               );
                             }),
                           ),
@@ -216,47 +284,69 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                       SizedBox(width: 12.0),
                     ],
                   ),
-                  // The slider itself
                   Slider(
                     value: question.value < 0
                         ? 10 - (model.answers[questionIndex] ?? 0).toDouble()
                         : (model.answers[questionIndex] ?? 0).toDouble(),
                     onChanged: (val) {
                       model.answerQuestion(
-                          questionIndex,
-                          question.value < 0 ? 10 - val.toInt() : val.toInt());
+                        questionIndex,
+                        question.value < 0 ? 10 - val.toInt() : val.toInt(),
+                      );
                     },
                     min: 0,
                     max: 10,
-                    divisions: 10, // Indicates 10 steps on the slider
+                    divisions: 10,
                     activeColor: Color(0xFFCB9935),
                     inactiveColor: Colors.grey,
                     thumbColor: Color(0xFFCB9935),
                   ),
                 ],
               ),
+
+              // Skalen-Beschriftung
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SelectableText(
                     'NEIN',
-                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
                   SelectableText(
                     'EHER NEIN',
-                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
                   SelectableText(
                     'NEUTRAL',
-                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
                   SelectableText(
                     'EHER JA',
-                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
                   SelectableText(
                     'JA',
-                    style: TextStyle(color: Colors.grey[900], fontSize: 12, fontWeight: FontWeight.w300),
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
                 ],
               ),
@@ -276,9 +366,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
           content: Text(backgroundInfo),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: Text("Close"),
             ),
           ],
@@ -287,19 +375,18 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     );
   }
 
-
-
+  /// Buttons zum Navigieren zwischen den Seiten + Test-Abschluss
   Widget _buildNavigationButtons(BuildContext context, QuestionnaireModel model) {
-    int questionsPerPage = 7; // Adjusted for mobile layout
+    int questionsPerPage = 7;
     int start = model.currentPage * questionsPerPage;
     int end = start + questionsPerPage;
 
-    // Determine if "Fertigstellen" button should be shown
     bool showCompleteButton = false;
     String completeButtonAction = '';
     String completeButtonLabel = 'Fertigstellen';
     bool isBlackButton = false;
 
+    // Wenn wir am Ende angelangt sind, soll ggf. "Fertigstellen" angezeigt werden
     if (end >= model.questions.length) {
       if (!model.isFirstTestCompleted) {
         showCompleteButton = true;
@@ -316,6 +403,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
+        // Zurück-Button
         if (model.currentPage > 0)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -330,9 +418,14 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             child: Text(
               'Zurück',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+                color: Colors.white,
+                fontFamily: 'Roboto',
+                fontSize: 18,
+              ),
             ),
           ),
+
+        // Weiter-Button (sofern noch nicht letzte Seite)
         if (end < model.questions.length)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -344,14 +437,19 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             ),
             onPressed: () {
               model.nextPage(context);
-              _scrollToFirstQuestion(context);
+              _scrollToFirstQuestion();
             },
             child: Text(
               'Weiter',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+                color: Colors.white,
+                fontFamily: 'Roboto',
+                fontSize: 18,
+              ),
             ),
           ),
+
+        // Fertigstellen-Button (wenn letzter Fragenblock)
         if (showCompleteButton)
           isLoading
               ? SizedBox(
@@ -378,7 +476,6 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
               });
 
               try {
-                // Perform the appropriate action based on completeButtonAction
                 if (completeButtonAction == 'first') {
                   await model.completeFirstTest(context);
                 } else if (completeButtonAction == 'second') {
@@ -386,11 +483,8 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                 } else if (completeButtonAction == 'final') {
                   await model.completeFinalTest(context);
                 }
-
-                // Optionally, you can add any additional logic here
-                _scrollToFirstQuestion(context);
+                _scrollToFirstQuestion();
               } catch (e) {
-                // Handle any errors here
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Ein Fehler ist aufgetreten: $e'),
@@ -407,24 +501,27 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             child: Text(
               completeButtonLabel,
               style: TextStyle(
-                  color: isBlackButton ? Colors.white : Colors.black,
-                  fontFamily: 'Roboto',
-                  fontSize: 18),
+                color: isBlackButton ? Colors.white : Colors.black,
+                fontFamily: 'Roboto',
+                fontSize: 18,
+              ),
             ),
           ),
       ],
     );
   }
 
-  void _scrollToFirstQuestion(BuildContext context) {
+  /// Scrollt wieder nach oben
+  void _scrollToFirstQuestion() {
     _scrollController.animateTo(
       0.0,
-      duration: Duration(seconds: 1),
+      duration: Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
   }
 }
 
+/// Fortschrittsbalken für die Seiten
 class CustomProgressBar extends StatelessWidget {
   final int totalSteps;
   final int currentStep;
@@ -434,8 +531,8 @@ class CustomProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          vertical: 20.0, horizontal: 16.0), // Adjusted padding for mobile
+      // Für Mobile Layout etwas engeres Padding
+      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
       child: Row(
         children: List.generate(totalSteps, (index) {
           return Expanded(
@@ -444,13 +541,11 @@ class CustomProgressBar extends StatelessWidget {
               children: [
                 Container(
                   height: 8,
-                  color:
-                  index <= currentStep ? Color(0xFFCB9935) : Colors.grey,
+                  color: index <= currentStep ? Color(0xFFCB9935) : Colors.grey,
                 ),
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor:
-                  index < currentStep ? Color(0xFFCB9935) : Colors.grey,
+                  backgroundColor: index < currentStep ? Color(0xFFCB9935) : Colors.grey,
                   child: index < currentStep
                       ? Icon(
                     Icons.check,

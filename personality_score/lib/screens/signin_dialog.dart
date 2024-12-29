@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore access
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:http/http.dart' as http;
-import 'package:firebase_auth/firebase_auth.dart'; // Import for FirebaseAuth
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignInDialog extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final bool allowAnonymous;
 
+  /// Route, zu der nach erfolgreichem Login/Sign-up navigiert werden soll.
+  final String nextRoute;
+
   SignInDialog({
     required this.emailController,
     required this.passwordController,
     required this.allowAnonymous,
+    this.nextRoute = '/home', // Default, falls nichts übergeben wird
   });
 
   @override
@@ -22,22 +26,21 @@ class SignInDialog extends StatefulWidget {
 }
 
 class _SignInDialogState extends State<SignInDialog> {
-  bool _isAnimating = false; // Flag to control the success animation
-  bool _isSignUpMode = true; // Flag to toggle between sign-in and sign-up
-  bool _isLoading = false; // Flag to control loading state
+  bool _isAnimating = false; // Flag für Erfolg-Animation
+  bool _isSignUpMode = true; // Flag für Umschalten zw. Registrieren/Anmelden
+  bool _isLoading = false;   // Flag für Ladezustand
 
-  // Controller for name input in sign-up form
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController nameController = TextEditingController(); // Name-Eingabe nur beim Registrieren
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => false, // Prevents dismissing by back button
+      onWillPop: () async => false, // Schließen via Back-Button verhindern
       child: Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        backgroundColor: Color(0xFFEDE8DB),
+        backgroundColor: const Color(0xFFEDE8DB),
         child: Stack(
           children: [
             Padding(
@@ -46,21 +49,20 @@ class _SignInDialogState extends State<SignInDialog> {
                 child: _isAnimating
                     ? Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
+                  children: const [
                     Icon(Icons.check_circle, color: Colors.green, size: 100),
                     SizedBox(height: 20),
                   ],
                 )
                     : _isLoading
-                    ? Center(
-                  child: CircularProgressIndicator(),
-                )
+                    ? const Center(child: CircularProgressIndicator())
                     : Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _isSignUpMode ? _buildSignUpForm() : _buildSignInForm(),
-                    SizedBox(height: 20),
-                    // Switch between modes
+                    _isSignUpMode
+                        ? _buildSignUpForm()
+                        : _buildSignInForm(),
+                    const SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
                         setState(() {
@@ -71,38 +73,41 @@ class _SignInDialogState extends State<SignInDialog> {
                         _isSignUpMode
                             ? 'Hast du bereits einen Account? Hier anmelden!'
                             : 'Noch keinen Account? Hier registrieren!',
-                        style: TextStyle(color: Colors.lightBlue),
+                        style: const TextStyle(color: Colors.lightBlue),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            // Exit Button at the top-right corner
-            Positioned(
-              top: 0,
-              right: 0,
-              child: IconButton(
-                icon: Icon(Icons.close, color: Colors.grey),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/home');
-                },
+
+            // Den X-Button nur anzeigen, wenn NICHT die Erfolgsanimation läuft:
+            if (!_isAnimating)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.grey),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // Oder: Navigator.of(context).pushNamed('/home');
+                    // Je nachdem, ob du wirklich zum Home willst oder nur den Dialog schließen möchtest.
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  // Build Sign In Form
+  // Formular: Anmelden
   Widget _buildSignInForm() {
     return Column(
       children: [
-        // Email Input
         TextField(
           controller: widget.emailController,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'E-Mail',
             labelStyle: TextStyle(color: Colors.grey),
             enabledBorder: UnderlineInputBorder(
@@ -112,14 +117,13 @@ class _SignInDialogState extends State<SignInDialog> {
               borderSide: BorderSide(color: Colors.grey),
             ),
           ),
-          style: TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.black),
         ),
-        SizedBox(height: 20),
-
-        // Password Input
+        const SizedBox(height: 20),
         TextField(
           controller: widget.passwordController,
-          decoration: InputDecoration(
+          obscureText: true,
+          decoration: const InputDecoration(
             labelText: 'Passwort',
             labelStyle: TextStyle(color: Colors.grey),
             enabledBorder: UnderlineInputBorder(
@@ -129,61 +133,52 @@ class _SignInDialogState extends State<SignInDialog> {
               borderSide: BorderSide(color: Colors.grey),
             ),
           ),
-          obscureText: true,
-          style: TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.black),
         ),
-        SizedBox(height: 20),
-
-        // Forgot Password
+        const SizedBox(height: 20),
         TextButton(
           onPressed: _resetPassword,
-          child: Text(
+          child: const Text(
             'Passwort vergessen?',
             style: TextStyle(color: Colors.lightBlue),
           ),
         ),
-        SizedBox(height: 20),
-
-        // Sign In Button
+        const SizedBox(height: 20),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-            backgroundColor: Color(0xFFCB9935),
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+            backgroundColor: const Color(0xFFCB9935),
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
+            shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(8.0)),
             ),
           ),
           onPressed: _isLoading ? null : _signIn,
-          child: Text('Anmelden'),
+          child: const Text('Anmelden'),
         ),
-        SizedBox(height: 20),
-
-        // Continue Without Account (conditionally displayed)
+        const SizedBox(height: 20),
         if (widget.allowAnonymous)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Colors.grey,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
             onPressed: _isLoading ? null : _continueWithoutAccount,
-            child: Text(
+            child: const Text(
               'Ohne Account fortfahren',
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
             ),
           ),
-
-        // Error Message
         Consumer<AuthService>(
           builder: (context, authService, child) {
             if (authService.errorMessage != null) {
               return SelectableText(
                 authService.errorMessage!,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               );
             }
             return Container();
@@ -193,13 +188,12 @@ class _SignInDialogState extends State<SignInDialog> {
     );
   }
 
-  // Build Sign Up Form
+  // Formular: Registrieren
   Widget _buildSignUpForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Headline
-        Text(
+        const Text(
           'Warum ein Konto erstellen?',
           style: TextStyle(
             fontSize: 24,
@@ -207,8 +201,7 @@ class _SignInDialogState extends State<SignInDialog> {
             fontFamily: 'Roboto',
           ),
         ),
-        SizedBox(height: 20),
-        // Reasons
+        const SizedBox(height: 20),
         _buildReasonCard(
           icon: Icons.save,
           text: 'Alte Ergebnisse werden gespeichert',
@@ -219,74 +212,60 @@ class _SignInDialogState extends State<SignInDialog> {
         ),
         _buildReasonCard(
           icon: Icons.email,
-          text:
-          'Du kannst regelmäßige News bekommen, die dich auf das nächste Level bringen',
+          text: 'Du kannst regelmäßige News bekommen, die dich auf das nächste Level bringen',
         ),
-        SizedBox(height: 40),
-
-        // Name Input
+        const SizedBox(height: 40),
         TextField(
           controller: nameController,
-          decoration: InputDecoration(labelText: 'Vorname'),
+          decoration: const InputDecoration(labelText: 'Vorname'),
         ),
-        SizedBox(height: 20),
-
-        // Email Input
+        const SizedBox(height: 20),
         TextField(
           controller: widget.emailController,
-          decoration: InputDecoration(labelText: 'Email-Adresse'),
+          decoration: const InputDecoration(labelText: 'Email-Adresse'),
         ),
-        SizedBox(height: 20),
-
-        // Password Input
+        const SizedBox(height: 20),
         TextField(
           controller: widget.passwordController,
-          decoration: InputDecoration(labelText: 'Kennwort'),
+          decoration: const InputDecoration(labelText: 'Kennwort'),
           obscureText: true,
         ),
-        SizedBox(height: 20),
-
-        // Sign Up Button
+        const SizedBox(height: 20),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-            backgroundColor: Color(0xFFCB9935),
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+            backgroundColor: const Color(0xFFCB9935),
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
+            shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(8.0)),
             ),
           ),
           onPressed: _isLoading ? null : _signUp,
-          child: Text('Registrieren'),
+          child: const Text('Registrieren'),
         ),
-
-        SizedBox(height: 20),
-
-        // Continue Without Account (conditionally displayed)
+        const SizedBox(height: 20),
         if (widget.allowAnonymous)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               backgroundColor: Colors.grey,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
             onPressed: _isLoading ? null : _continueWithoutAccount,
-            child: Text(
+            child: const Text(
               'Ohne Account fortfahren',
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
             ),
           ),
-
-        // Error Message
         Consumer<AuthService>(
           builder: (context, authService, child) {
             if (authService.errorMessage != null) {
               return SelectableText(
                 authService.errorMessage!,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               );
             }
             return Container();
@@ -296,23 +275,23 @@ class _SignInDialogState extends State<SignInDialog> {
     );
   }
 
-  // Build Reason Card
+  // Hilfs-Widget für die "Warum ein Konto erstellen?"-Karten
   Widget _buildReasonCard({required IconData icon, required String text}) {
     return GestureDetector(
       onTap: () {},
       child: Card(
         elevation: 4,
-        margin: EdgeInsets.symmetric(vertical: 8.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              Icon(icon, color: Color(0xFFCB9935)),
-              SizedBox(width: 10),
+              Icon(icon, color: const Color(0xFFCB9935)),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   text,
-                  style: TextStyle(fontSize: 18, fontFamily: 'Roboto'),
+                  style: const TextStyle(fontSize: 18, fontFamily: 'Roboto'),
                 ),
               ),
             ],
@@ -322,7 +301,7 @@ class _SignInDialogState extends State<SignInDialog> {
     );
   }
 
-  // Functions for Button Actions
+  // -------------------- Actions & Helferfunktionen --------------------
 
   void _resetPassword() async {
     if (widget.emailController.text.isNotEmpty) {
@@ -340,47 +319,39 @@ class _SignInDialogState extends State<SignInDialog> {
   void _signIn() async {
     final authService = Provider.of<AuthService>(context, listen: false);
     try {
-      // Speichere den aktuellen Benutzer (vor dem Login)
-      User? previousUser = authService.user;
+      User? previousUser = authService.user; // aktueller User (könnte anonym sein)
+      setState(() => _isLoading = true);
 
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Melde den Benutzer mit E-Mail und Passwort an
+      // Anmelden
       await authService.signInWithEmail(
         widget.emailController.text,
         widget.passwordController.text,
       );
 
-      // Überprüfe, ob die Anmeldung erfolgreich war
       if (authService.user != null) {
-        // Wenn der vorherige Benutzer anonym war, mergen wir die Daten
+        // Anonyme Daten mergen, falls vorheriger User anonym war
         if (previousUser != null && previousUser.isAnonymous) {
           await mergeAnonymousDataWithUser(previousUser, authService.user!);
-
         }
 
         setState(() {
           _isAnimating = true;
           _isLoading = false;
         });
-        Future.delayed(Duration(seconds: 1), () {
-          Navigator.of(context).pop();
+
+        // Nach kurzer Verzögerung weiterleiten
+        Future.delayed(const Duration(seconds: 1), () {
+          Navigator.of(context).pushReplacementNamed(widget.nextRoute);
         });
       } else {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
         _showMessage(
           authService.errorMessage ?? "Anmeldung fehlgeschlagen.",
           Colors.red,
         );
       }
     } on FirebaseAuthException catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
       String errorMessage;
       if (e.code == 'user-not-found') {
         errorMessage = "Kein Benutzer mit dieser E-Mail gefunden.";
@@ -391,9 +362,7 @@ class _SignInDialogState extends State<SignInDialog> {
       }
       _showMessage(errorMessage, Colors.red);
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
       _showMessage("Ein Fehler ist aufgetreten.", Colors.red);
     }
   }
@@ -403,28 +372,24 @@ class _SignInDialogState extends State<SignInDialog> {
         isValidEmail(widget.emailController.text)) {
       final authService = Provider.of<AuthService>(context, listen: false);
       try {
-        setState(() {
-          _isLoading = true;
-        });
+        setState(() => _isLoading = true);
 
-        // Speichere den aktuellen Benutzer (vor der Registrierung)
+        // aktueller User (könnte anonym sein)
         User? currentUser = authService.user;
 
-        // Erstelle Anmeldeinformationen mit E-Mail und Passwort
         AuthCredential credential = EmailAuthProvider.credential(
           email: widget.emailController.text,
           password: widget.passwordController.text,
         );
 
+        // Falls der aktuelle User anonym ist -> Link mit neuem Email/PW-Konto
         if (currentUser != null && currentUser.isAnonymous) {
-          // Verknüpfe das anonyme Konto mit dem E-Mail/Passwort-Konto
-          UserCredential userCredential = await currentUser.linkWithCredential(credential);
+          UserCredential userCredential =
+          await currentUser.linkWithCredential(credential);
 
-          // Aktualisiere den Anzeigenamen des Benutzers
+          // Anzeigenamen & Firestore updaten
           await userCredential.user!.updateDisplayName(nameController.text);
           await userCredential.user!.reload();
-
-          // Speichere Benutzerdaten in Firestore
           FirebaseFirestore.instance
               .collection('users')
               .doc(userCredential.user!.uid)
@@ -433,7 +398,6 @@ class _SignInDialogState extends State<SignInDialog> {
             'email': widget.emailController.text,
           });
 
-          // Abonniere den Benutzer zum Newsletter
           await subscribeToNewsletter(
             widget.emailController.text,
             nameController.text,
@@ -444,22 +408,19 @@ class _SignInDialogState extends State<SignInDialog> {
             _isLoading = false;
           });
 
-          // Schließe den Dialog nach 2 Sekunden
-          Future.delayed(Duration(seconds: 1), () {
-            Navigator.of(context).pop();
+          Future.delayed(const Duration(seconds: 1), () {
+            Navigator.of(context).pushReplacementNamed(widget.nextRoute);
           });
         } else {
-          // Kein anonymer Benutzer, normaler Registrierungsprozess
+          // Normaler Registrierungsprozess
           await authService.signUpWithEmail(
             widget.emailController.text,
             widget.passwordController.text,
           );
 
-          // Aktualisiere den Anzeigenamen des Benutzers
+          // Anzeigenamen & Firestore updaten
           await authService.user!.updateDisplayName(nameController.text);
           await authService.user!.reload();
-
-          // Speichere Benutzerdaten in Firestore
           FirebaseFirestore.instance
               .collection('users')
               .doc(authService.user!.uid)
@@ -468,7 +429,6 @@ class _SignInDialogState extends State<SignInDialog> {
             'email': widget.emailController.text,
           });
 
-          // Abonniere den Benutzer zum Newsletter
           await subscribeToNewsletter(
             widget.emailController.text,
             nameController.text,
@@ -479,15 +439,12 @@ class _SignInDialogState extends State<SignInDialog> {
             _isLoading = false;
           });
 
-          // Schließe den Dialog nach 2 Sekunden
-          Future.delayed(Duration(seconds: 1), () {
-            Navigator.of(context).pop();
+          Future.delayed(const Duration(seconds: 1), () {
+            Navigator.of(context).pushReplacementNamed(widget.nextRoute);
           });
         }
       } on FirebaseAuthException catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
         String errorMessage;
         if (e.code == 'email-already-in-use') {
           errorMessage = "E-Mail ist bereits registriert.";
@@ -502,9 +459,7 @@ class _SignInDialogState extends State<SignInDialog> {
         }
         _showMessage(errorMessage, Colors.red);
       } catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
         _showMessage("Ein Fehler ist aufgetreten.", Colors.red);
       }
     } else {
@@ -514,21 +469,18 @@ class _SignInDialogState extends State<SignInDialog> {
 
   void _continueWithoutAccount() async {
     final authService = Provider.of<AuthService>(context, listen: false);
-    setState(() {
-      _isLoading = true;
-    });
-    await authService.signInAnonymously(); // Sign in anonymously
+    setState(() => _isLoading = true);
+    await authService.signInAnonymously();
     setState(() {
       _isAnimating = true;
       _isLoading = false;
     });
-    // Wait for 2 seconds, then close the dialog
-    Future.delayed(Duration(seconds: 1), () {
-      Navigator.of(context).pop();
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.of(context).pushReplacementNamed(widget.nextRoute);
     });
   }
 
-  // Function to display messages
+  // Einfache Helper-Methode für Fehlermeldungen
   void _showMessage(String message, Color backgroundColor) {
     showDialog(
       context: context,
@@ -537,7 +489,7 @@ class _SignInDialogState extends State<SignInDialog> {
         backgroundColor: backgroundColor,
         actions: [
           TextButton(
-            child: Text('OK', style: TextStyle(color: Colors.white)),
+            child: const Text('OK', style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -550,6 +502,7 @@ class _SignInDialogState extends State<SignInDialog> {
     return regex.hasMatch(email);
   }
 
+  // Zusammenführen anonymer Daten mit dem registrierten Benutzer
   Future<void> mergeAnonymousDataWithUser(
       User anonymousUser, User signedInUser) async {
     if (!anonymousUser.isAnonymous) return;
@@ -559,62 +512,45 @@ class _SignInDialogState extends State<SignInDialog> {
     final signedInUserRef =
     FirebaseFirestore.instance.collection('users').doc(signedInUser.uid);
 
-    // Get existing 'results' collections in signed-in user's data
     List<String> signedInUserResultsCollections =
     await getResultsCollections(signedInUserRef);
 
-    // Determine the highest 'results_x' number in the signed-in user's data
     int maxResultNumber = 0;
     for (String collectionId in signedInUserResultsCollections) {
       if (collectionId == 'results') {
-        maxResultNumber = maxResultNumber > 1 ? maxResultNumber : 1;
+        maxResultNumber = (maxResultNumber > 1) ? maxResultNumber : 1;
       } else if (collectionId.startsWith('results_')) {
-        int number =
-            int.tryParse(collectionId.substring('results_'.length)) ?? 0;
+        int number = int.tryParse(collectionId.substring('results_'.length)) ?? 0;
         if (number > maxResultNumber) {
           maxResultNumber = number;
         }
       }
     }
 
-    // Get the anonymous user's 'results' collections
     List<String> anonymousUserResultsCollections =
     await getResultsCollections(anonymousUserRef);
 
-    // Now copy each of the anonymous user's 'results' subcollections
     for (String collectionId in anonymousUserResultsCollections) {
-      // Increment the maxResultNumber
       maxResultNumber += 1;
-      String newCollectionId = 'results_${maxResultNumber}';
+      String newCollectionId = 'results_$maxResultNumber';
 
-      // Copy documents from anonymous subcollection to the signed-in user's new subcollection
       final anonymousCollectionRef = anonymousUserRef.collection(collectionId);
       final anonymousDocs = await anonymousCollectionRef.get();
       for (DocumentSnapshot doc in anonymousDocs.docs) {
         final data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
-          await signedInUserRef
-              .collection(newCollectionId)
-              .doc(doc.id)
-              .set(data);
-        } else {
-          print('Document ${doc.id} has no data.');
+          await signedInUserRef.collection(newCollectionId).doc(doc.id).set(data);
         }
       }
     }
-
-    // Optionally delete the anonymous user's data
+    // ggf. Daten des anonymen Users löschen, wenn gewünscht
     await deleteUserData(anonymousUser.uid);
   }
 
-  // Helper function to delete user data
   Future<void> deleteUserData(String uid) async {
     final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
-
-    // Get the list of 'results' collections
     List<String> resultsCollections = await getResultsCollections(userRef);
 
-    // Delete documents in each subcollection
     for (String collectionId in resultsCollections) {
       final collectionRef = userRef.collection(collectionId);
       final snapshot = await collectionRef.get();
@@ -623,25 +559,18 @@ class _SignInDialogState extends State<SignInDialog> {
       }
     }
 
-    // Delete the user document
     await userRef.delete();
   }
 
-  // Helper function to get 'results' collections from a user's document
   Future<List<String>> getResultsCollections(DocumentReference userRef) async {
     List<String> resultsCollections = [];
-
-    // Attempt to find collections named 'results', 'results_1', up to 'results_100'
     for (int i = 0; i <= 100; i++) {
       String collectionId = i == 0 ? 'results' : 'results_$i';
-      final collectionRef = userRef.collection(collectionId);
-      // Try to read a single document to see if the collection exists
-      final snapshot = await collectionRef.limit(1).get();
+      final snapshot = await userRef.collection(collectionId).limit(1).get();
       if (snapshot.docs.isNotEmpty) {
         resultsCollections.add(collectionId);
       }
     }
-
     return resultsCollections;
   }
 

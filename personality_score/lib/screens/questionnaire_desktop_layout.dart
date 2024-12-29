@@ -65,6 +65,7 @@ class _QuestionnaireDesktopLayoutState
         emailController: TextEditingController(),
         passwordController: TextEditingController(),
         allowAnonymous: true, // Or as per your requirement
+        nextRoute: '/questionnaire',
       ),
     );
   }
