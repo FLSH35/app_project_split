@@ -193,9 +193,8 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _scrollController,
       child: Column(
         children: [
-          SizedBox(height: 50),
+          SizedBox(height: 200),
           _buildHeaderSection(context, screenHeight, screenWidth),
-          SizedBox(height: 50),
           SizedBox(height: 200),
           _buildVideoSection1(),
           SizedBox(height: 200),
@@ -387,19 +386,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeaderSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
       children: [
+
+        Positioned.fill(
+          child: Image.asset(
+            'assets/ps_background_ai.jpg',
+            fit: BoxFit.cover,
+            width: screenWidth,
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Center(
             child: Column(
               children: [
-
-                Positioned.fill(
-                  child: Image.asset(
-                    'ps_background_ai.jpg',
-                    fit: BoxFit.cover,
-                    width: screenWidth,
-                  ),
-                ),
                 SelectableText(
                   "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
