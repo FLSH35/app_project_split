@@ -107,7 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _initializeVideos() async {
     final storage = FirebaseStorage.instance;
     final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 3.mov';
-    final gsUrl2 = 'gs://personality-score.appspot.com/Personality Score 1.mov'; // Replace with the correct URL if different
+    final gsUrl2 =
+        'gs://personality-score.appspot.com/Personality Score 1.mov'; // Replace with the correct URL if different
 
     try {
       // Initialize the first video controller
@@ -137,7 +138,8 @@ class _HomeScreenState extends State<HomeScreen> {
       isLoading = false;
     });
   }
-  // Mobile AppBar (grey background, button for right drawer)
+
+  // Mobile AppBar (grauer Hintergrund, Button für Right Drawer)
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text(
@@ -193,7 +195,14 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _scrollController,
       child: Column(
         children: [
-          SizedBox(height: 200),
+      // Anstatt des SVG-Hintergrunds verwenden wir nun ps_background.jpeg
+      Positioned.fill(
+      child: Image.asset(
+        'assets/ps_background.jpeg',
+        fit: BoxFit.cover,
+        width: screenWidth,
+      ),
+    ),
           _buildHeaderSection(context, screenHeight, screenWidth),
           SizedBox(height: 200),
           _buildVideoSection1(),
@@ -383,16 +392,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  ///
+  /// ERSATZ: Hintergrundbild oben
+  ///
   Widget _buildHeaderSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
       children: [
-        Positioned.fill(
-          child: SvgPicture.asset(
-            'assets/background_personality_type.svg',
-            fit: BoxFit.cover,
-            width: screenWidth,
-          ),
-        ),
+
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Center(
@@ -517,7 +523,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Row of vertical lines with margin to align with slider divisions
+                  // Reihe vertikaler Striche für die Slider-Einteilung
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -540,7 +546,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(width: 12.0),
                     ],
                   ),
-                  // The slider itself
+                  // Der Slider
                   Slider(
                     value: (answers[questionIndex] ?? 5).toDouble(),
                     onChanged: (val) {
@@ -732,11 +738,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 }
-
-
-
 
 // AdventurerImage Widget with hover effect
 class AdventurerImage extends StatefulWidget {
@@ -768,9 +770,11 @@ class _AdventurerImageState extends State<AdventurerImage> {
       child: AnimatedContainer(
         duration: Duration(milliseconds: 300),
         child: Transform(
-          transform: !isHovered ? Matrix4.identity() : Matrix4.identity()
+          transform: !isHovered
+              ? Matrix4.identity()
+              : (Matrix4.identity()
             ..setEntry(3, 2, 0.000)
-            ..rotateY(pi / 1),
+            ..rotateY(pi / 1)),
           alignment: FractionalOffset.center,
           child: AnimatedContainer(
             duration: Duration(milliseconds: 300),

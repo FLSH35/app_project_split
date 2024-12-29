@@ -70,7 +70,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     }
                   },
                 ),
-                SizedBox(height: 10), // Add some spacing between buttons
+                SizedBox(height: 5), // Add some spacing between buttons
                 // Test-Button (Beginne den Test) or CircularProgressIndicator
                 isLoading
                     ? SizedBox(
@@ -102,7 +102,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   },
                   child: Text(
                     'Beginne den Test',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                    style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
                   ),
                 ),
               ],
@@ -155,6 +155,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
       child: Text(
         label,
         style: TextStyle(
+          fontSize: 18,
           color: isSelected ? Color(0xFFCB9935) : Colors.black,
           fontFamily: 'Roboto',
         ),
