@@ -193,14 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _scrollController,
       child: Column(
         children: [
-          SizedBox(height: 50),
-          Positioned.fill(
-            child: Image.asset(
-              'assets/ps_background_ai.jpg',
-              fit: BoxFit.cover,
-              width: screenWidth,
-            ),
-          ),
+          SizedBox(height: 200),
           _buildHeaderSection(context, screenHeight, screenWidth),
           SizedBox(height: 200),
           _buildVideoSection1(),
@@ -393,13 +386,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeaderSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
       children: [
-        Positioned.fill(
-          child: SvgPicture.asset(
-            'assets/background_personality_type.svg',
-            fit: BoxFit.cover,
-            width: screenWidth,
-          ),
-        ),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Center(
