@@ -1,15 +1,142 @@
-// profile_mobile_layout.dart
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:developer' as logging;
 import 'signin_dialog.dart';
 import 'mobile_sidebar.dart';
+
+/// Beispielmodell für ein detailliertes Resultat
+class Result {
+  final int selbstwerterhoehung;
+  final int zielsetzung;
+  final int weiterbildung;
+  final int finanzen;
+  final int karriere;
+  final int fitness;
+  final int energie;
+  final int produktivitaet;
+  final int stressmanagement;
+  final int resilienz;
+  final int innerCoreInnerChange;
+  final int emotionen;
+  final int glaubenssaetze;
+  final int bindungBeziehungen;
+  final int kommunikation;
+  final int gemeinschaft;
+  final int familie;
+  final int netzwerk;
+  final int dating;
+  final int lebenssinn;
+  final int umwelt;
+  final int spiritualitaet;
+  final int spenden;
+  final int lebensplanung;
+  final int selbstfuersorge;
+  final int freizeit;
+  final int spassFreude;
+  final int gesundheit;
+
+  Result({
+    required this.selbstwerterhoehung,
+    required this.zielsetzung,
+    required this.weiterbildung,
+    required this.finanzen,
+    required this.karriere,
+    required this.fitness,
+    required this.energie,
+    required this.produktivitaet,
+    required this.stressmanagement,
+    required this.resilienz,
+    required this.innerCoreInnerChange,
+    required this.emotionen,
+    required this.glaubenssaetze,
+    required this.bindungBeziehungen,
+    required this.kommunikation,
+    required this.gemeinschaft,
+    required this.familie,
+    required this.netzwerk,
+    required this.dating,
+    required this.lebenssinn,
+    required this.umwelt,
+    required this.spiritualitaet,
+    required this.spenden,
+    required this.lebensplanung,
+    required this.selbstfuersorge,
+    required this.freizeit,
+    required this.spassFreude,
+    required this.gesundheit,
+  });
+
+  /// Factory-Konstruktor zum Erstellen aus JSON
+  factory Result.fromJson(Map<String, dynamic> json) {
+    return Result(
+      selbstwerterhoehung: json['Selbstwerterhöhung'] ?? 0,
+      zielsetzung: json['Zielsetzung'] ?? 0,
+      weiterbildung: json['Weiterbildung'] ?? 0,
+      finanzen: json['Finanzen'] ?? 0,
+      karriere: json['Karriere'] ?? 0,
+      fitness: json['Fitness'] ?? 0,
+      energie: json['Energie'] ?? 0,
+      produktivitaet: json['Produktivität'] ?? 0,
+      stressmanagement: json['Stressmanagement'] ?? 0,
+      resilienz: json['Resilienz'] ?? 0,
+      innerCoreInnerChange: json['Inner Core Inner Change'] ?? 0,
+      emotionen: json['Emotionen'] ?? 0,
+      glaubenssaetze: json['Glaubenssätze'] ?? 0,
+      bindungBeziehungen: json['Bindung & Beziehungen'] ?? 0,
+      kommunikation: json['Kommunikation'] ?? 0,
+      gemeinschaft: json['Gemeinschaft'] ?? 0,
+      familie: json['Familie'] ?? 0,
+      netzwerk: json['Netzwerk'] ?? 0,
+      dating: json['Dating'] ?? 0,
+      lebenssinn: json['Lebenssinn'] ?? 0,
+      umwelt: json['Umwelt'] ?? 0,
+      spiritualitaet: json['Spiritualität'] ?? 0,
+      spenden: json['Spenden'] ?? 0,
+      lebensplanung: json['Lebensplanung'] ?? 0,
+      selbstfuersorge: json['Selbstfürsorge'] ?? 0,
+      freizeit: json['Freizeit'] ?? 0,
+      spassFreude: json['Spaß & Freude'] ?? 0,
+      gesundheit: json['Gesundheit'] ?? 0,
+    );
+  }
+}
+
+/// Beispielmodell für ein "UserResult" (ähnlich wie im Desktop-Code)
+class UserResult {
+  final String combinedTotalScore;
+  final String finalCharacter;
+  final String finalCharacterDescription;
+  final String completionDate;
+  final String collectionName;
+
+  /// Ob das vollständige Charakter-Description ausgeklappt ist.
+  bool isExpanded;
+
+  /// Zustände fürs Laden weiterer Details
+  bool isLoadingDetails;
+  String? errorLoadingDetails;
+
+  /// Das geladene, detaillierte Result (kann null sein, solange nicht geladen)
+  Result? detailedResult;
+
+  UserResult({
+    required this.combinedTotalScore,
+    required this.finalCharacter,
+    required this.finalCharacterDescription,
+    required this.completionDate,
+    required this.collectionName,
+    this.isExpanded = false,
+    this.isLoadingDetails = false,
+    this.errorLoadingDetails,
+    this.detailedResult,
+  });
+}
 
 class ProfileMobileLayout extends StatefulWidget {
   final TextEditingController nameController;
@@ -29,19 +156,26 @@ class ProfileMobileLayout extends StatefulWidget {
 }
 
 class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
-  bool isExpanded = false;
   bool _isLoading = false;
 
-  List<Map<String, dynamic>> validResults = [];
+  /// Hier speichern wir die Ergebnisse als Liste von [UserResult].
+  List<UserResult> validResults = [];
+
   late PageController _pageController;
-  int selectedIndex = 0; // Aktuelle Seite
+  int selectedIndex = 0; // Aktuelle Seite im PageView
 
   @override
   void initState() {
     super.initState();
-    tz.initializeTimeZones();
     _pageController = PageController(initialPage: 0);
-    fetchFinalCharacters();
+
+    // (Optional) Datumsformatierung initialisieren
+    initializeDateFormatting('de_DE', null);
+
+    // Sobald der Screen geladen ist, rufen wir die Cloud Function ab
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initialize();
+    });
   }
 
   @override
@@ -50,7 +184,9 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     super.dispose();
   }
 
-  Future<void> fetchFinalCharacters() async {
+  /// Ähnlich wie im Desktop-Code:
+  /// Holt die Liste aller Ergebnisse aus der Cloud Function get_user_results?uuid=...
+  Future<void> fetchFinalCharactersFromCloudFunction() async {
     setState(() {
       _isLoading = true;
     });
@@ -58,84 +194,191 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     try {
       final user = Provider.of<AuthService>(context, listen: false).user;
       if (user != null) {
-        final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-        List<String> resultCollectionNames = ['results'];
+        final uuid = user.uid;
+        final url = Uri.parse(
+          'https://us-central1-personality-score.cloudfunctions.net/get_user_results?uuid=$uuid',
+        );
 
-        for (int i = 1; i <= 100; i++) {
-          resultCollectionNames.add('results_$i');
+        logging.log("Fetching data from Cloud Function (Mobile) for UUID: $uuid");
+
+        final response = await http.get(url);
+
+        if (response.statusCode == 200) {
+          List<dynamic> data = json.decode(response.body);
+
+          // Zu UserResult parsen
+          List<UserResult> tempResults = data.map((item) {
+            return UserResult(
+              combinedTotalScore: item['CombinedTotalScore'].toString(),
+              finalCharacter: item['FinalCharacter'],
+              finalCharacterDescription: item['FinalCharacterDescription'],
+              completionDate: item['CompletionDate'],
+              collectionName: item['ResultsX'],
+            );
+          }).toList();
+
+          // Sortieren nach completionDate, ältestes zuerst
+          tempResults.sort((a, b) {
+            DateTime dateA = DateTime.parse(a.completionDate);
+            DateTime dateB = DateTime.parse(b.completionDate);
+            return dateA.compareTo(dateB);
+          });
+
+          setState(() {
+            validResults = tempResults;
+            // Wir starten (wie gewünscht) direkt beim neusten Ergebnis.
+            selectedIndex = validResults.length - 1;
+            // PageController neu aufsetzen
+            _pageController = PageController(initialPage: selectedIndex);
+          });
+
+          logging.log(
+              "Successfully fetched and processed ${validResults.length} results (Mobile).");
+        } else {
+          logging.log(
+              "Failed to fetch data (Mobile). Status Code: ${response.statusCode}");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Fehler beim Laden der Ergebnisse. Status Code: ${response.statusCode}'),
+            ),
+          );
         }
-
-        List<Map<String, dynamic>> tempResults = [];
-
-        for (String collectionName in resultCollectionNames) {
-          final collectionRef = userDocRef.collection(collectionName);
-          final docSnapshot = await collectionRef.doc('finalCharacter').get();
-
-          if (docSnapshot.exists) {
-            var data = docSnapshot.data() as Map<String, dynamic>?;
-            if (data != null &&
-                data['combinedTotalScore'] != null &&
-                data['combinedTotalScore'] is num &&
-                data['completionDate'] != null) {
-              data['collectionName'] = collectionName;
-              tempResults.add(data);
-            }
-          }
-        }
-
-        // Sortieren nach Abschlussdatum absteigend (neueste zuerst)
-        tempResults.sort((a, b) {
-          Timestamp dateA = a['completionDate'];
-          Timestamp dateB = b['completionDate'];
-          return dateB.compareTo(dateA);
-        });
-
-        // Umkehren, damit das älteste Ergebnis an Index 0 steht
-        validResults = tempResults.reversed.toList();
-
-        setState(() {
-          _isLoading = false;
-          // Wir wollen beim neuesten Ergebnis starten, das sich jetzt am Ende der Liste befindet
-          selectedIndex = validResults.length - 1;
-        });
-
-        // Nach dem Bauen der Widgets auf die letzte Seite springen:
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (validResults.isNotEmpty) {
-            _pageController.jumpToPage(validResults.length - 1);
-          }
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
       }
     } catch (error) {
-      print("Error loading profile data: $error");
+      logging.log("Error fetching data (Mobile): $error");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fehler beim Laden der Profildaten.')),
+        SnackBar(
+          content: Text("Fehler beim Laden der Profildaten: $error"),
+        ),
       );
-      setState(() {
-        _isLoading = false;
-      });
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  /// Holt für ein bestimmtes Result-CollectionName die Detaildaten (Scores, Lebensbereiche usw.)
+  Future<Result> fetchResultSummary(String userUUID, String resultsX) async {
+    final uri = Uri.https(
+      'us-central1-personality-score.cloudfunctions.net',
+      '/get_result_summary',
+      {
+        'User-UUID': userUUID,
+        'ResultsX': resultsX,
+      },
+    );
+
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        return Result.fromJson(jsonResponse);
+      } else {
+        throw Exception(
+            'Failed to load result summary. Status Code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching result summary: $e');
     }
   }
 
-  String _formatTimestamp(Timestamp timestamp) {
-    DateTime date = timestamp.toDate();
-    final berlin = tz.getLocation('Europe/Berlin');
-    tz.TZDateTime dateInGermany = tz.TZDateTime.from(date, berlin);
-    DateFormat dateFormat = DateFormat('dd.MM.yyyy HH:mm', 'de_DE');
-    return dateFormat.format(dateInGermany) + ' Uhr';
-  }
+  /// Überprüft, ob der User eingeloggt ist, fragt ggf. nach Login und lädt dann die Ergebnisse
+  Future<void> _initialize() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
 
-  String _truncateDescription(String description) {
-    List<String> sentences = description.split('. ');
-    if (sentences.length <= 4) {
-      return description;
+    if (authService.user == null || authService.user?.displayName == null) {
+      // Falls nicht eingeloggt, zeige SignInDialog
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => SignInDialog(
+          emailController: TextEditingController(),
+          passwordController: TextEditingController(),
+          allowAnonymous: false,
+        ),
+      );
+
+      // Nach dem Dialog nochmal prüfen, ob jetzt eingeloggt
+      final updatedAuthService = Provider.of<AuthService>(context, listen: false);
+      if (updatedAuthService.user != null &&
+          updatedAuthService.user!.displayName != null) {
+        setState(() {
+          widget.nameController.text = updatedAuthService.user!.displayName!;
+        });
+        await fetchFinalCharactersFromCloudFunction();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Anmeldung fehlgeschlagen.')),
+        );
+      }
     } else {
-      return sentences.take(4).join('. ') + '...';
+      // Direkt laden, wenn bereits eingeloggt
+      setState(() {
+        widget.nameController.text = authService.user!.displayName!;
+      });
+      await fetchFinalCharactersFromCloudFunction();
     }
+  }
+
+  /// Kleiner Helper für deutsche Datumsanzeige
+  String _formatCompletionDate(String isoString) {
+    if (isoString.isEmpty) return '';
+    DateTime date = DateTime.parse(isoString);
+    // Du kannst hier gern noch Winter-/Sommerzeit-Abfragen machen
+    // oder `DateFormat('dd.MM.yyyy HH:mm', 'de_DE')` verwenden.
+    final dateFormat = DateFormat('dd.MM.yyyy HH:mm', 'de_DE');
+    return dateFormat.format(date) + ' Uhr';
+  }
+
+  /// Widget zur Anzeige detaillierter Scores (Lebensbereiche)
+  Widget _buildDetailedResultUI(Result detailedResult) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLebensbereichRow('Selbstwerterhöhung', detailedResult.selbstwerterhoehung),
+        _buildLebensbereichRow('Zielsetzung', detailedResult.zielsetzung),
+        _buildLebensbereichRow('Weiterbildung', detailedResult.weiterbildung),
+        _buildLebensbereichRow('Finanzen', detailedResult.finanzen),
+        _buildLebensbereichRow('Karriere', detailedResult.karriere),
+        _buildLebensbereichRow('Fitness', detailedResult.fitness),
+        _buildLebensbereichRow('Energie', detailedResult.energie),
+        _buildLebensbereichRow('Produktivität', detailedResult.produktivitaet),
+        _buildLebensbereichRow('Stressmanagement', detailedResult.stressmanagement),
+        _buildLebensbereichRow('Resilienz', detailedResult.resilienz),
+        _buildLebensbereichRow('Inner Core Inner Change', detailedResult.innerCoreInnerChange),
+        _buildLebensbereichRow('Emotionen', detailedResult.emotionen),
+        _buildLebensbereichRow('Glaubenssätze', detailedResult.glaubenssaetze),
+        _buildLebensbereichRow('Bindung & Beziehungen', detailedResult.bindungBeziehungen),
+        _buildLebensbereichRow('Kommunikation', detailedResult.kommunikation),
+        _buildLebensbereichRow('Gemeinschaft', detailedResult.gemeinschaft),
+        _buildLebensbereichRow('Familie', detailedResult.familie),
+        _buildLebensbereichRow('Netzwerk', detailedResult.netzwerk),
+        _buildLebensbereichRow('Dating', detailedResult.dating),
+        _buildLebensbereichRow('Lebenssinn', detailedResult.lebenssinn),
+        _buildLebensbereichRow('Umwelt', detailedResult.umwelt),
+        _buildLebensbereichRow('Spiritualität', detailedResult.spiritualitaet),
+        _buildLebensbereichRow('Spenden', detailedResult.spenden),
+        _buildLebensbereichRow('Lebensplanung', detailedResult.lebensplanung),
+        _buildLebensbereichRow('Selbstfürsorge', detailedResult.selbstfuersorge),
+        _buildLebensbereichRow('Freizeit', detailedResult.freizeit),
+        _buildLebensbereichRow('Spaß & Freude', detailedResult.spassFreude),
+        _buildLebensbereichRow('Gesundheit', detailedResult.gesundheit),
+      ],
+    );
+  }
+
+  Widget _buildLebensbereichRow(String title, int score) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
+        children: [
+          Expanded(child: Text('$title:')),
+          Text('$score'),
+        ],
+      ),
+    );
   }
 
   @override
@@ -146,12 +389,13 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       backgroundColor: Color(0xFFEDE8DB),
       appBar: _buildAppBar(context),
       endDrawer: MobileSidebar(),
-      body: Center(
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Center(
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Column(
               children: [
+                // Name-Editing
                 widget.isEditingName
                     ? Row(
                   children: [
@@ -193,169 +437,265 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                 if (_isLoading)
                   Center(child: CircularProgressIndicator())
                 else if (validResults.isNotEmpty)
-                  Column(
-                    children: [
-                      SizedBox(
-                        height: 550,
-                        child: PageView.builder(
-                          controller: _pageController,
-                          onPageChanged: (index) {
-                            setState(() {
-                              selectedIndex = index;
-                              isExpanded = false;
-                            });
-                          },
-                          itemCount: validResults.length,
-                          itemBuilder: (context, index) {
-                            Map<String, dynamic> data = validResults[index];
+                  SizedBox(
+                    height: 700, // ausreichend Platz fürs Scrollen
+                    child: PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          selectedIndex = index;
+                        });
+                      },
+                      itemCount: validResults.length,
+                      itemBuilder: (context, index) {
+                        UserResult userResult = validResults[index];
 
-                            String completionDate = '';
-                            if (data['completionDate'] != null) {
-                              Timestamp timestamp = data['completionDate'];
-                              completionDate = _formatTimestamp(timestamp);
-                            }
+                        String completionDate =
+                        _formatCompletionDate(userResult.completionDate);
 
-                            // Ergebnisnummer: Da das älteste bei 0 steht, ist index 0 = Ergebnis 1.
-                            int resultNumber = index + 1;
+                        // Da 0 das älteste ist, ist Index + 1 die "Ergebnisnummer"
+                        int resultNumber = index + 1;
 
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.arrow_left),
-                                      onPressed: index > 0
-                                          ? () {
-                                        _pageController.previousPage(
-                                            duration: Duration(milliseconds: 300),
-                                            curve: Curves.ease);
-                                      }
-                                          : null,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        'Ergebnis $resultNumber: abgeschlossen am $completionDate',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Roboto',
-                                        ),
+                        return SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 10),
+                              // Navigations-Buttons
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.arrow_left),
+                                    onPressed: index > 0
+                                        ? () {
+                                      _pageController.previousPage(
+                                        duration: Duration(milliseconds: 300),
+                                        curve: Curves.ease,
+                                      );
+                                    }
+                                        : null,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      'Ergebnis $resultNumber: abgeschlossen am $completionDate',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Roboto',
                                       ),
                                     ),
-                                    IconButton(
-                                      icon: Icon(Icons.arrow_right),
-                                      onPressed: index < validResults.length - 1
-                                          ? () {
-                                        _pageController.nextPage(
-                                            duration: Duration(milliseconds: 300),
-                                            curve: Curves.ease);
-                                      }
-                                          : null,
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 10),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.arrow_right),
+                                    onPressed: index < validResults.length - 1
+                                        ? () {
+                                      _pageController.nextPage(
+                                        duration: Duration(milliseconds: 300),
+                                        curve: Curves.ease,
+                                      );
+                                    }
+                                        : null,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
 
-                                CircleAvatar(
-                                  radius: 60,
-                                  backgroundImage: AssetImage('assets/${data['finalCharacter']}.webp'),
-                                  backgroundColor: Colors.transparent,
+                              // Avatar
+                              CircleAvatar(
+                                radius: 60,
+                                backgroundImage: AssetImage(
+                                  'assets/${userResult.finalCharacter}.webp',
                                 ),
-                                SizedBox(height: 10),
+                                backgroundColor: Colors.transparent,
+                              ),
+                              SizedBox(height: 10),
 
-                                Card(
-                                  color: Color(0xFFF7F5EF),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Column(
-                                      children: [
-                                        SelectableText(
-                                          '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}!',
+                              // Card für Short-Description
+                              Card(
+                                color: Color(0xFFF7F5EF),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Column(
+                                    children: [
+                                      SelectableText(
+                                        '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Roboto',
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      SizedBox(height: 8),
+
+                                      // Langer/kurzer Beschreibungstext
+                                      userResult.isExpanded
+                                          ? Container(
+                                        constraints: BoxConstraints(
+                                          maxHeight: 300,
+                                        ),
+                                        child: SingleChildScrollView(
+                                          child: SelectableText(
+                                            userResult.finalCharacterDescription,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontFamily: 'Roboto',
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                          : Container(
+                                        // Falls du hier den Text kürzen möchtest,
+                                        // kannst du das wie gehabt mit einer Hilfsfunktion tun.
+                                        child: SelectableText(
+                                          _truncateDescription(
+                                            userResult.finalCharacterDescription,
+                                          ),
                                           style: TextStyle(
                                             color: Colors.black,
                                             fontFamily: 'Roboto',
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        SizedBox(height: 8),
-                                        isExpanded
-                                            ? Container(
-                                          constraints: BoxConstraints(
-                                            maxHeight: 240,
-                                          ),
-                                          child: SingleChildScrollView(
-                                            child: SelectableText(
-                                              data['finalCharacterDescription'] ??
-                                                  'Beschreibung nicht verfügbar.',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontFamily: 'Roboto',
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                            : Container(
-                                          constraints: BoxConstraints(
-                                            maxHeight: 100,
-                                          ),
-                                          child: SingleChildScrollView(
-                                            child: SelectableText(
-                                              data['finalCharacterDescription'] != null
-                                                  ? _truncateDescription(
-                                                  data['finalCharacterDescription'])
-                                                  : 'Beschreibung nicht verfügbar.',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontFamily: 'Roboto',
-                                                fontSize: 14,
-                                              ),
-                                            ),
+                                            fontSize: 14,
                                           ),
                                         ),
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: TextButton(
-                                            style: TextButton.styleFrom(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 16.0, vertical: 4.0),
-                                              backgroundColor: isExpanded
-                                                  ? Colors.black
-                                                  : Color(0xFFCB9935),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(8.0)),
-                                              ),
+                                      ),
+
+                                      // Button "Lese mehr" / "Lese weniger"
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: TextButton(
+                                          style: TextButton.styleFrom(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 16.0,
+                                              vertical: 4.0,
                                             ),
-                                            onPressed: () {
-                                              setState(() {
-                                                isExpanded = !isExpanded;
-                                              });
-                                            },
-                                            child: Text(
-                                              isExpanded ? 'Lese weniger' : 'Lese mehr',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontFamily: 'Roboto',
-                                                fontSize: 14,
-                                              ),
+                                            backgroundColor: userResult.isExpanded
+                                                ? Colors.black
+                                                : Color(0xFFCB9935),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                              BorderRadius.all(Radius.circular(8.0)),
                                             ),
                                           ),
-                                        )
-                                      ],
-                                    ),
+                                          onPressed: () {
+                                            setState(() {
+                                              userResult.isExpanded =
+                                              !userResult.isExpanded;
+                                            });
+                                          },
+                                          child: Text(
+                                            userResult.isExpanded
+                                                ? 'Lese weniger'
+                                                : 'Lese mehr',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontFamily: 'Roboto',
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      // ------------------- Button "Mehr Details laden" -------------------
+                                      if (userResult.isExpanded)
+                                        Column(
+                                          children: [
+                                            userResult.detailedResult != null
+                                                ? _buildDetailedResultUI(
+                                                userResult.detailedResult!)
+                                                : userResult.isLoadingDetails
+                                                ? CircularProgressIndicator()
+                                                : userResult.errorLoadingDetails != null
+                                                ? Text(
+                                              'Fehler: ${userResult.errorLoadingDetails}',
+                                              style: TextStyle(
+                                                  color: Colors.red),
+                                            )
+                                                : ElevatedButton(
+                                              onPressed: () async {
+                                                final uuid =
+                                                    Provider.of<AuthService>(
+                                                        context,
+                                                        listen: false)
+                                                        .user
+                                                        ?.uid;
+                                                if (uuid == null) return;
+
+                                                setState(() {
+                                                  userResult.isLoadingDetails =
+                                                  true;
+                                                  userResult
+                                                      .errorLoadingDetails =
+                                                  null;
+                                                });
+
+                                                try {
+                                                  Result detailedResult =
+                                                  await fetchResultSummary(
+                                                    uuid,
+                                                    userResult
+                                                        .collectionName,
+                                                  );
+                                                  if (!mounted) return;
+                                                  setState(() {
+                                                    userResult.detailedResult =
+                                                        detailedResult;
+                                                  });
+                                                } catch (e) {
+                                                  if (!mounted) return;
+                                                  setState(() {
+                                                    userResult
+                                                        .errorLoadingDetails =
+                                                        e.toString();
+                                                  });
+                                                } finally {
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      userResult
+                                                          .isLoadingDetails =
+                                                      false;
+                                                    });
+                                                  }
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                Color(0xFFCB9935),
+                                                padding:
+                                                EdgeInsets.symmetric(
+                                                  horizontal: 20,
+                                                  vertical: 12,
+                                                ),
+                                                shape:
+                                                RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.all(
+                                                    Radius.circular(8.0),
+                                                  ),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Mehr Details laden',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontFamily: 'Roboto',
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      // ------------------- Ende "Mehr Details laden" -------------------
+                                    ],
                                   ),
                                 ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   )
                 else
                   SelectableText(
@@ -365,24 +705,27 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                       fontFamily: 'Roboto',
                     ),
                   ),
+
                 SizedBox(height: 10),
 
+                // Teilen-Button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextButton(
                       style: TextButton.styleFrom(
                         backgroundColor: Color(0xFFCB9935),
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding:
+                        EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8.0)),
                         ),
                       ),
                       onPressed: validResults.isNotEmpty
                           ? () {
-                        Map<String, dynamic> data = validResults[selectedIndex];
+                        UserResult data = validResults[selectedIndex];
                         String shareText =
-                            '${data['combinedTotalScore']} Prozent deines Potentials erreicht!\nDu bist ein ${data['finalCharacter']}.\n\nBeschreibung: ${data['finalCharacterDescription']}';
+                            '${data.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${data.finalCharacter}.\n\nBeschreibung: ${data.finalCharacterDescription}';
                         Share.share(shareText);
                       }
                           : null,
@@ -395,8 +738,33 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                         ),
                       ),
                     ),
+                    SizedBox(width: 12),
+                    // Beispiel-Button für Paywall (analog Desktop)
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.lock, color: Colors.white),
+                      label: Text(
+                        'Details freischalten',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding:
+                        EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Upselling/Paywall geöffnet (Demo).'),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
+
                 SizedBox(height: 20),
 
                 ElevatedButton(
@@ -404,7 +772,10 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                     await authService.logout(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                    padding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 24.0,
+                    ),
                     backgroundColor: Colors.grey,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
@@ -428,6 +799,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     );
   }
 
+  /// Angepasste AppBar
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: SelectableText(
@@ -448,5 +820,15 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       ],
       automaticallyImplyLeading: false,
     );
+  }
+
+  /// Beispiel-Hilfsfunktion, um die Beschreibung zu kürzen (falls du das möchtest)
+  String _truncateDescription(String description) {
+    final sentences = description.split('. ');
+    if (sentences.length <= 4) {
+      return description;
+    } else {
+      return sentences.take(4).join('. ') + '...';
+    }
   }
 }

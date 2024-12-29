@@ -1,7 +1,8 @@
+// -------------------- Result Class --------------------
 class Result {
   final String userUUID;
   final String resultsX;
-  final double combinedTotalScore; // Changed from int to double
+  final double combinedTotalScore;
   final DateTime completionDate;
   final String finalCharacter;
   final String finalCharacterDescription;
@@ -79,7 +80,7 @@ class Result {
       userUUID: json['User-UUID'] as String,
       resultsX: json['ResultsX'] as String,
       combinedTotalScore: (json['CombinedTotalScore'] as num).toDouble(),
-      completionDate: DateTime.parse(json['CompletionDate'] as String),
+      completionDate: DateTime.parse(cleanDateString(json['CompletionDate'] as String)),
       finalCharacter: json['FinalCharacter'] as String,
       finalCharacterDescription: json['FinalCharacterDescription'] as String,
       selbstwerterhoehung: json['Selbstwerterhoehung'] ?? 0,
@@ -152,4 +153,39 @@ class Result {
       'Gesundheit': gesundheit,
     };
   }
+}
+
+
+String cleanDateString(String dateStr) {
+  // Entfernt die zusätzlichen Millisekunden und das "+" vor "Z"
+  return dateStr.replaceAllMapped(
+    RegExp(r'(\.\d{6})?\+00:00Z$'),
+        (match) => 'Z',
+  );
+}
+
+// -------------------- UserResult Class --------------------
+class UserResult {
+  final String combinedTotalScore;
+  final String finalCharacter;
+  final String finalCharacterDescription;
+  final String completionDate;
+  final String collectionName;
+
+  bool isExpanded;
+  Result? detailedResult;
+  bool isLoadingDetails;
+  String? errorLoadingDetails;
+
+  UserResult({
+    required this.combinedTotalScore,
+    required this.finalCharacter,
+    required this.finalCharacterDescription,
+    required this.completionDate,
+    required this.collectionName,
+    this.isExpanded = false,
+    this.detailedResult,
+    this.isLoadingDetails = false,
+    this.errorLoadingDetails,
+  });
 }
