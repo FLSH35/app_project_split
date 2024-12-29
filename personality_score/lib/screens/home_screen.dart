@@ -194,6 +194,11 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         children: [
           SizedBox(height: 200),
+          Image.asset(
+              'assets/ps_background_ai.jpg',
+              fit: BoxFit.cover,
+              width: screenWidth,
+            ),
           _buildHeaderSection(context, screenHeight, screenWidth),
           SizedBox(height: 200),
           _buildVideoSection1(),
