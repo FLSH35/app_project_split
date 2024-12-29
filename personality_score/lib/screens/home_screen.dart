@@ -198,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Anstatt des SVG-Hintergrunds verwenden wir nun ps_background.jpeg
       Positioned.fill(
       child: Image.asset(
-        'assets/ps_background.jpeg',
+        'assets/ps_background_ai.jpg',
         fit: BoxFit.cover,
         width: screenWidth,
       ),
