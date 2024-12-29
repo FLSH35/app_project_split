@@ -193,11 +193,11 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _scrollController,
       child: Column(
         children: [
-          SizedBox(height: 50),
+          SizedBox(height: 15),
           Image.asset(
               'assets/ps_background_ai.jpg',
             ),
-          SizedBox(height: 50),
+          SizedBox(height: 15),
           _buildHeaderSection(context, screenHeight, screenWidth),
           SizedBox(height: 200),
           _buildVideoSection1(),
