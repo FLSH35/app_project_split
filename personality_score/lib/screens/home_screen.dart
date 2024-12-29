@@ -386,10 +386,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeaderSection(BuildContext context, double screenHeight, double screenWidth) {
     return Stack(
       children: [
-
         Positioned.fill(
-          child: Image.asset(
-            'assets/ps_background_ai.jpg',
+          child: SvgPicture.asset(
+            'assets/background_personality_type.svg',
             fit: BoxFit.cover,
             width: screenWidth,
           ),
