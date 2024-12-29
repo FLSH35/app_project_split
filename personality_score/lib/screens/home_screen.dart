@@ -395,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 Positioned.fill(
                   child: Image.asset(
-                    'assets/ps_background_ai.jpg',
+                    'ps_background_ai.jpg',
                     fit: BoxFit.cover,
                     width: screenWidth,
                   ),

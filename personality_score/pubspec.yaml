@@ -60,7 +60,6 @@ flutter:
     - assets/icons/
     - assets/testimonials/
     - assets/thumbnail.png
-    - assets/ps_background_ai.jpg
 
   fonts:
     - family: SortsMillGoudy
