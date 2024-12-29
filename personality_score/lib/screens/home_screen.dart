@@ -195,14 +195,6 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _scrollController,
       child: Column(
         children: [
-      // Anstatt des SVG-Hintergrunds verwenden wir nun ps_background.jpeg
-      Positioned.fill(
-      child: Image.asset(
-        'assets/ps_background_ai.jpg',
-        fit: BoxFit.cover,
-        width: screenWidth,
-      ),
-    ),
           _buildHeaderSection(context, screenHeight, screenWidth),
           SizedBox(height: 200),
           _buildVideoSection1(),
