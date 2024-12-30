@@ -656,31 +656,12 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
 
   /// Angepasste AppBar
   AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
+    return AppBar( title: Image.asset(
+      'assets/Logo-IYC-gross.png', height: 50,
+    ),
       backgroundColor: Color(0xFFF7F5EF),
       iconTheme: IconThemeData(color: Colors.black),
-      actions: [Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
-        child: InkWell(
-          onTap: () async {
-            final Uri url = Uri.parse('https://ifyouchange.com/');
-            if (await canLaunchUrl(url)) {
-              await launchUrl(
-                url,
-                mode: LaunchMode.externalApplication,
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Could not launch $url')),
-              );
-            }
-          },
-          child: Image.asset(
-            'assets/Logo-IYC-gross.png',
-            height: 50,
-          ),
-        ),
-      ),
+      actions: [
         Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
