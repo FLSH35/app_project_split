@@ -123,6 +123,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
         List<dynamic> jsonData = json.decode(response.body);
         List<Result> results =
         jsonData.map((item) => Result.fromJson(item)).toList();
+
         logger.info(
             "Successfully fetched and parsed ${results.length} results for UUID: $uuid");
         return results;
@@ -135,6 +136,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       logger.severe("Error fetching user results: $e");
       throw Exception('Error fetching user results: $e');
     }
+
+
   }
 
   /// Überprüft, ob der User eingeloggt ist, fragt ggf. nach Login und lädt dann die Ergebnisse
@@ -186,7 +189,17 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     try {
       List<Result> results = await fetchUserResults(uuid);
       setState(() {
+        // Sortieren nach completionDate, ältestes zuerst
+        results.sort((a, b) {
+          DateTime dateA = a.completionDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+          DateTime dateB = b.completionDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return dateA.compareTo(dateB);
+        });
+
         validResults = results;
+        selectedIndex = validResults.length - 1;
+        // PageController neu aufsetzen
+        _pageController = PageController(initialPage: selectedIndex);
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
