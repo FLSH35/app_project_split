@@ -1,18 +1,20 @@
+// profile_mobile_layout.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:developer' as logging;
+import 'package:logging/logging.dart';
+
 import 'signin_dialog.dart';
 import 'home_screen/mobile_sidebar.dart';
-
 import 'package:personality_score/models/result.dart';
+import 'package:personality_score/auth/auth_service.dart';
 
 class ProfileMobileLayout extends StatefulWidget {
   final TextEditingController nameController;
@@ -34,11 +36,55 @@ class ProfileMobileLayout extends StatefulWidget {
 class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
   bool _isLoading = false;
 
-  /// Hier speichern wir die Ergebnisse als Liste von [UserResult].
-  List<UserResult> validResults = [];
+  /// Hier speichern wir die Ergebnisse als Liste von [Result].
+  List<Result> validResults = [];
 
   late PageController _pageController;
   int selectedIndex = 0; // Aktuelle Seite im PageView
+
+  /// Set zur Verfolgung der expandierten Ergebnisse (Index)
+  Set<int> _expandedResults = Set<int>();
+
+  /// Definieren Sie die LIFE_AREA_MAP_DART hier
+  static const Map<String, List<String>> LIFE_AREA_MAP_DART = {
+    // Hauptbereich 1: Selbstwerterhöhung
+    "Selbstwerterhöhung": ["SelbstwerterhoehungSum", "SelbstwerterhoehungCount"],
+    "Zielsetzung": ["ZielsetzungSum", "ZielsetzungCount"],
+    "Weiterbildung": ["WeiterbildungSum", "WeiterbildungCount"],
+    "Finanzen": ["FinanzenSum", "FinanzenCount"],
+    "Karriere": ["KarriereSum", "KarriereCount"],
+    "Fitness": ["FitnessSum", "FitnessCount"],
+
+    // Hauptbereich 2: Energie
+    "Energie": ["EnergieSum", "EnergieCount"],
+    "Produktivität": ["ProduktivitaetSum", "ProduktivitaetCount"],
+    "Stressmanagement": ["StressmanagementSum", "StressmanagementCount"],
+    "Resilienz": ["ResilienzSum", "ResilienzCount"],
+
+    // Hauptbereich 3: Inner Core, Inner Change
+    "Inner Core, Inner Change": ["InnerCoreInnerChangeSum", "InnerCoreInnerChangeCount"],
+    "Emotionen": ["EmotionenSum", "EmotionenCount"],
+    "Glaubenssätze": ["GlaubenssaetzeSum", "GlaubenssaetzeCount"],
+
+    // Hauptbereich 4: Bindung & Beziehungen
+    "Bindung & Beziehungen": ["BindungBeziehungenSum", "BindungBeziehungenCount"],
+    "Kommunikation": ["KommunikationSum", "KommunikationCount"],
+    "Gemeinschaft": ["GemeinschaftSum", "GemeinschaftCount"],
+    "Familie": ["FamilieSum", "FamilieCount"],
+    "Netzwerk": ["NetzwerkSum", "NetzwerkCount"],
+    "Dating": ["DatingSum", "DatingCount"],
+
+    // Hauptbereich 5: Lebenssinn
+    "Lebenssinn": ["LebenssinnSum", "LebenssinnCount"],
+    "Umwelt": ["UmweltSum", "UmweltCount"],
+    "Spiritualität": ["SpiritualitaetSum", "SpiritualitaetCount"],
+    "Spenden": ["SpendenSum", "SpendenCount"],
+    "Lebensplanung": ["LebensplanungSum", "LebensplanungCount"],
+    "Selbstfürsorge": ["SelbstfuersorgeSum", "SelbstfuersorgeCount"],
+    "Freizeit": ["FreizeitSum", "FreizeitCount"],
+    "Spaß & Freude im Leben": ["SpassFreudeSum", "SpassFreudeCount"],
+    "Gesundheit": ["GesundheitSum", "GesundheitCount"],
+  };
 
   @override
   void initState() {
@@ -60,103 +106,34 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     super.dispose();
   }
 
-  /// Ähnlich wie im Desktop-Code:
-  /// Holt die Liste aller Ergebnisse aus der Cloud Function get_user_results?uuid=...
-  Future<void> fetchFinalCharactersFromCloudFunction() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final user = Provider.of<AuthService>(context, listen: false).user;
-      if (user != null) {
-        final uuid = user.uid;
-        final url = Uri.parse(
-          'https://us-central1-personality-score.cloudfunctions.net/get_user_results?uuid=$uuid',
-        );
-
-        logging.log("Fetching data from Cloud Function (Mobile) for UUID: $uuid");
-
-        final response = await http.get(url);
-
-        if (response.statusCode == 200) {
-          List<dynamic> data = json.decode(response.body);
-
-          // Zu UserResult parsen
-          List<UserResult> tempResults = data.map((item) {
-            return UserResult(
-              combinedTotalScore: item['CombinedTotalScore'].toString(),
-              finalCharacter: item['FinalCharacter'],
-              finalCharacterDescription: item['FinalCharacterDescription'],
-              completionDate: item['CompletionDate'],
-              collectionName: item['ResultsX'],
-            );
-          }).toList();
-
-          // Sortieren nach completionDate, ältestes zuerst
-          tempResults.sort((a, b) {
-            DateTime dateA = DateTime.parse(a.completionDate);
-            DateTime dateB = DateTime.parse(b.completionDate);
-            return dateA.compareTo(dateB);
-          });
-
-          setState(() {
-            validResults = tempResults;
-            // Wir starten (wie gewünscht) direkt beim neusten Ergebnis.
-            selectedIndex = validResults.length - 1;
-            // PageController neu aufsetzen
-            _pageController = PageController(initialPage: selectedIndex);
-          });
-
-          logging.log(
-              "Successfully fetched and processed ${validResults.length} results (Mobile).");
-        } else {
-          logging.log(
-              "Failed to fetch data (Mobile). Status Code: ${response.statusCode}");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  'Fehler beim Laden der Ergebnisse. Status Code: ${response.statusCode}'),
-            ),
-          );
-        }
-      }
-    } catch (error) {
-      logging.log("Error fetching data (Mobile): $error");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Fehler beim Laden der Profildaten: $error"),
-        ),
-      );
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  /// Holt für ein bestimmtes Result-CollectionName die Detaildaten (Scores, Lebensbereiche usw.)
-  Future<Result> fetchResultSummary(String userUUID, String resultsX) async {
-    final uri = Uri.https(
-      'us-central1-personality-score.cloudfunctions.net',
-      '/get_result_summary',
-      {
-        'User-UUID': userUUID,
-        'ResultsX': resultsX,
-      },
+  /// Holt alle Benutzerergebnisse von der Cloud Function
+  Future<List<Result>> fetchUserResults(String uuid) async {
+    final url = Uri.parse(
+      'https://us-central1-personality-score.cloudfunctions.net/get_user_results?uuid=$uuid',
     );
 
+    // Initialisieren des Loggers
+    Logger logger = Logger('fetchUserResults');
+    logger.info("Fetching data from Cloud Function for UUID: $uuid");
+
     try {
-      final response = await http.get(uri);
+      final response = await http.get(url);
+
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        return Result.fromJson(jsonResponse);
+        List<dynamic> jsonData = json.decode(response.body);
+        List<Result> results =
+        jsonData.map((item) => Result.fromJson(item)).toList();
+        logger.info(
+            "Successfully fetched and parsed ${results.length} results for UUID: $uuid");
+        return results;
       } else {
-        throw Exception(
-            'Failed to load result summary. Status Code: ${response.statusCode}');
+        logger.severe(
+            "Failed to fetch data. Status code: ${response.statusCode}");
+        throw Exception('Failed to fetch data from server');
       }
     } catch (e) {
-      throw Exception('Error fetching result summary: $e');
+      logger.severe("Error fetching user results: $e");
+      throw Exception('Error fetching user results: $e');
     }
   }
 
@@ -178,13 +155,14 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       );
 
       // Nach dem Dialog nochmal prüfen, ob jetzt eingeloggt
-      final updatedAuthService = Provider.of<AuthService>(context, listen: false);
+      final updatedAuthService =
+      Provider.of<AuthService>(context, listen: false);
       if (updatedAuthService.user != null &&
           updatedAuthService.user!.displayName != null) {
         setState(() {
           widget.nameController.text = updatedAuthService.user!.displayName!;
         });
-        await fetchFinalCharactersFromCloudFunction();
+        await _fetchAndSetUserResults(updatedAuthService.user!.uid);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Anmeldung fehlgeschlagen.')),
@@ -195,71 +173,198 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       setState(() {
         widget.nameController.text = authService.user!.displayName!;
       });
-      await fetchFinalCharactersFromCloudFunction();
+      await _fetchAndSetUserResults(authService.user!.uid);
+    }
+  }
+
+  /// Holt die Ergebnisse und setzt sie in den State
+  Future<void> _fetchAndSetUserResults(String uuid) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      List<Result> results = await fetchUserResults(uuid);
+      setState(() {
+        validResults = results;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fehler beim Laden der Ergebnisse: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   /// Kleiner Helper für deutsche Datumsanzeige
-  String _formatCompletionDate(String isoString) {
-    if (isoString.isEmpty) return '';
-    DateTime date = DateTime.parse(isoString);
-    // Du kannst hier gern noch Winter-/Sommerzeit-Abfragen machen
-    // oder `DateFormat('dd.MM.yyyy HH:mm', 'de_DE')` verwenden.
+  String _formatCompletionDate(DateTime? date) {
+    if (date == null) return '';
     final dateFormat = DateFormat('dd.MM.yyyy HH:mm', 'de_DE');
-    return dateFormat.format(date) + ' Uhr';
+    return dateFormat.format(date.toLocal()) + ' Uhr';
   }
 
-  /// Widget zur Anzeige detaillierter Scores (Lebensbereiche)
-  Widget _buildDetailedResultUI(Result detailedResult) {
+  /// Widget zur Anzeige detaillierter Scores (Lebensbereiche) dynamisch
+  Widget _buildDetailedResultUI(Result detailedResult, int index) {
     return Padding(
       padding: const EdgeInsets.all(16.0), // Größeres Padding
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        children: LIFE_AREA_MAP_DART.entries.map((entry) {
+          String lebensbereich = entry.key;
+          String sumKey = entry.value[0];
+          String countKey = entry.value[1];
+          int sum = _getLebensbereichSum(detailedResult, sumKey);
+          int count = _getLebensbereichCount(detailedResult, countKey);
+          return _buildLebensbereichRow(lebensbereich, sum, count);
+        }).toList(),
+      ),
+    );
+  }
+
+  /// Helper-Funktion, um die Summe eines Lebensbereichs abzurufen
+  int _getLebensbereichSum(Result result, String sumKey) {
+    switch (sumKey) {
+      case 'SelbstwerterhoehungSum':
+        return result.selbstwerterhoehungSum;
+      case 'ZielsetzungSum':
+        return result.zielsetzungSum;
+      case 'WeiterbildungSum':
+        return result.weiterbildungSum;
+      case 'FinanzenSum':
+        return result.finanzenSum;
+      case 'KarriereSum':
+        return result.karriereSum;
+      case 'FitnessSum':
+        return result.fitnessSum;
+      case 'EnergieSum':
+        return result.energieSum;
+      case 'ProduktivitaetSum':
+        return result.produktivitaetSum;
+      case 'StressmanagementSum':
+        return result.stressmanagementSum;
+      case 'ResilienzSum':
+        return result.resilienzSum;
+      case 'InnerCoreInnerChangeSum':
+        return result.innerCoreInnerChangeSum;
+      case 'EmotionenSum':
+        return result.emotionenSum;
+      case 'GlaubenssaetzeSum':
+        return result.glaubenssaetzeSum;
+      case 'BindungBeziehungenSum':
+        return result.bindungBeziehungenSum;
+      case 'KommunikationSum':
+        return result.kommunikationSum;
+      case 'GemeinschaftSum':
+        return result.gemeinschaftSum;
+      case 'FamilieSum':
+        return result.familieSum;
+      case 'NetzwerkSum':
+        return result.netzwerkSum;
+      case 'DatingSum':
+        return result.datingSum;
+      case 'LebenssinnSum':
+        return result.lebenssinnSum;
+      case 'UmweltSum':
+        return result.umweltSum;
+      case 'SpiritualitaetSum':
+        return result.spiritualitaetSum;
+      case 'SpendenSum':
+        return result.spendenSum;
+      case 'LebensplanungSum':
+        return result.lebensplanungSum;
+      case 'SelbstfuersorgeSum':
+        return result.selbstfuersorgeSum;
+      case 'FreizeitSum':
+        return result.freizeitSum;
+      case 'SpassFreudeSum':
+        return result.spassFreudeSum;
+      case 'GesundheitSum':
+        return result.gesundheitSum;
+      default:
+        return 0;
+    }
+  }
+
+  /// Helper-Funktion, um die Count eines Lebensbereichs abzurufen
+  int _getLebensbereichCount(Result result, String countKey) {
+    switch (countKey) {
+      case 'SelbstwerterhoehungCount':
+        return result.selbstwerterhoehungCount;
+      case 'ZielsetzungCount':
+        return result.zielsetzungCount;
+      case 'WeiterbildungCount':
+        return result.weiterbildungCount;
+      case 'FinanzenCount':
+        return result.finanzenCount;
+      case 'KarriereCount':
+        return result.karriereCount;
+      case 'FitnessCount':
+        return result.fitnessCount;
+      case 'EnergieCount':
+        return result.energieCount;
+      case 'ProduktivitaetCount':
+        return result.produktivitaetCount;
+      case 'StressmanagementCount':
+        return result.stressmanagementCount;
+      case 'ResilienzCount':
+        return result.resilienzCount;
+      case 'InnerCoreInnerChangeCount':
+        return result.innerCoreInnerChangeCount;
+      case 'EmotionenCount':
+        return result.emotionenCount;
+      case 'GlaubenssaetzeCount':
+        return result.glaubenssaetzeCount;
+      case 'BindungBeziehungenCount':
+        return result.bindungBeziehungenCount;
+      case 'KommunikationCount':
+        return result.kommunikationCount;
+      case 'GemeinschaftCount':
+        return result.gemeinschaftCount;
+      case 'FamilieCount':
+        return result.familieCount;
+      case 'NetzwerkCount':
+        return result.netzwerkCount;
+      case 'DatingCount':
+        return result.datingCount;
+      case 'LebenssinnCount':
+        return result.lebenssinnCount;
+      case 'UmweltCount':
+        return result.umweltCount;
+      case 'SpiritualitaetCount':
+        return result.spiritualitaetCount;
+      case 'SpendenCount':
+        return result.spendenCount;
+      case 'LebensplanungCount':
+        return result.lebensplanungCount;
+      case 'SelbstfuersorgeCount':
+        return result.selbstfuersorgeCount;
+      case 'FreizeitCount':
+        return result.freizeitCount;
+      case 'SpassFreudeCount':
+        return result.spassFreudeCount;
+      case 'GesundheitCount':
+        return result.gesundheitCount;
+      default:
+        return 0;
+    }
+  }
+
+  /// Widget zur Anzeige einzelner Lebensbereiche dynamisch
+  Widget _buildLebensbereichRow(String title, int sum, int count) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
         children: [
-          _buildLebensbereichRow('Selbstwerterhöhung', detailedResult.selbstwerterhoehung),
-          _buildLebensbereichRow('Zielsetzung', detailedResult.zielsetzung),
-          _buildLebensbereichRow('Weiterbildung', detailedResult.weiterbildung),
-          _buildLebensbereichRow('Finanzen', detailedResult.finanzen),
-          _buildLebensbereichRow('Karriere', detailedResult.karriere),
-          _buildLebensbereichRow('Fitness', detailedResult.fitness),
-          _buildLebensbereichRow('Energie', detailedResult.energie),
-          _buildLebensbereichRow('Produktivität', detailedResult.produktivitaet),
-          _buildLebensbereichRow('Stressmanagement', detailedResult.stressmanagement),
-          _buildLebensbereichRow('Resilienz', detailedResult.resilienz),
-          _buildLebensbereichRow('Inner Core Inner Change', detailedResult.innerCoreInnerChange),
-          _buildLebensbereichRow('Emotionen', detailedResult.emotionen),
-          _buildLebensbereichRow('Glaubenssätze', detailedResult.glaubenssaetze),
-          _buildLebensbereichRow('Bindung & Beziehungen', detailedResult.bindungBeziehungen),
-          _buildLebensbereichRow('Kommunikation', detailedResult.kommunikation),
-          _buildLebensbereichRow('Gemeinschaft', detailedResult.gemeinschaft),
-          _buildLebensbereichRow('Familie', detailedResult.familie),
-          _buildLebensbereichRow('Netzwerk', detailedResult.netzwerk),
-          _buildLebensbereichRow('Dating', detailedResult.dating),
-          _buildLebensbereichRow('Lebenssinn', detailedResult.lebenssinn),
-          _buildLebensbereichRow('Umwelt', detailedResult.umwelt),
-          _buildLebensbereichRow('Spiritualität', detailedResult.spiritualitaet),
-          _buildLebensbereichRow('Spenden', detailedResult.spenden),
-          _buildLebensbereichRow('Lebensplanung', detailedResult.lebensplanung),
-          _buildLebensbereichRow('Selbstfürsorge', detailedResult.selbstfuersorge),
-          _buildLebensbereichRow('Freizeit', detailedResult.freizeit),
-          _buildLebensbereichRow('Spaß & Freude', detailedResult.spassFreude),
-          _buildLebensbereichRow('Gesundheit', detailedResult.gesundheit),
+          Expanded(child: Text('$title: Sum = $sum')),
+          Text('Count = $count'),
         ],
       ),
     );
   }
 
-  Widget _buildLebensbereichRow(String title, int score) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: Row(
-        children: [
-          Expanded(child: Text('$title:')),
-          Text('$score'),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -301,7 +406,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                       child: Container(
                         child: Align(
                           alignment: Alignment.topRight,
-                          child:  IconButton(
+                          child: IconButton(
                             icon: Icon(Icons.logout, color: Colors.black),
                             onPressed: () async {
                               await authService.logout(context);
@@ -312,7 +417,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                         ),
                       ),
                     ),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -329,7 +433,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                           icon: Icon(Icons.edit),
                           onPressed: widget.onEditName,
                         ),
-
                       ],
                     ),
                   ],
@@ -340,7 +443,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                   Center(child: CircularProgressIndicator())
                 else if (validResults.isNotEmpty)
                   SizedBox(
-                    height: 700, // ausreichend Platz fürs Scrollen
+                    height: 800, // ausreichend Platz fürs Scrollen
                     child: PageView.builder(
                       controller: _pageController,
                       onPageChanged: (index) {
@@ -350,12 +453,12 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                       },
                       itemCount: validResults.length,
                       itemBuilder: (context, index) {
-                        UserResult userResult = validResults[index];
+                        Result userResult = validResults[index];
 
                         String completionDate =
                         _formatCompletionDate(userResult.completionDate);
 
-                        // Da 0 das älteste ist, ist Index + 1 die "Ergebnisnummer"
+                        // Da wir die Reihenfolge beibehalten, ist Index + 1 die "Ergebnisnummer"
                         int resultNumber = index + 1;
 
                         return SingleChildScrollView(
@@ -372,7 +475,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                     onPressed: index > 0
                                         ? () {
                                       _pageController.previousPage(
-                                        duration: Duration(milliseconds: 300),
+                                        duration:
+                                        Duration(milliseconds: 300),
                                         curve: Curves.ease,
                                       );
                                     }
@@ -394,7 +498,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                     onPressed: index < validResults.length - 1
                                         ? () {
                                       _pageController.nextPage(
-                                        duration: Duration(milliseconds: 300),
+                                        duration:
+                                        Duration(milliseconds: 300),
                                         curve: Curves.ease,
                                       );
                                     }
@@ -420,11 +525,13 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(16.0), // Erhöhtes Padding
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                     children: [
                                       // Icons oben rechts
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.end,
                                         children: [
                                           GestureDetector(
                                             onTap: () {
@@ -441,10 +548,15 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                             ),
                                           ),
                                           SizedBox(width: 16), // Abstand zwischen den Icons
+                                          // Expand/Collapse Icon
                                           GestureDetector(
                                             onTap: () {
                                               setState(() {
-                                                userResult.isExpanded = !userResult.isExpanded;
+                                                if (_expandedResults.contains(index)) {
+                                                  _expandedResults.remove(index);
+                                                } else {
+                                                  _expandedResults.add(index);
+                                                }
                                               });
                                             },
                                             child: SvgPicture.asset(
@@ -467,39 +579,32 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                       ),
                                       SizedBox(height: 8),
 
-                                      // Langer/kurzer Beschreibungstext
-                                      userResult.isExpanded
-                                          ? Container(
-                                        constraints: BoxConstraints(
-                                          maxHeight: 300,
-                                        ),
-                                        child: SingleChildScrollView(
-                                          child: SelectableText(
-                                            userResult.finalCharacterDescription,
+                                      // Beschreibungstext mit Expand/Collapse
+                                      _expandedResults.contains(index)
+                                          ? Column(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                        children: [
+                                          SelectableText(
+                                            userResult.finalCharacterDescription ?? '',
                                             style: TextStyle(
                                               color: Colors.black,
                                               fontFamily: 'Roboto',
                                               fontSize: 14,
                                             ),
                                           ),
-                                        ),
+                                        ],
                                       )
-                                          : Container(
-                                        // Falls du hier den Text kürzen möchtest,
-                                        // kannst du das wie gehabt mit einer Hilfsfunktion tun.
-                                        child: SelectableText(
-                                          _truncateDescription(
-                                            userResult.finalCharacterDescription,
-                                          ),
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontFamily: 'Roboto',
-                                            fontSize: 14,
-                                          ),
+                                          : SelectableText(
+                                        _truncateDescription(
+                                          userResult.finalCharacterDescription,
+                                        ),
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Roboto',
+                                          fontSize: 14,
                                         ),
                                       ),
-
-                                      // Entfernt den bisherigen "Lese mehr" Button
                                     ],
                                   ),
                                 ),
@@ -507,18 +612,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
 
                               SizedBox(height: 10),
 
-                                userResult.detailedResult != null
-                                    ? _buildDetailedResultUI(
-                                    userResult.detailedResult!)
-                                    : userResult.isLoadingDetails
-                                    ? CircularProgressIndicator()
-                                    : userResult.errorLoadingDetails != null
-                                    ? Text(
-                                  'Fehler: ${userResult.errorLoadingDetails}',
-                                  style: TextStyle(
-                                      color: Colors.red),
-                                )
-                                    : Container(),
+                              // Detaillierte Ergebnisse (Lebensbereiche)
+                              _buildDetailedResultUI(userResult, index),
                             ],
                           ),
                         );
@@ -535,8 +630,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                   ),
 
                 SizedBox(height: 20),
-
-                // Entfernt die bisherigen "Teilen" und "Details freischalten" Buttons
 
                 // Weitere Inhalte können hier hinzugefügt werden
 
@@ -587,7 +680,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
   }
 
   /// Beispiel-Hilfsfunktion, um die Beschreibung zu kürzen (falls du das möchtest)
-  String _truncateDescription(String description) {
+  String _truncateDescription(String? description) {
+    if (description == null) return '';
     final sentences = description.split('. ');
     if (sentences.length <= 4) {
       return description;
