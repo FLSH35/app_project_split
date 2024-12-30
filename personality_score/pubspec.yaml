@@ -61,8 +61,8 @@ flutter:
     - assets/testimonials/
     - assets/thumbnail.png
     - assets/ps_background_ai.jpg
-    - assets/icons/share-svgrepo-com
-    - assets/icons/arrow-expand-svgrepo-com
+    - assets/icons/share-svgrepo-com.svg
+    - assets/icons/arrow-expand-svgrepo-com.svg
     - assets/icons/goldbaum.ico
 
   fonts:
