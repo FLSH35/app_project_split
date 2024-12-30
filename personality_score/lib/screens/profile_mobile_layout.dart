@@ -12,137 +12,7 @@ import 'dart:developer' as logging;
 import 'signin_dialog.dart';
 import 'home_screen/mobile_sidebar.dart';
 
-/// Beispielmodell für ein detailliertes Resultat
-class Result {
-  final int selbstwerterhoehung;
-  final int zielsetzung;
-  final int weiterbildung;
-  final int finanzen;
-  final int karriere;
-  final int fitness;
-  final int energie;
-  final int produktivitaet;
-  final int stressmanagement;
-  final int resilienz;
-  final int innerCoreInnerChange;
-  final int emotionen;
-  final int glaubenssaetze;
-  final int bindungBeziehungen;
-  final int kommunikation;
-  final int gemeinschaft;
-  final int familie;
-  final int netzwerk;
-  final int dating;
-  final int lebenssinn;
-  final int umwelt;
-  final int spiritualitaet;
-  final int spenden;
-  final int lebensplanung;
-  final int selbstfuersorge;
-  final int freizeit;
-  final int spassFreude;
-  final int gesundheit;
-
-  Result({
-    required this.selbstwerterhoehung,
-    required this.zielsetzung,
-    required this.weiterbildung,
-    required this.finanzen,
-    required this.karriere,
-    required this.fitness,
-    required this.energie,
-    required this.produktivitaet,
-    required this.stressmanagement,
-    required this.resilienz,
-    required this.innerCoreInnerChange,
-    required this.emotionen,
-    required this.glaubenssaetze,
-    required this.bindungBeziehungen,
-    required this.kommunikation,
-    required this.gemeinschaft,
-    required this.familie,
-    required this.netzwerk,
-    required this.dating,
-    required this.lebenssinn,
-    required this.umwelt,
-    required this.spiritualitaet,
-    required this.spenden,
-    required this.lebensplanung,
-    required this.selbstfuersorge,
-    required this.freizeit,
-    required this.spassFreude,
-    required this.gesundheit,
-  });
-
-  /// Factory-Konstruktor zum Erstellen aus JSON
-  factory Result.fromJson(Map<String, dynamic> json) {
-    return Result(
-      selbstwerterhoehung: json['Selbstwerterhöhung'] ?? 0,
-      zielsetzung: json['Zielsetzung'] ?? 0,
-      weiterbildung: json['Weiterbildung'] ?? 0,
-      finanzen: json['Finanzen'] ?? 0,
-      karriere: json['Karriere'] ?? 0,
-      fitness: json['Fitness'] ?? 0,
-      energie: json['Energie'] ?? 0,
-      produktivitaet: json['Produktivität'] ?? 0,
-      stressmanagement: json['Stressmanagement'] ?? 0,
-      resilienz: json['Resilienz'] ?? 0,
-      innerCoreInnerChange: json['Inner Core Inner Change'] ?? 0,
-      emotionen: json['Emotionen'] ?? 0,
-      glaubenssaetze: json['Glaubenssätze'] ?? 0,
-      bindungBeziehungen: json['Bindung & Beziehungen'] ?? 0,
-      kommunikation: json['Kommunikation'] ?? 0,
-      gemeinschaft: json['Gemeinschaft'] ?? 0,
-      familie: json['Familie'] ?? 0,
-      netzwerk: json['Netzwerk'] ?? 0,
-      dating: json['Dating'] ?? 0,
-      lebenssinn: json['Lebenssinn'] ?? 0,
-      umwelt: json['Umwelt'] ?? 0,
-      spiritualitaet: json['Spiritualität'] ?? 0,
-      spenden: json['Spenden'] ?? 0,
-      lebensplanung: json['Lebensplanung'] ?? 0,
-      selbstfuersorge: json['Selbstfürsorge'] ?? 0,
-      freizeit: json['Freizeit'] ?? 0,
-      spassFreude: json['Spaß & Freude'] ?? 0,
-      gesundheit: json['Gesundheit'] ?? 0,
-    );
-  }
-}
-
-/// Beispielmodell für ein "UserResult" (ähnlich wie im Desktop-Code)
-class UserResult {
-  final String combinedTotalScore;
-  final String finalCharacter;
-  final String finalCharacterDescription;
-  final String completionDate;
-  final String collectionName;
-
-  /// Ob das vollständige Charakter-Description ausgeklappt ist.
-  bool isExpanded;
-
-  /// Zustände fürs Laden weiterer Details
-  bool isLoadingDetails;
-  String? errorLoadingDetails;
-
-  /// Das geladene, detaillierte Result (kann null sein, solange nicht geladen)
-  Result? detailedResult;
-
-  /// Ob die zusätzlichen Details ausgeklappt sind
-  bool isMoreDetailsExpanded;
-
-  UserResult({
-    required this.combinedTotalScore,
-    required this.finalCharacter,
-    required this.finalCharacterDescription,
-    required this.completionDate,
-    required this.collectionName,
-    this.isExpanded = false,
-    this.isLoadingDetails = false,
-    this.errorLoadingDetails,
-    this.detailedResult,
-    this.isMoreDetailsExpanded = false,
-  });
-}
+import 'package:personality_score/models/result.dart';
 
 class ProfileMobileLayout extends StatefulWidget {
   final TextEditingController nameController;
@@ -564,7 +434,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                               Share.share(shareText);
                                             },
                                             child: SvgPicture.asset(
-                                              'icons/share-svgrepo-com.svg',
+                                              'assets/icons/share-svgrepo-com.svg',
                                               width: 24,
                                               height: 24,
                                               color: Colors.black, // Passe die Farbe an
@@ -578,7 +448,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                               });
                                             },
                                             child: SvgPicture.asset(
-                                              'icons/arrow-expand-svgrepo-com.svg',
+                                              'assets/icons/arrow-expand-svgrepo-com.svg',
                                               width: 24,
                                               height: 24,
                                               color: Colors.black, // Passe die Farbe an
@@ -637,78 +507,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
 
                               SizedBox(height: 10),
 
-                              // Mehr Details Button außerhalb des Cards
-                              ElevatedButton(
-                                onPressed: () async {
-                                  if (userResult.detailedResult == null &&
-                                      !userResult.isLoadingDetails) {
-                                    final uuid = Provider.of<AuthService>(
-                                        context,
-                                        listen: false)
-                                        .user
-                                        ?.uid;
-                                    if (uuid == null) return;
-
-                                    setState(() {
-                                      userResult.isLoadingDetails = true;
-                                      userResult.errorLoadingDetails = null;
-                                    });
-
-                                    try {
-                                      Result detailedResult =
-                                      await fetchResultSummary(
-                                        uuid,
-                                        userResult.collectionName,
-                                      );
-                                      if (!mounted) return;
-                                      setState(() {
-                                        userResult.detailedResult = detailedResult;
-                                      });
-                                    } catch (e) {
-                                      if (!mounted) return;
-                                      setState(() {
-                                        userResult.errorLoadingDetails =
-                                            e.toString();
-                                      });
-                                    } finally {
-                                      if (mounted) {
-                                        setState(() {
-                                          userResult.isLoadingDetails = false;
-                                        });
-                                      }
-                                    }
-                                  }
-
-                                  setState(() {
-                                    userResult.isMoreDetailsExpanded =
-                                    !userResult.isMoreDetailsExpanded;
-                                  });
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFFCB9935),
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(8.0)),
-                                  ),
-                                ),
-                                child: Text(
-                                  userResult.isMoreDetailsExpanded
-                                      ? 'Weniger Details'
-                                      : 'Mehr Details',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Roboto',
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-
-                              // Zusätzlicher Textbereich für Mehr Details
-                              if (userResult.isMoreDetailsExpanded)
                                 userResult.detailedResult != null
                                     ? _buildDetailedResultUI(
                                     userResult.detailedResult!)
