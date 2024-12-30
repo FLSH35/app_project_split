@@ -5,10 +5,11 @@ import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import 'dart:developer' as logging;
 import 'signin_dialog.dart';
-import 'mobile_sidebar.dart';
+import 'home_screen/mobile_sidebar.dart';
 
 /// Beispielmodell für ein detailliertes Resultat
 class Result {
@@ -803,10 +804,19 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
   /// Angepasste AppBar
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: SelectableText(
-        'PROFIL',
-        style: TextStyle(color: Colors.black),
-      ),
+      title: Padding(padding: EdgeInsets.symmetric(vertical: 12.0), child: Flexible(
+          child: GestureDetector(
+            onTap: () async {
+              const url = 'https://ifyouchange.com/';
+              if (await canLaunch(url)) {
+                await launch(url);
+              } else {
+                throw 'Could not launch $url';
+              }
+            },
+            child: Image.asset(
+              'assets/Logo-IYC-gross.png', height: 50,
+            ),))),
       backgroundColor: Color(0xFFF7F5EF),
       iconTheme: IconThemeData(color: Colors.black),
       actions: [

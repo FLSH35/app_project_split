@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:personality_score/screens/home_screen/home_screen.dart';
 import 'package:personality_score/screens/questionnaire_screen.dart';
 import 'package:provider/provider.dart';
 import 'auth/auth_service.dart';
-import 'screens/home_screen.dart';
 import 'firebase_options.dart'; // Ensure you have this file generated
 import 'package:personality_score/screens/profile_screen.dart';
 import 'package:personality_score/models/questionaire_model.dart';
@@ -48,6 +48,8 @@ void main() async {
 
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -60,20 +62,49 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        initialRoute: '/home',
-        routes: {
-          '/': (context) => HomeScreen(),
-          '/home': (context) => HomeScreen(),
-          '/questionnaire': (context) => QuestionnaireScreen(),
-          '/profile': (context) => ProfileScreen(),
-          '/personality_types': (context) => PersonalityTypesPage(),
-          '/impressum': (context) => ImpressumPage(),
-          '/datenschutz': (context) => DatenschutzPage(),
-        },
+        // initialRoute & routes kommen aus routes.dart
+        initialRoute: Routes.home,
+        onGenerateRoute: Routes.controller,
       ),
     );
   }
 }
+
+
+class Routes {
+  static const String home = '/home';
+  static const String questionnaire = '/questionnaire';
+  static const String profile = '/profile';
+  static const String personalityTypes = '/personality_types';
+
+  static Route<dynamic> controller(RouteSettings settings) {
+    switch (settings.name) {
+      case home:
+        return MaterialPageRoute(builder: (context) => HomeScreen());
+      case questionnaire:
+        return MaterialPageRoute(builder: (context) => QuestionnaireScreen());
+      case profile:
+        return MaterialPageRoute(builder: (context) => ProfileScreen());
+      case personalityTypes:
+        return MaterialPageRoute(builder: (context) => PersonalityTypesPage());
+
+      default:
+      // Default/Fallback Route:
+        return MaterialPageRoute(builder: (context) => HomeScreen());
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
 class ImpressumPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

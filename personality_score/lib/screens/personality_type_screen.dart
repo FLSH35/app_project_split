@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For rootBundle
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../helper_functions/questionnaire_helpers.dart';
 import 'personality_types_desktop_layout.dart'; // Import the Desktop Layout
-import 'mobile_sidebar.dart'; // Import the mobile Sidebar
+import 'home_screen/mobile_sidebar.dart'; // Import the mobile Sidebar
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:video_player/video_player.dart';
 import '../helper_functions/video_helper.dart'; // Import the VideoWidget helper
@@ -259,10 +260,19 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
   // AppBar for Mobile with Menu Button
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: SelectableText(
-        'STUFEN',
-        style: TextStyle(color: Colors.black),
-      ),
+      title: Padding(padding: EdgeInsets.symmetric(vertical: 12.0), child: Flexible(
+          child: GestureDetector(
+            onTap: () async {
+              const url = 'https://ifyouchange.com/';
+              if (await canLaunch(url)) {
+                await launch(url);
+              } else {
+                throw 'Could not launch $url';
+              }
+            },
+            child: Image.asset(
+              'assets/Logo-IYC-gross.png', height: 50,
+            ),))),
       backgroundColor: Color(0xFFF7F5EF),
       iconTheme: IconThemeData(color: Colors.black),
       actions: [

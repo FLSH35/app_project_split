@@ -19,7 +19,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isEditingName = false;
   TextEditingController _nameController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void initState() {

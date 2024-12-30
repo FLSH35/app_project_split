@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
-import 'package:personality_score/screens/home_screen.dart';
+import 'package:personality_score/screens/home_screen_1/home_screen.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
