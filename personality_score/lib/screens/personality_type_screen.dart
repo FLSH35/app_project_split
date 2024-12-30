@@ -95,7 +95,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
   // Initialize video from Firebase Storage
   Future<void> _initializeVideos() async {
     final storage = FirebaseStorage.instance;
-    final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 2.mov';
+    final gsUrl1 = 'gs://personality-score.appspot.com/PS_2_cut.mp4';
     try {
       // Initialize the video controller
       String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
@@ -151,7 +151,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                   SizedBox(height: 20),
                   VideoWidget(
                     videoController: _videoController1,
-                    screenHeight: screenHeight,
+                    screenHeight: screenHeight * 1.15,
                     headerText: "Was bedeuten die einzelnen Stufen?",
                     subHeaderText: "Erfahre es im Video!",
                   ),
