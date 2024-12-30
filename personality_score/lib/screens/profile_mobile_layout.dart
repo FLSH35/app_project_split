@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
@@ -126,6 +127,9 @@ class UserResult {
   /// Das geladene, detaillierte Result (kann null sein, solange nicht geladen)
   Result? detailedResult;
 
+  /// Ob die zusätzlichen Details ausgeklappt sind
+  bool isMoreDetailsExpanded;
+
   UserResult({
     required this.combinedTotalScore,
     required this.finalCharacter,
@@ -136,6 +140,7 @@ class UserResult {
     this.isLoadingDetails = false,
     this.errorLoadingDetails,
     this.detailedResult,
+    this.isMoreDetailsExpanded = false,
   });
 }
 
@@ -336,38 +341,41 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
 
   /// Widget zur Anzeige detaillierter Scores (Lebensbereiche)
   Widget _buildDetailedResultUI(Result detailedResult) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLebensbereichRow('Selbstwerterhöhung', detailedResult.selbstwerterhoehung),
-        _buildLebensbereichRow('Zielsetzung', detailedResult.zielsetzung),
-        _buildLebensbereichRow('Weiterbildung', detailedResult.weiterbildung),
-        _buildLebensbereichRow('Finanzen', detailedResult.finanzen),
-        _buildLebensbereichRow('Karriere', detailedResult.karriere),
-        _buildLebensbereichRow('Fitness', detailedResult.fitness),
-        _buildLebensbereichRow('Energie', detailedResult.energie),
-        _buildLebensbereichRow('Produktivität', detailedResult.produktivitaet),
-        _buildLebensbereichRow('Stressmanagement', detailedResult.stressmanagement),
-        _buildLebensbereichRow('Resilienz', detailedResult.resilienz),
-        _buildLebensbereichRow('Inner Core Inner Change', detailedResult.innerCoreInnerChange),
-        _buildLebensbereichRow('Emotionen', detailedResult.emotionen),
-        _buildLebensbereichRow('Glaubenssätze', detailedResult.glaubenssaetze),
-        _buildLebensbereichRow('Bindung & Beziehungen', detailedResult.bindungBeziehungen),
-        _buildLebensbereichRow('Kommunikation', detailedResult.kommunikation),
-        _buildLebensbereichRow('Gemeinschaft', detailedResult.gemeinschaft),
-        _buildLebensbereichRow('Familie', detailedResult.familie),
-        _buildLebensbereichRow('Netzwerk', detailedResult.netzwerk),
-        _buildLebensbereichRow('Dating', detailedResult.dating),
-        _buildLebensbereichRow('Lebenssinn', detailedResult.lebenssinn),
-        _buildLebensbereichRow('Umwelt', detailedResult.umwelt),
-        _buildLebensbereichRow('Spiritualität', detailedResult.spiritualitaet),
-        _buildLebensbereichRow('Spenden', detailedResult.spenden),
-        _buildLebensbereichRow('Lebensplanung', detailedResult.lebensplanung),
-        _buildLebensbereichRow('Selbstfürsorge', detailedResult.selbstfuersorge),
-        _buildLebensbereichRow('Freizeit', detailedResult.freizeit),
-        _buildLebensbereichRow('Spaß & Freude', detailedResult.spassFreude),
-        _buildLebensbereichRow('Gesundheit', detailedResult.gesundheit),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(16.0), // Größeres Padding
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLebensbereichRow('Selbstwerterhöhung', detailedResult.selbstwerterhoehung),
+          _buildLebensbereichRow('Zielsetzung', detailedResult.zielsetzung),
+          _buildLebensbereichRow('Weiterbildung', detailedResult.weiterbildung),
+          _buildLebensbereichRow('Finanzen', detailedResult.finanzen),
+          _buildLebensbereichRow('Karriere', detailedResult.karriere),
+          _buildLebensbereichRow('Fitness', detailedResult.fitness),
+          _buildLebensbereichRow('Energie', detailedResult.energie),
+          _buildLebensbereichRow('Produktivität', detailedResult.produktivitaet),
+          _buildLebensbereichRow('Stressmanagement', detailedResult.stressmanagement),
+          _buildLebensbereichRow('Resilienz', detailedResult.resilienz),
+          _buildLebensbereichRow('Inner Core Inner Change', detailedResult.innerCoreInnerChange),
+          _buildLebensbereichRow('Emotionen', detailedResult.emotionen),
+          _buildLebensbereichRow('Glaubenssätze', detailedResult.glaubenssaetze),
+          _buildLebensbereichRow('Bindung & Beziehungen', detailedResult.bindungBeziehungen),
+          _buildLebensbereichRow('Kommunikation', detailedResult.kommunikation),
+          _buildLebensbereichRow('Gemeinschaft', detailedResult.gemeinschaft),
+          _buildLebensbereichRow('Familie', detailedResult.familie),
+          _buildLebensbereichRow('Netzwerk', detailedResult.netzwerk),
+          _buildLebensbereichRow('Dating', detailedResult.dating),
+          _buildLebensbereichRow('Lebenssinn', detailedResult.lebenssinn),
+          _buildLebensbereichRow('Umwelt', detailedResult.umwelt),
+          _buildLebensbereichRow('Spiritualität', detailedResult.spiritualitaet),
+          _buildLebensbereichRow('Spenden', detailedResult.spenden),
+          _buildLebensbereichRow('Lebensplanung', detailedResult.lebensplanung),
+          _buildLebensbereichRow('Selbstfürsorge', detailedResult.selbstfuersorge),
+          _buildLebensbereichRow('Freizeit', detailedResult.freizeit),
+          _buildLebensbereichRow('Spaß & Freude', detailedResult.spassFreude),
+          _buildLebensbereichRow('Gesundheit', detailedResult.gesundheit),
+        ],
+      ),
     );
   }
 
@@ -394,8 +402,9 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(16.0), // Erhöhtes Padding
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Name-Editing
                 widget.isEditingName
@@ -416,21 +425,42 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                     ),
                   ],
                 )
-                    : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                    : Column(
                   children: [
-                    SelectableText(
-                      widget.nameController.text,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontFamily: 'Roboto',
+                    Center(
+                      child: Container(
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child:  IconButton(
+                            icon: Icon(Icons.logout, color: Colors.black),
+                            onPressed: () async {
+                              await authService.logout(context);
+                            },
+                            alignment: Alignment.topRight,
+                            tooltip: 'Abmelden',
+                          ),
+                        ),
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: widget.onEditName,
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SelectableText(
+                          widget.nameController.text,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            fontFamily: 'Roboto',
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: widget.onEditName,
+                        ),
+
+                      ],
                     ),
                   ],
                 ),
@@ -514,13 +544,49 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                               ),
                               SizedBox(height: 10),
 
-                              // Card für Short-Description
+                              // Card für Short-Description mit Icons oben rechts
                               Card(
                                 color: Color(0xFFF7F5EF),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
+                                  padding: const EdgeInsets.all(16.0), // Erhöhtes Padding
                                   child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
+                                      // Icons oben rechts
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              // Teilen-Funktion
+                                              String shareText =
+                                                  '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!\n\n${userResult.finalCharacterDescription}';
+                                              Share.share(shareText);
+                                            },
+                                            child: SvgPicture.asset(
+                                              'icons/share-svgrepo-com.svg',
+                                              width: 24,
+                                              height: 24,
+                                              color: Colors.black, // Passe die Farbe an
+                                            ),
+                                          ),
+                                          SizedBox(width: 16), // Abstand zwischen den Icons
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                userResult.isExpanded = !userResult.isExpanded;
+                                              });
+                                            },
+                                            child: SvgPicture.asset(
+                                              'icons/arrow-expand-svgrepo-com.svg',
+                                              width: 24,
+                                              height: 24,
+                                              color: Colors.black, // Passe die Farbe an
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
                                       SelectableText(
                                         '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!',
                                         style: TextStyle(
@@ -563,136 +629,98 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                         ),
                                       ),
 
-                                      // Button "Lese mehr" / "Lese weniger"
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: TextButton(
-                                          style: TextButton.styleFrom(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 16.0,
-                                              vertical: 4.0,
-                                            ),
-                                            backgroundColor: userResult.isExpanded
-                                                ? Colors.black
-                                                : Color(0xFFCB9935),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                              BorderRadius.all(Radius.circular(8.0)),
-                                            ),
-                                          ),
-                                          onPressed: () {
-                                            setState(() {
-                                              userResult.isExpanded =
-                                              !userResult.isExpanded;
-                                            });
-                                          },
-                                          child: Text(
-                                            userResult.isExpanded
-                                                ? 'Lese weniger'
-                                                : 'Lese mehr',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontFamily: 'Roboto',
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-
-                                      // ------------------- Button "Mehr Details laden" -------------------
-                                      if (userResult.isExpanded)
-                                        Column(
-                                          children: [
-                                            userResult.detailedResult != null
-                                                ? _buildDetailedResultUI(
-                                                userResult.detailedResult!)
-                                                : userResult.isLoadingDetails
-                                                ? CircularProgressIndicator()
-                                                : userResult.errorLoadingDetails != null
-                                                ? Text(
-                                              'Fehler: ${userResult.errorLoadingDetails}',
-                                              style: TextStyle(
-                                                  color: Colors.red),
-                                            )
-                                                : ElevatedButton(
-                                              onPressed: () async {
-                                                final uuid =
-                                                    Provider.of<AuthService>(
-                                                        context,
-                                                        listen: false)
-                                                        .user
-                                                        ?.uid;
-                                                if (uuid == null) return;
-
-                                                setState(() {
-                                                  userResult.isLoadingDetails =
-                                                  true;
-                                                  userResult
-                                                      .errorLoadingDetails =
-                                                  null;
-                                                });
-
-                                                try {
-                                                  Result detailedResult =
-                                                  await fetchResultSummary(
-                                                    uuid,
-                                                    userResult
-                                                        .collectionName,
-                                                  );
-                                                  if (!mounted) return;
-                                                  setState(() {
-                                                    userResult.detailedResult =
-                                                        detailedResult;
-                                                  });
-                                                } catch (e) {
-                                                  if (!mounted) return;
-                                                  setState(() {
-                                                    userResult
-                                                        .errorLoadingDetails =
-                                                        e.toString();
-                                                  });
-                                                } finally {
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      userResult
-                                                          .isLoadingDetails =
-                                                      false;
-                                                    });
-                                                  }
-                                                }
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                Color(0xFFCB9935),
-                                                padding:
-                                                EdgeInsets.symmetric(
-                                                  horizontal: 20,
-                                                  vertical: 12,
-                                                ),
-                                                shape:
-                                                RoundedRectangleBorder(
-                                                  borderRadius:
-                                                  BorderRadius.all(
-                                                    Radius.circular(8.0),
-                                                  ),
-                                                ),
-                                              ),
-                                              child: Text(
-                                                'Mehr Details laden',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontFamily: 'Roboto',
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      // ------------------- Ende "Mehr Details laden" -------------------
+                                      // Entfernt den bisherigen "Lese mehr" Button
                                     ],
                                   ),
                                 ),
                               ),
+
+                              SizedBox(height: 10),
+
+                              // Mehr Details Button außerhalb des Cards
+                              ElevatedButton(
+                                onPressed: () async {
+                                  if (userResult.detailedResult == null &&
+                                      !userResult.isLoadingDetails) {
+                                    final uuid = Provider.of<AuthService>(
+                                        context,
+                                        listen: false)
+                                        .user
+                                        ?.uid;
+                                    if (uuid == null) return;
+
+                                    setState(() {
+                                      userResult.isLoadingDetails = true;
+                                      userResult.errorLoadingDetails = null;
+                                    });
+
+                                    try {
+                                      Result detailedResult =
+                                      await fetchResultSummary(
+                                        uuid,
+                                        userResult.collectionName,
+                                      );
+                                      if (!mounted) return;
+                                      setState(() {
+                                        userResult.detailedResult = detailedResult;
+                                      });
+                                    } catch (e) {
+                                      if (!mounted) return;
+                                      setState(() {
+                                        userResult.errorLoadingDetails =
+                                            e.toString();
+                                      });
+                                    } finally {
+                                      if (mounted) {
+                                        setState(() {
+                                          userResult.isLoadingDetails = false;
+                                        });
+                                      }
+                                    }
+                                  }
+
+                                  setState(() {
+                                    userResult.isMoreDetailsExpanded =
+                                    !userResult.isMoreDetailsExpanded;
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xFFCB9935),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(8.0)),
+                                  ),
+                                ),
+                                child: Text(
+                                  userResult.isMoreDetailsExpanded
+                                      ? 'Weniger Details'
+                                      : 'Mehr Details',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Roboto',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+
+                              // Zusätzlicher Textbereich für Mehr Details
+                              if (userResult.isMoreDetailsExpanded)
+                                userResult.detailedResult != null
+                                    ? _buildDetailedResultUI(
+                                    userResult.detailedResult!)
+                                    : userResult.isLoadingDetails
+                                    ? CircularProgressIndicator()
+                                    : userResult.errorLoadingDetails != null
+                                    ? Text(
+                                  'Fehler: ${userResult.errorLoadingDetails}',
+                                  style: TextStyle(
+                                      color: Colors.red),
+                                )
+                                    : Container(),
                             ],
                           ),
                         );
@@ -708,91 +736,12 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                     ),
                   ),
 
-                SizedBox(height: 10),
-
-                // Teilen-Button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Color(0xFFCB9935),
-                        padding:
-                        EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        ),
-                      ),
-                      onPressed: validResults.isNotEmpty
-                          ? () {
-                        UserResult data = validResults[selectedIndex];
-                        String shareText =
-                            '${data.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${data.finalCharacter}.\n\nBeschreibung: ${data.finalCharacterDescription}';
-                        Share.share(shareText);
-                      }
-                          : null,
-                      child: Text(
-                        'Teilen',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Roboto',
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    // Beispiel-Button für Paywall (analog Desktop)
-                    ElevatedButton.icon(
-                      icon: Icon(Icons.lock, color: Colors.white),
-                      label: Text(
-                        'Details freischalten',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        padding:
-                        EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        ),
-                      ),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Upselling/Paywall geöffnet (Demo).'),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-
                 SizedBox(height: 20),
 
-                ElevatedButton(
-                  onPressed: () async {
-                    await authService.logout(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 12.0,
-                      horizontal: 24.0,
-                    ),
-                    backgroundColor: Colors.grey,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                    ),
-                  ),
-                  child: Text(
-                    'Abmelden',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Roboto',
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
+                // Entfernt die bisherigen "Teilen" und "Details freischalten" Buttons
+
+                // Weitere Inhalte können hier hinzugefügt werden
+
               ],
             ),
           ),
@@ -804,7 +753,9 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
   /// Angepasste AppBar
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Padding(padding: EdgeInsets.symmetric(vertical: 12.0), child: Flexible(
+      title: Padding(
+        padding: EdgeInsets.symmetric(vertical: 12.0),
+        child: Flexible(
           child: GestureDetector(
             onTap: () async {
               const url = 'https://ifyouchange.com/';
@@ -815,8 +766,12 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
               }
             },
             child: Image.asset(
-              'assets/Logo-IYC-gross.png', height: 50,
-            ),))),
+              'assets/Logo-IYC-gross.png',
+              height: 50,
+            ),
+          ),
+        ),
+      ),
       backgroundColor: Color(0xFFF7F5EF),
       iconTheme: IconThemeData(color: Colors.black),
       actions: [
