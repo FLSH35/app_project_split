@@ -156,7 +156,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Padding(
+      backgroundColor: const Color(0xFFF7F5EF),
+      actions: [Padding(
         padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: InkWell(
           onTap: () async {
@@ -178,8 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      backgroundColor: const Color(0xFFF7F5EF),
-      actions: [
         Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Colors.black),
