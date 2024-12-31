@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:personality_score/screens/home_desktop_layout/desktop_layout.dart'; // Für Timer
+import 'package:personality_score/screens/home_screen/home_screen.dart'; // Für Timer
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // Beispiel: Warte 2 Sekunden und navigiere dann weiter
     Timer(const Duration(seconds: 2), () {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const DesktopLayout()),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     });
   }

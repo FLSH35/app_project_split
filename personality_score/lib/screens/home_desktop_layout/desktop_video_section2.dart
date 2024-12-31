@@ -1,90 +1,103 @@
-// lib/screens/desktop_layout/desktop_videos_section.dart
+// lib/screens/desktop_layout/desktop_video_section2.dart
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:async';
+import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
-import '../../helper_functions/video_helper.dart';
+import '../../helper_functions/video_helper.dart'; // Where your VideoWidget is
 
 class DesktopVideoSection2 extends StatefulWidget {
   const DesktopVideoSection2({Key? key}) : super(key: key);
 
   @override
-  State<DesktopVideoSection2> createState() => _DesktopVideosSectionState();
+  State<DesktopVideoSection2> createState() => _DesktopVideoSection2State();
 }
 
-class _DesktopVideosSectionState extends State<DesktopVideoSection2> {
-  Future<List<VideoPlayerController>>? _videosFuture;
+class _DesktopVideoSection2State extends State<DesktopVideoSection2> {
+  VideoPlayerController? _videoController;
+  bool _isLoading = false;
+  bool _hasLoaded = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _videosFuture = _loadVideos();
-  }
+  Future<void> _loadVideo() async {
+    // Don’t load multiple times
+    if (_isLoading || _hasLoaded) return;
 
-  Future<List<VideoPlayerController>> _loadVideos() async {
-    final storage = FirebaseStorage.instance;
-
-    final gsUrl2 = 'gs://personality-score.appspot.com/Personality Score 1.mov';
-
-    final List<VideoPlayerController> controllers = [];
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
+      final storage = FirebaseStorage.instance;
+      final gsUrl2 = 'gs://personality-score.appspot.com/Personality Score 1.mov';
 
-      String downloadUrl2 = await storage.refFromURL(gsUrl2).getDownloadURL();
-      final controller2 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl2))
+      // Fetch Firebase download URL
+      final downloadUrl = await storage.refFromURL(gsUrl2).getDownloadURL();
+
+      // Create and initialize VideoPlayerController
+      final controller = VideoPlayerController.network(downloadUrl)
         ..setLooping(true);
-      await controller2.initialize();
-      controllers.add(controller2);
+      await controller.initialize();
 
-      return controllers;
+      if (mounted) {
+        setState(() {
+          _videoController = controller;
+          _hasLoaded = true;
+        });
+      }
+
+      // Optionally auto-play
+      _videoController?.play();
     } catch (e) {
-      print('Error loading video: $e');
-      return [];
+      debugPrint('Error loading video: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   void dispose() {
+    _videoController?.dispose();
     super.dispose();
-    // Dispose all video controllers if loaded
-    _videosFuture?.then((controllers) {
-      for (var c in controllers) {
-        c.dispose();
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<VideoPlayerController>>(
-      future: _videosFuture,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          // Noch kein Video geladen -> Placeholder
-          return const Center(
-            child: SizedBox(
-              height: 200,
-              child: CircularProgressIndicator(),
-            ),
-          );
+    // Only load when the widget is visible
+    return VisibilityDetector(
+      key: const Key('desktop-video-section2-visibility-key'),
+      onVisibilityChanged: (info) {
+        // If more than 20% of the widget is visible on screen, start loading
+        if (info.visibleFraction > 0.2) {
+          _loadVideo();
         }
-
-        final controllers = snapshot.data!;
-        if (controllers.isEmpty) {
-          return const Text('Videos konnten nicht geladen werden');
-        }
-
-        final controller2 = controllers[0];
-
-        return VideoWidget(
-                videoController: controller2,
-                screenHeight: MediaQuery.of(context).size.height * 1.5,
-                headerText: "Starte Hier",
-                subHeaderText: "10 Minuten. 120 Fragen. Bis zu deinem Ergebnis!",
-              );
-
       },
+      child: Center(
+        child: _buildContent(context),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    // You can choose to show a bigger spinner *before* the VideoWidget’s own spinner:
+    if (_isLoading && _videoController == null) {
+      // Show a spinner while we are fetching the download URL.
+      return const SizedBox(
+        height: 200,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Once we have the controller (or if we’re done loading),
+    // hand it off to VideoWidget to handle its own loading UI.
+    return VideoWidget(
+      videoController: _videoController,
+      screenHeight: MediaQuery.of(context).size.height * 1.2,
+      headerText: "Starte Hier",
+      subHeaderText: "10 Minuten. 120 Fragen. Bis zu deinem Ergebnis!",
     );
   }
 }

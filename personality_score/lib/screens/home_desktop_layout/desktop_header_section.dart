@@ -2,16 +2,25 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
-class DesktopHeaderSection extends StatelessWidget {
+class DesktopHeaderSection extends StatefulWidget {
   final GlobalKey videoSection2Key;
 
-  const DesktopHeaderSection({Key? key, required this.videoSection2Key}) : super(key: key);
+  const DesktopHeaderSection({Key? key, required this.videoSection2Key})
+      : super(key: key);
+
+  @override
+  State<DesktopHeaderSection> createState() => _DesktopHeaderSectionState();
+}
+
+class _DesktopHeaderSectionState extends State<DesktopHeaderSection> {
+  bool _hasRevealed = false;
 
   void _scrollToVideoSection2(BuildContext context) {
-    if (videoSection2Key.currentContext != null) {
+    if (widget.videoSection2Key.currentContext != null) {
       Scrollable.ensureVisible(
-        videoSection2Key.currentContext!,
+        widget.videoSection2Key.currentContext!,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
@@ -23,6 +32,27 @@ class DesktopHeaderSection extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth  = MediaQuery.of(context).size.width;
 
+    return VisibilityDetector(
+      key: const Key('DesktopHeaderSection-VisibilityKey'),
+      onVisibilityChanged: (visibilityInfo) {
+        // If at least 10% of this widget is visible on screen, reveal the SVG
+        if (visibilityInfo.visibleFraction > 0.1 && !_hasRevealed) {
+          setState(() {
+            _hasRevealed = true;
+          });
+        }
+      },
+      child: _hasRevealed
+          ? _buildRevealedContent(screenHeight, screenWidth)
+          : SizedBox(
+        height: screenHeight,
+        width: screenWidth,
+        child: const Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+
+  Widget _buildRevealedContent(double screenHeight, double screenWidth) {
     return Stack(
       children: [
         Positioned.fill(
@@ -49,9 +79,9 @@ class DesktopHeaderSection extends StatelessWidget {
                   "Erhalte messerscharfe Klarheit über deinen Entwicklungsstand und erfahre, wie du das nächste Level erreichen kannst.",
                   style: TextStyle(
                     fontSize: screenHeight * 0.02,
-                    fontWeight: FontWeight.normal,
                     color: Colors.black,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 50),
                 ElevatedButton(
@@ -65,9 +95,7 @@ class DesktopHeaderSection extends StatelessWidget {
                       vertical: screenHeight * 0.021,
                     ),
                   ),
-                  onPressed: () {
-                    _scrollToVideoSection2(context);
-                  },
+                  onPressed: () => _scrollToVideoSection2(context),
                   child: Text(
                     'Zum Test',
                     style: TextStyle(

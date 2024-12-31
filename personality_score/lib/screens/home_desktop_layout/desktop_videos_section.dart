@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:async';
+import 'package:visibility_detector/visibility_detector.dart';
 
-import '../../helper_functions/video_helper.dart';
+import '../../helper_functions/video_helper.dart'; // Where your VideoWidget is
 
 class DesktopVideosSection extends StatefulWidget {
   const DesktopVideosSection({Key? key}) : super(key: key);
@@ -14,79 +14,94 @@ class DesktopVideosSection extends StatefulWidget {
 }
 
 class _DesktopVideosSectionState extends State<DesktopVideosSection> {
-  Future<List<VideoPlayerController>>? _videosFuture;
+  VideoPlayerController? _videoController;
+  bool _isLoading = false;
+  bool _hasLoaded = false;
 
   @override
-  void initState() {
-    super.initState();
-    _videosFuture = _loadVideos();
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
   }
 
-  Future<List<VideoPlayerController>> _loadVideos() async {
-    final storage = FirebaseStorage.instance;
+  Future<void> _loadVideo() async {
+    // Prevent multiple loads
+    if (_isLoading || _hasLoaded) return;
 
-    final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 3.mov';
-
-    final List<VideoPlayerController> controllers = [];
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
-      final controller1 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
+      final storage = FirebaseStorage.instance;
+      final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 3.mov';
+
+      // Get the download URL from Firebase
+      final downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
+
+      // Create and initialize the VideoPlayerController
+      final controller = VideoPlayerController.network(downloadUrl1)
         ..setLooping(true);
-      await controller1.initialize();
-      controllers.add(controller1);
 
+      await controller.initialize();
 
-      return controllers;
+      if (mounted) {
+        setState(() {
+          _videoController = controller;
+          _hasLoaded = true;
+        });
+      }
+
+      // Optionally auto-play
+      _videoController?.play();
     } catch (e) {
-      print('Error loading video: $e');
-      return [];
+      debugPrint('Error loading video: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
-  void dispose() {
-    super.dispose();
-    // Dispose all video controllers if loaded
-    _videosFuture?.then((controllers) {
-      for (var c in controllers) {
-        c.dispose();
-      }
-    });
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: const Key('DesktopVideosSection-VisibilityKey'),
+      onVisibilityChanged: (visibilityInfo) {
+        // If at least 20% of this widget is visible, load the video
+        if (visibilityInfo.visibleFraction > 0.2) {
+          _loadVideo();
+        }
+      },
+      child: _buildContent(context),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<VideoPlayerController>>(
-      future: _videosFuture,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          // Noch kein Video geladen -> Placeholder
-          return const Center(
-            child: SizedBox(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
+  Widget _buildContent(BuildContext context) {
+    // If we are still fetching the download URL and have no controller, show spinner
+    if (_isLoading && _videoController == null) {
+      return const Center(
+        child: SizedBox(
+          height: 50,
+          width: 50,
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
-        final controllers = snapshot.data!;
-        if (controllers.isEmpty) {
-          return const Text('Videos konnten nicht geladen werden');
-        }
-
-        final controller1 = controllers[0];
-
-        return Column(
-          children: [
-            VideoWidget(
-              videoController: controller1,
-              screenHeight: MediaQuery.of(context).size.height * 1.5,
-              headerText: "Wieso MUSST du den Personality Score ausfüllen?",
-              subHeaderText: "Erfahre es im Video!",
-            ),
-          ],
-        );
-      },
+    // Hand off to your VideoWidget, which will also show its own CircularProgressIndicator
+    // if the controller is not yet initialized.
+    return Column(
+      children: [
+        VideoWidget(
+          videoController: _videoController,
+          screenHeight: MediaQuery.of(context).size.height * 1.2,
+          headerText: "Wieso MUSST du den Personality Score ausfüllen?",
+          subHeaderText: "Erfahre es im Video!",
+        ),
+      ],
     );
   }
 }

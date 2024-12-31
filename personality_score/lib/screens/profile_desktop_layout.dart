@@ -12,6 +12,7 @@ import 'dart:convert';
 import 'dart:developer' as logging;
 import 'package:logging/logging.dart';
 
+import 'detailed_result_ui.dart';
 import 'signin_dialog.dart';
 import 'home_screen/mobile_sidebar.dart';
 import 'package:personality_score/models/result.dart';
@@ -43,6 +44,12 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
 
   late PageController _pageController;
   int selectedIndex = 0; // Aktuelle Seite im PageView
+
+  /// Set zur Verfolgung der expandierten Ergebnisse (Index)
+  Set<int> _expandedResults = <int>{};
+
+  /// Helleres Beige, wie in der Mobile-Version
+  static const Color middleColor = Color(0xFFF2EEE5);
 
   @override
   void initState() {
@@ -143,10 +150,19 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
 
     try {
       List<Result> results = await fetchUserResults(uuid);
+
+      // Sortiere die Ergebnisse nach Datum aufsteigend (optional, falls gewünscht)
+      results.sort((a, b) {
+        DateTime dateA = a.completionDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+        DateTime dateB = b.completionDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return dateA.compareTo(dateB);
+      });
+
       setState(() {
         validResults = results;
-        selectedIndex = validResults.length - 1; // Start bei letztem Ergebnis
-        _pageController = PageController(initialPage: 0);
+        // Standard: Zeige das jüngste Ergebnis (am Ende der sortierten Liste)
+        selectedIndex = validResults.length - 1;
+        _pageController = PageController(initialPage: selectedIndex);
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -166,23 +182,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
     return dateFormat.format(date.toLocal()) + ' Uhr';
   }
 
-  /// Widget zur Anzeige detaillierter Scores (Lebensbereiche)
-  Widget _buildDetailedResultUI(Result detailedResult) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0), // Größeres Padding
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: LIFE_AREA_MAP_DART.entries.map((entry) {
-          String lebensbereich = entry.key;
-          String sumKey = entry.value[0];
-          String countKey = entry.value[1];
-          int sum = _getLebensbereichSum(detailedResult, sumKey);
-          int count = _getLebensbereichCount(detailedResult, countKey);
-          return _buildLebensbereichRow(lebensbereich, sum, count);
-        }).toList(),
-      ),
-    );
-  }
+
 
   /// Helper-Funktion, um die Summe eines Lebensbereichs abzurufen
   int _getLebensbereichSum(Result result, String sumKey) {
@@ -325,11 +325,21 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
     );
   }
 
+  /// Beschreibung kürzen
+  String _truncateDescription(String? description) {
+    if (description == null) return '';
+    final sentences = description.split('. ');
+    if (sentences.length <= 4) {
+      return description;
+    } else {
+      return sentences.take(4).join('. ') + '...';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
     final user = authService.user;
-    String uuid = user?.uid ?? "";
 
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
@@ -342,46 +352,40 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
           padding: EdgeInsets.all(16.0),
           constraints: BoxConstraints(maxWidth: 1200), // Begrenzung der Maximalbreite
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Name-Editing Widgets
-              widget.isEditingName
-                  ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 200,
-                    child: TextField(
-                      controller: widget.nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Anzeigename',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.check),
-                    onPressed: widget.onSaveName,
-                  ),
-                ],
-              )
-                  : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SelectableText(
-                    widget.nameController.text,
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontFamily: 'Roboto'),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: widget.onEditName,
-                  ),
-                ],
+          children: [
+          Center(
+          child: Container(
+          child: Align(
+          alignment: Alignment.topRight,
+            child: IconButton(
+              icon: Icon(Icons.logout, color: Colors.black),
+              onPressed: () async {
+                await authService.logout(context);
+              },
+              alignment: Alignment.topRight,
+              tooltip: 'Abmelden',
+            ),
+          ),
+        ),
+      ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SelectableText(
+              widget.nameController.text,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'Roboto',
               ),
+            ),
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: widget.onEditName,
+            ),
+          ],
+        ),
               SizedBox(height: 20),
               if (_isLoading)
                 Center(child: CircularProgressIndicator())
@@ -399,11 +403,11 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                           },
                           itemCount: validResults.length,
                           itemBuilder: (context, index) {
-                            Result userResult = validResults[index];
-
+                            final userResult = validResults[index];
                             String completionDate =
                             _formatCompletionDate(userResult.completionDate);
 
+                            // "Ergebnisnummer" (1-based)
                             int resultNumber = index + 1;
 
                             return SingleChildScrollView(
@@ -476,6 +480,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                             mainAxisAlignment:
                                             MainAxisAlignment.end,
                                             children: [
+                                              // Teilen-Icon mit kreisförmigem Hintergrund
                                               GestureDetector(
                                                 onTap: () {
                                                   // Teilen-Funktion
@@ -483,15 +488,58 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                                       '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!\n\n${userResult.finalCharacterDescription}';
                                                   Share.share(shareText);
                                                 },
-                                                child: SvgPicture.asset(
-                                                  'assets/icons/share-svgrepo-com.svg',
-                                                  width: 24,
-                                                  height: 24,
-                                                  color: Colors.black,
+                                                child: Container(
+                                                  width: 36,
+                                                  height: 36,
+                                                  decoration: BoxDecoration(
+                                                    color: middleColor,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Center(
+                                                    child: SvgPicture.asset(
+                                                      'assets/icons/share-svgrepo-com.svg',
+                                                      width: 24,
+                                                      height: 24,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
                                               SizedBox(width: 16),
-                                              // Entfernen der Expand-Icon, da detaillierte Ergebnisse bereits in einer einzigen Abfrage enthalten sind
+                                              // Expand/Collapse-Icon mit kreisförmigem Hintergrund
+                                              GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    if (_expandedResults
+                                                        .contains(index)) {
+                                                      _expandedResults
+                                                          .remove(index);
+                                                    } else {
+                                                      _expandedResults
+                                                          .add(index);
+                                                    }
+                                                  });
+                                                },
+                                                child: Container(
+                                                  width: 36,
+                                                  height: 36,
+                                                  decoration: BoxDecoration(
+                                                    color: middleColor,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Center(
+                                                    child: SvgPicture.asset(
+                                                      _expandedResults
+                                                          .contains(index)
+                                                          ? 'assets/icons/shrink-svgrepo-com.svg'
+                                                          : 'assets/icons/expand-svgrepo-com.svg',
+                                                      width: 24,
+                                                      height: 24,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
                                             ],
                                           ),
                                           SizedBox(height: 8),
@@ -504,8 +552,23 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                             textAlign: TextAlign.center,
                                           ),
                                           SizedBox(height: 8),
-                                          SelectableText(
-                                            userResult.finalCharacterDescription ?? '',
+                                          // Beschreibungstext mit Expand/Collapse
+                                          _expandedResults.contains(index)
+                                              ? SelectableText(
+                                            userResult
+                                                .finalCharacterDescription ??
+                                                '',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontFamily: 'Roboto',
+                                              fontSize: 16,
+                                            ),
+                                          )
+                                              : SelectableText(
+                                            _truncateDescription(
+                                              userResult
+                                                  .finalCharacterDescription,
+                                            ),
                                             style: TextStyle(
                                               color: Colors.black,
                                               fontFamily: 'Roboto',
@@ -518,7 +581,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                                   ),
                                   SizedBox(height: 20),
                                   // Detaillierte Ergebnisse (Lebensbereiche)
-                                  _buildDetailedResultUI(userResult),
+                                  buildDetailedResultUI(userResult),
                                   SizedBox(height: 20),
                                 ],
                               ),
@@ -527,94 +590,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
                         ),
                       ),
                       SizedBox(height: 20),
-                      // Teilen- und Paywall-Buttons
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              backgroundColor: Color(0xFFCB9935),
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(8.0)),
-                              ),
-                            ),
-                            onPressed: validResults.isNotEmpty
-                                ? () {
-                              // Aktuelles PageView-Item ermitteln
-                              int sortedIndex =
-                                  validResults.length - 1 - selectedIndex;
-                              Result data = validResults[sortedIndex];
-                              String shareText =
-                                  '${data.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${data.finalCharacter}.\n\nBeschreibung: ${data.finalCharacterDescription}';
-                              Share.share(shareText);
-                            }
-                                : null,
-                            child: Text(
-                              'Teilen',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontSize: 18),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          ElevatedButton.icon(
-                            icon: Icon(Icons.lock, color: Colors.white),
-                            label: Text(
-                              'Details freischalten',
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: 'Roboto'),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(8.0)),
-                              ),
-                            ),
-                            onPressed: () {
-                              // TODO: Hier Paywall-/Upselling-Logik einfügen
-                              // 1. Paywall zeigen oder Payment-Flow starten
-                              // 2. Bei Erfolg -> zusätzliche Inhalte/Analyse freischalten
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Upselling/Paywall geöffnet.'),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      // Abmelden-Button
-                      ElevatedButton(
-                        onPressed: () async {
-                          await authService.logout(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 16.0, horizontal: 32.0),
-                          backgroundColor: Colors.grey,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(8.0)),
-                          ),
-                        ),
-                        child: Text(
-                          'Abmelden',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Roboto',
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
+
                     ],
                   ),
                 )
@@ -635,7 +611,7 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
     );
   }
 
-  /// Angepasste AppBar
+  /// Angepasste AppBar (unbenutzt im aktuellen Code, da wir CustomAppBar nutzen)
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Padding(
@@ -673,47 +649,3 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
     );
   }
 }
-
-/// Definieren Sie die LIFE_AREA_MAP_DART hier
-const Map<String, List<String>> LIFE_AREA_MAP_DART = {
-  // Hauptbereich 1: Selbstwerterhöhung
-  "Selbstwerterhöhung": ["SelbstwerterhoehungSum", "SelbstwerterhoehungCount"],
-  "Zielsetzung": ["ZielsetzungSum", "ZielsetzungCount"],
-  "Weiterbildung": ["WeiterbildungSum", "WeiterbildungCount"],
-  "Finanzen": ["FinanzenSum", "FinanzenCount"],
-  "Karriere": ["KarriereSum", "KarriereCount"],
-  "Fitness": ["FitnessSum", "FitnessCount"],
-
-  // Hauptbereich 2: Energie
-  "Energie": ["EnergieSum", "EnergieCount"],
-  "Produktivität": ["ProduktivitaetSum", "ProduktivitaetCount"],
-  "Stressmanagement": ["StressmanagementSum", "StressmanagementCount"],
-  "Resilienz": ["ResilienzSum", "ResilienzCount"],
-
-  // Hauptbereich 3: Inner Core, Inner Change
-  "Inner Core, Inner Change": [
-    "InnerCoreInnerChangeSum",
-    "InnerCoreInnerChangeCount"
-  ],
-  "Emotionen": ["EmotionenSum", "EmotionenCount"],
-  "Glaubenssätze": ["GlaubenssaetzeSum", "GlaubenssaetzeCount"],
-
-  // Hauptbereich 4: Bindung & Beziehungen
-  "Bindung & Beziehungen": ["BindungBeziehungenSum", "BindungBeziehungenCount"],
-  "Kommunikation": ["KommunikationSum", "KommunikationCount"],
-  "Gemeinschaft": ["GemeinschaftSum", "GemeinschaftCount"],
-  "Familie": ["FamilieSum", "FamilieCount"],
-  "Netzwerk": ["NetzwerkSum", "NetzwerkCount"],
-  "Dating": ["DatingSum", "DatingCount"],
-
-  // Hauptbereich 5: Lebenssinn
-  "Lebenssinn": ["LebenssinnSum", "LebenssinnCount"],
-  "Umwelt": ["UmweltSum", "UmweltCount"],
-  "Spiritualität": ["SpiritualitaetSum", "SpiritualitaetCount"],
-  "Spenden": ["SpendenSum", "SpendenCount"],
-  "Lebensplanung": ["LebensplanungSum", "LebensplanungCount"],
-  "Selbstfürsorge": ["SelbstfuersorgeSum", "SelbstfuersorgeCount"],
-  "Freizeit": ["FreizeitSum", "FreizeitCount"],
-  "Spaß & Freude im Leben": ["SpassFreudeSum", "SpassFreudeCount"],
-  "Gesundheit": ["GesundheitSum", "GesundheitCount"],
-};

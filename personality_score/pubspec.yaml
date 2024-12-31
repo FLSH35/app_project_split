@@ -8,6 +8,8 @@ environment:
   sdk: '>=3.0.5 <4.0.0'
 
 dependencies:
+
+  visibility_detector: ^0.3.3
   responsive_builder: ^0.4.1
   flutter_svg: ^1.1.0+1
   csv: ^5.0.0

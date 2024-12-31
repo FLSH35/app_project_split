@@ -14,7 +14,7 @@ class DesktopTutorialSection extends StatefulWidget {
 }
 
 class _DesktopTutorialSectionState extends State<DesktopTutorialSection> {
-  bool isLoading = true;
+  bool isLoading = false;
   final List<String> tutorialQuestions = [
     'Mit dem Schieberegler kann ich 10 verschiedene Stufen einstellen.',
     'Die Test-Fragen beantworte ich schnell, ...',
@@ -190,27 +190,39 @@ class _DesktopTutorialSectionState extends State<DesktopTutorialSection> {
     );
   }
   Widget _buildNavigationButton(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
-            backgroundColor: Color(0xFFCB9935),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+    return isLoading
+              ? SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+              strokeWidth: 2.0,
             ),
-          ),
-          onPressed: () {
-            handleTakeTest(context); // Ensure this function is defined in your helpers
-          },
-          child: Text(
-            'Beginne den Test',
-            style: TextStyle(
-                color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
-          ),
-        ),
-      ],
+          )
+              : ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFCB9935),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+            ),
+            onPressed: isLoading
+                ? null
+                : () async {
+              setState(() {
+                isLoading = true;
+              });
+              await handleTakeTest(context);
+              setState(() {
+                isLoading = false;
+              });
+            },
+            child: Text(
+              'Beginne den Test',
+              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+            ),
+
     );
   }
 }

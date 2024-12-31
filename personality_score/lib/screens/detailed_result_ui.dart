@@ -46,7 +46,7 @@ const Map<String, List<String>> LIFE_AREA_MAP_DART = {
 };
 
 // Widget zur Darstellung der detaillierten Ergebnisse
-Widget buildDetailedResultUI(Result detailedResult, int index) {
+Widget buildDetailedResultUI(Result detailedResult) {
   return Padding(
     padding: const EdgeInsets.all(16.0), // Größeres Padding
     child: Column(

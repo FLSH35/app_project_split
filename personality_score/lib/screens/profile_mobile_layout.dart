@@ -596,7 +596,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                               SizedBox(height: 10),
 
                               // Detaillierte Ergebnisse (Lebensbereiche)
-                              buildDetailedResultUI(userResult, index),
+                              buildDetailedResultUI(userResult),
                             ],
                           ),
                         );
