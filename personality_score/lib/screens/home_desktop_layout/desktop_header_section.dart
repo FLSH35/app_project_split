@@ -1,14 +1,17 @@
 // lib/screens/desktop_layout/desktop_header_section.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class DesktopHeaderSection extends StatelessWidget {
-  const DesktopHeaderSection({Key? key}) : super(key: key);
+  final GlobalKey videoSection2Key;
 
-  void _scrollToTutorialSection(BuildContext context, GlobalKey key) {
-    if (key.currentContext != null) {
+  const DesktopHeaderSection({Key? key, required this.videoSection2Key}) : super(key: key);
+
+  void _scrollToVideoSection2(BuildContext context) {
+    if (videoSection2Key.currentContext != null) {
       Scrollable.ensureVisible(
-        key.currentContext!,
+        videoSection2Key.currentContext!,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
@@ -43,9 +46,10 @@ class DesktopHeaderSection extends StatelessWidget {
                   ),
                 ),
                 SelectableText(
-                  "Erhalte messerscharfe Klarheit ...",
+                  "Erhalte messerscharfe Klarheit über deinen Entwicklungsstand und erfahre, wie du das nächste Level erreichen kannst.",
                   style: TextStyle(
                     fontSize: screenHeight * 0.02,
+                    fontWeight: FontWeight.normal,
                     color: Colors.black,
                   ),
                 ),
@@ -62,9 +66,7 @@ class DesktopHeaderSection extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // Hier könntest du den TutorialKey nutzen,
-                    // der in DesktopTutorialSection definiert ist (per GlobalKey).
-                    // _scrollToTutorialSection(context, tutorialKey);
+                    _scrollToVideoSection2(context);
                   },
                   child: Text(
                     'Zum Test',

@@ -66,3 +66,5 @@ flutter:
     - assets/icons/goldbaum.ico
     - assets/icons/shrink-svgrepo-com.svg
     - assets/icons/expand-svgrepo-com.svg
+    - assets/wasserzeichen.svg
+    - assets/wasserzeichen.ico

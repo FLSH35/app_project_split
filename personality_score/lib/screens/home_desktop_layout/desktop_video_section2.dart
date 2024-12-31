@@ -6,14 +6,14 @@ import 'dart:async';
 
 import '../../helper_functions/video_helper.dart';
 
-class DesktopVideosSection extends StatefulWidget {
-  const DesktopVideosSection({Key? key}) : super(key: key);
+class DesktopVideoSection2 extends StatefulWidget {
+  const DesktopVideoSection2({Key? key}) : super(key: key);
 
   @override
-  State<DesktopVideosSection> createState() => _DesktopVideosSectionState();
+  State<DesktopVideoSection2> createState() => _DesktopVideosSectionState();
 }
 
-class _DesktopVideosSectionState extends State<DesktopVideosSection> {
+class _DesktopVideosSectionState extends State<DesktopVideoSection2> {
   Future<List<VideoPlayerController>>? _videosFuture;
 
   @override
@@ -25,17 +25,17 @@ class _DesktopVideosSectionState extends State<DesktopVideosSection> {
   Future<List<VideoPlayerController>> _loadVideos() async {
     final storage = FirebaseStorage.instance;
 
-    final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 3.mov';
+    final gsUrl2 = 'gs://personality-score.appspot.com/Personality Score 1.mov';
 
     final List<VideoPlayerController> controllers = [];
 
     try {
-      String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
-      final controller1 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
-        ..setLooping(true);
-      await controller1.initialize();
-      controllers.add(controller1);
 
+      String downloadUrl2 = await storage.refFromURL(gsUrl2).getDownloadURL();
+      final controller2 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl2))
+        ..setLooping(true);
+      await controller2.initialize();
+      controllers.add(controller2);
 
       return controllers;
     } catch (e) {
@@ -64,6 +64,7 @@ class _DesktopVideosSectionState extends State<DesktopVideosSection> {
           // Noch kein Video geladen -> Placeholder
           return const Center(
             child: SizedBox(
+              height: 200,
               child: CircularProgressIndicator(),
             ),
           );
@@ -74,18 +75,15 @@ class _DesktopVideosSectionState extends State<DesktopVideosSection> {
           return const Text('Videos konnten nicht geladen werden');
         }
 
-        final controller1 = controllers[0];
+        final controller2 = controllers[0];
 
-        return Column(
-          children: [
-            VideoWidget(
-              videoController: controller1,
-              screenHeight: MediaQuery.of(context).size.height * 1.5,
-              headerText: "Wieso MUSST du den Personality Score ausfüllen?",
-              subHeaderText: "Erfahre es im Video!",
-            ),
-          ],
-        );
+        return VideoWidget(
+                videoController: controller2,
+                screenHeight: MediaQuery.of(context).size.height * 1.5,
+                headerText: "Starte Hier",
+                subHeaderText: "10 Minuten. 120 Fragen. Bis zu deinem Ergebnis!",
+              );
+
       },
     );
   }

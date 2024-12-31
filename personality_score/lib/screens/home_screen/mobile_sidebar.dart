@@ -96,13 +96,17 @@ class _MobileSidebarState extends State<MobileSidebar> {
                   // Noch nicht eingeloggt
                   if (user == null || user.displayName == null) {
                     return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: ElevatedButton(
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      child: SizedBox(
+                  width: double.infinity, // <-- match_parent
+                  child: ElevatedButton(
+
                         style: ElevatedButton.styleFrom(
+
                           backgroundColor: Colors.black,
-                          side: const BorderSide(color: Color(0xFFCB9935)),
+                          side: const BorderSide(color: Colors.black),
                           shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                            borderRadius: BorderRadius.all(Radius.circular(4.0)),
                           ),
                         ),
                         onPressed: () async {
@@ -138,6 +142,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                           });
                         },
                         child: const Text(
+
                           'Anmelden',
                           style: TextStyle(
                             color: Colors.white,
@@ -145,7 +150,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                             fontSize: 20,
                           ),
                         ),
-                      ),
+                      ),)
                     );
                   } else {
                     // Bereits eingeloggt, Name vorhanden

@@ -23,49 +23,52 @@ class DesktopPersonalityTypesSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 20.0, right: 20, top: 50, bottom: 0),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Left column
               Expanded(
                 flex: 1,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
+                    SelectableText(
                       "PERSÖNLICHKEITSSTUFEN",
                       style: TextStyle(
                         fontSize: screenHeight * 0.021,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
+                        fontFamily: 'Roboto',
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Text(
+                    SizedBox(height: 20),
+                    SelectableText(
                       "Verstehe dich selbst und andere ",
                       style: TextStyle(
                         fontSize: screenHeight * 0.056,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
+                        fontFamily: 'Roboto',
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      "Vom Anonymus zum LifeArtist: ...",
+                    SizedBox(height: 20),
+                    SelectableText(
+                      "Vom Anonymus zum LifeArtist: Die 8 Stufen symbolisieren die wichtigsten Etappen auf dem Weg, dein Potenzial voll auszuschöpfen. Mit einem fundierten Verständnis des Modells wirst du nicht nur dich selbst, sondern auch andere Menschen viel besser verstehen und einordnen können.",
                       style: TextStyle(
                         color: Colors.black,
+                        fontFamily: 'Roboto',
                         fontSize: screenHeight * 0.021,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 70),
+                    SizedBox(height: 70),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFCB9935),
+                        backgroundColor: Color(0xFFCB9935),
                         padding: EdgeInsets.symmetric(
                           horizontal: screenWidth * 0.07,
                           vertical: screenHeight * 0.021,
                         ),
-                        shape: const RoundedRectangleBorder(
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8.0)),
                         ),
                       ),
@@ -76,6 +79,7 @@ class DesktopPersonalityTypesSection extends StatelessWidget {
                         'Erfahre mehr',
                         style: TextStyle(
                           color: Colors.white,
+                          fontFamily: 'Roboto',
                           fontSize: screenHeight * 0.021,
                         ),
                       ),
@@ -83,16 +87,12 @@ class DesktopPersonalityTypesSection extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 16.0),
-              // Right column (Adventurer Image)
+              SizedBox(width: 16.0),
               Expanded(
                 flex: 1,
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: AdventurerImage(
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                  ),
+                  child: AdventurerImage(screenWidth: screenWidth, screenHeight: screenHeight),
                 ),
               ),
             ],

@@ -29,85 +29,109 @@ class _CustomAppBarState extends State<CustomAppBar> {
       padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
       child: Stack(
         children: [
-          // First row with the buttons
+          // First row with the buttons (Profile/Login and optionally "Beginne den Test")
           Positioned(
             right: 0,
             top: 0, // Adjusted position to be at the top
-            child: Column(
-              children: [
-                Consumer<AuthService>(
-                  builder: (context, authService, child) {
-                    // Check if user is logged in
-                    if (authService.user != null && authService.user!.displayName != null) {
-                      // User is logged in -> show profile icon
-                      return IconButton(
-                        icon: Icon(Icons.person, color: _getIconColor(context, '/profile')),
+            child: Consumer<AuthService>(
+              builder: (context, authService, child) {
+                return Column(
+                  children: [
+                    // Profile Icon and Name or Login Button
+                    authService.user != null && authService.user!.displayName != null
+                        ? InkWell(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pushNamed('/profile');
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.person,
+                              color: Colors.black,
+                              size: 32,
+                              semanticLabel: 'Profil',
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              authService.user!.displayName!,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                        : Padding(
+                      padding: EdgeInsets.all(6.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          side: BorderSide(color: Color(0xFFCB9935)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                          ),
+                        ),
                         onPressed: () {
                           Navigator.of(context).pushNamed('/profile');
                         },
-                      );
-                    } else {
-                      // User is not logged in -> show login button
-                      return Padding(
-                        padding: EdgeInsets.all(6.0),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            side: BorderSide(color: Color(0xFFCB9935)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('/profile');
-                          },
-                          child: Text(
-                            'Anmelden',
-                            style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                        child: Text(
+                          'Anmelden',
+                          style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                        ),
+                      ),
+                    ),
+
+                    // Spacer between Profile/Login and "Beginne den Test"
+                    SizedBox(height: 5),
+
+                    // "Beginne den Test" Button or CircularProgressIndicator
+                    // Nur anzeigen, wenn der Benutzer nicht eingeloggt ist
+                    if (authService.user == null)
+                      isLoading
+                          ? SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                          strokeWidth: 2.0,
+                        ),
+                      )
+                          : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFCB9935),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
                           ),
                         ),
-                      );
-                    }
-                  },
-                ),
-                SizedBox(height: 5), // Add some spacing between buttons
-                // Test-Button (Beginne den Test) or CircularProgressIndicator
-                isLoading
-                    ? SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
-                    strokeWidth: 2.0,
-                  ),
-                )
-                    : ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFCB9935),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                    ),
-                  ),
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    await handleTakeTest(context);
-                    setState(() {
-                      isLoading = false;
-                    });
-                  },
-                  child: Text(
-                    'Beginne den Test',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
-                  ),
-                ),
-              ],
+                        onPressed: isLoading
+                            ? null
+                            : () async {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          await handleTakeTest(context);
+                          setState(() {
+                            isLoading = false;
+                          });
+                        },
+                        child: Text(
+                          'Beginne den Test',
+                          style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
           ),
+
           // Second row: Logo and navigation buttons
           Align(
             alignment: Alignment.center,
@@ -123,7 +147,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
                       if (await canLaunch(url)) {
                         await launch(url);
                       } else {
-                        throw 'Could not launch $url';
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Konnte die URL nicht öffnen: $url')),
+                        );
                       }
                     },
                     child: Image.asset(
@@ -163,11 +189,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
     );
   }
 
-  Color _getIconColor(BuildContext context, String route) {
-    return ModalRoute.of(context)?.settings.name == route
-        ? Color(0xFFCB9935)
-        : Colors.black;
-  }
+  // Entfernte _getIconColor Funktion, da sie nicht mehr benötigt wird
 
   // Add the showSignInDialog function
   void showSignInDialog(BuildContext context) {

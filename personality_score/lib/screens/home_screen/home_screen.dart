@@ -221,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 SelectableText(
                   "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
                   style: TextStyle(
-                    fontSize: screenHeight * 0.036,
+                    fontSize: screenHeight * 0.025,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                     fontFamily: 'Roboto',

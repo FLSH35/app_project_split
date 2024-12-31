@@ -10,15 +10,40 @@ class DesktopTestimonialSection extends StatefulWidget {
 
 class _DesktopTestimonialSectionState extends State<DesktopTestimonialSection> {
   late PageController _pageController;
+  late int selectedIndex;
 
+  int initialPage = 0;
   final List<Map<String, String>> testimonials = [
     {
       "name": "Andrés",
-      "text": "Der Personality Score hat mir geholfen ...",
+      "text": "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
       "image": "assets/testimonials/Andres.jpg",
       "personalityType": "Traveller",
     },
-    // ...
+    {
+      "name": "Jana",
+      "text": "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
+      "image": "assets/testimonials/Jana.jpg",
+      "personalityType": "Traveller",
+    },
+    {
+      "name": "Christoph",
+      "text": "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
+      "image": "assets/testimonials/Christoph.jpg",
+      "personalityType": "Individual",
+    },
+    {
+      "name": "Alex",
+      "text": "Endlich ein Persönlichkeitstest, der mir weiterhilft.",
+      "image": "assets/testimonials/Alex.jpg",
+      "personalityType": "Traveller",
+    },
+    {
+      "name": "Klaus",
+      "text": "Woher kennt er mich so gut?",
+      "image": "assets/testimonials/Klaus.jpg",
+      "personalityType": "Individual",
+    },
   ];
 
   @override
@@ -26,6 +51,14 @@ class _DesktopTestimonialSectionState extends State<DesktopTestimonialSection> {
     super.initState();
     _pageController = PageController(
       initialPage: testimonials.length * 1000,
+      viewportFraction: 0.4,
+    );
+
+    // Set initialPage to a large value to simulate infinite scrolling
+    initialPage = testimonials.length * 1000;
+    selectedIndex = initialPage % testimonials.length;
+    _pageController = PageController(
+      initialPage: initialPage,
       viewportFraction: 0.4,
     );
   }
@@ -38,100 +71,167 @@ class _DesktopTestimonialSectionState extends State<DesktopTestimonialSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFFF7F5EF),
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          const Text(
-            "Was unsere Nutzer sagen",
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
+    return StatefulBuilder(
+      builder: (context, setState) {
+        // Keep track of the selected index
+        int selectedIndex = initialPage % testimonials.length;
+
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          color: Color(0xFFF7F5EF),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Was unsere Nutzer sagen",
+                style: TextStyle(
+                  fontSize: 28, // Larger font size for the section title
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Roboto',
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 20),
+              SizedBox(
+                height: 450, // Adjust height based on design
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          // Update selectedIndex using modulo to wrap around
+                          selectedIndex = index % testimonials.length;
+                        });
+                      },
+                      // Set itemCount to null for infinite scrolling
+                      itemBuilder: (context, index) {
+                        // Adjust index to wrap around using modulo
+                        int adjustedIndex = index % testimonials.length;
+                        return Align(
+                          alignment: Alignment.center,
+                          child: _buildTestimonialCard(
+                              testimonials[adjustedIndex]['name']!,
+                              testimonials[adjustedIndex]['text']!,
+                              testimonials[adjustedIndex]['personalityType']!,
+                              testimonials[adjustedIndex]['image']!
+
+                          ),
+                        );
+                      },
+                    ),
+                    Positioned(
+                      left: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back_ios),
+                        onPressed: () {
+                          if (_pageController.hasClients) {
+                            _pageController.previousPage(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_forward_ios),
+                        onPressed: () {
+                          if (_pageController.hasClients) {
+                            _pageController.nextPage(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
           ),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: 450,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                PageView.builder(
-                  controller: _pageController,
-                  itemBuilder: (context, index) {
-                    int adjustedIndex = index % testimonials.length;
-                    return _buildTestimonialCard(testimonials[adjustedIndex]);
-                  },
-                ),
-                Positioned(
-                  left: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: () {
-                      _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios),
-                    onPressed: () {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildTestimonialCard(Map<String, String> data) {
-    return Center(
+  Widget _buildTestimonialCard(
+      String name,
+      String text,
+      String personalityType,
+      String imagePath,
+      ) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    // Dynamische Größen basierend auf der Bildschirmgröße
+    double cardWidth = screenWidth *0.25; // 25% der Bildschirmbreite
+    double imageSize = (cardWidth * 0.4); // 40% der Card-Breite, 25% kleiner
+
+    return SizedBox(
+      width: cardWidth,
       child: Container(
-        width: 350,
-        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+        margin: EdgeInsets.symmetric(horizontal: 8.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+            ),
+          ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 15),
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage(data['image']!),
+            SizedBox(height: 15),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(imageSize / 2),
+              child: Image.asset(
+                imagePath,
+                width: imageSize, // Verkleinertes Bild
+                height: imageSize,
+                fit: BoxFit.cover,
+              ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             Text(
-              data['name']!,
-              style: const TextStyle(
+              name,
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
+                fontSize: screenHeight * 0.01875 * 1.35, // 25% größere Schriftgröße
+                fontFamily: 'Roboto',
                 color: Colors.black,
               ),
+              textAlign: TextAlign.center,
             ),
+            SizedBox(height: 3),
             Text(
-              data['personalityType']!,
-              style: const TextStyle(
-                color: Colors.grey,
+              personalityType,
+              style: TextStyle(
+                fontSize: screenHeight * 0.0125 * 1.35, // 25% größere Schriftgröße
+                fontFamily: 'Roboto',
+                color: Colors.grey[600],
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: Text(
-                data['text']!,
+                text,
+                style: TextStyle(
+                  fontSize: screenHeight * 0.01 * 1.4, // 25% größere Schriftgröße
+                  fontFamily: 'Roboto',
+                  color: Colors.grey[800],
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -140,4 +240,5 @@ class _DesktopTestimonialSectionState extends State<DesktopTestimonialSection> {
       ),
     );
   }
+
 }
