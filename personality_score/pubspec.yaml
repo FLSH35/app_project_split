@@ -64,12 +64,5 @@ flutter:
     - assets/icons/share-svgrepo-com.svg
     - assets/icons/arrow-expand-svgrepo-com.svg
     - assets/icons/goldbaum.ico
-
-  fonts:
-    - family: SortsMillGoudy
-      fonts:
-        - asset: assets/fonts/SortsMillGoudy-Italic.ttf
-
-    - family: AlexBrush
-      fonts:
-        - asset: assets/fonts/AlexBrush-Regular.ttf
+    - assets/icons/shrink-svgrepo-com.svg
+    - assets/icons/expand-svgrepo-com.svg

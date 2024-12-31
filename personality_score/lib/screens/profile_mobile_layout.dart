@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:logging/logging.dart';
 
+import 'detailed_result_ui.dart';
 import 'signin_dialog.dart';
 import 'home_screen/mobile_sidebar.dart';
 import 'package:personality_score/models/result.dart';
@@ -38,53 +39,13 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
 
   /// Hier speichern wir die Ergebnisse als Liste von [Result].
   List<Result> validResults = [];
+  static const Color middleColor = Color(0xFFF2EEE5);
 
   late PageController _pageController;
   int selectedIndex = 0; // Aktuelle Seite im PageView
 
   /// Set zur Verfolgung der expandierten Ergebnisse (Index)
   Set<int> _expandedResults = Set<int>();
-
-  /// Definieren Sie die LIFE_AREA_MAP_DART hier
-  static const Map<String, List<String>> LIFE_AREA_MAP_DART = {
-    // Hauptbereich 1: Selbstwerterhöhung
-    "Selbstwerterhöhung": ["SelbstwerterhoehungSum", "SelbstwerterhoehungCount"],
-    "Zielsetzung": ["ZielsetzungSum", "ZielsetzungCount"],
-    "Weiterbildung": ["WeiterbildungSum", "WeiterbildungCount"],
-    "Finanzen": ["FinanzenSum", "FinanzenCount"],
-    "Karriere": ["KarriereSum", "KarriereCount"],
-    "Fitness": ["FitnessSum", "FitnessCount"],
-
-    // Hauptbereich 2: Energie
-    "Energie": ["EnergieSum", "EnergieCount"],
-    "Produktivität": ["ProduktivitaetSum", "ProduktivitaetCount"],
-    "Stressmanagement": ["StressmanagementSum", "StressmanagementCount"],
-    "Resilienz": ["ResilienzSum", "ResilienzCount"],
-
-    // Hauptbereich 3: Inner Core, Inner Change
-    "Inner Core, Inner Change": ["InnerCoreInnerChangeSum", "InnerCoreInnerChangeCount"],
-    "Emotionen": ["EmotionenSum", "EmotionenCount"],
-    "Glaubenssätze": ["GlaubenssaetzeSum", "GlaubenssaetzeCount"],
-
-    // Hauptbereich 4: Bindung & Beziehungen
-    "Bindung & Beziehungen": ["BindungBeziehungenSum", "BindungBeziehungenCount"],
-    "Kommunikation": ["KommunikationSum", "KommunikationCount"],
-    "Gemeinschaft": ["GemeinschaftSum", "GemeinschaftCount"],
-    "Familie": ["FamilieSum", "FamilieCount"],
-    "Netzwerk": ["NetzwerkSum", "NetzwerkCount"],
-    "Dating": ["DatingSum", "DatingCount"],
-
-    // Hauptbereich 5: Lebenssinn
-    "Lebenssinn": ["LebenssinnSum", "LebenssinnCount"],
-    "Umwelt": ["UmweltSum", "UmweltCount"],
-    "Spiritualität": ["SpiritualitaetSum", "SpiritualitaetCount"],
-    "Spenden": ["SpendenSum", "SpendenCount"],
-    "Lebensplanung": ["LebensplanungSum", "LebensplanungCount"],
-    "Selbstfürsorge": ["SelbstfuersorgeSum", "SelbstfuersorgeCount"],
-    "Freizeit": ["FreizeitSum", "FreizeitCount"],
-    "Spaß & Freude im Leben": ["SpassFreudeSum", "SpassFreudeCount"],
-    "Gesundheit": ["GesundheitSum", "GesundheitCount"],
-  };
 
   @override
   void initState() {
@@ -219,23 +180,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     return dateFormat.format(date.toLocal()) + ' Uhr';
   }
 
-  /// Widget zur Anzeige detaillierter Scores (Lebensbereiche) dynamisch
-  Widget _buildDetailedResultUI(Result detailedResult, int index) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0), // Größeres Padding
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: LIFE_AREA_MAP_DART.entries.map((entry) {
-          String lebensbereich = entry.key;
-          String sumKey = entry.value[0];
-          String countKey = entry.value[1];
-          int sum = _getLebensbereichSum(detailedResult, sumKey);
-          int count = _getLebensbereichCount(detailedResult, countKey);
-          return _buildLebensbereichRow(lebensbereich, sum, count);
-        }).toList(),
-      ),
-    );
-  }
+
 
   /// Helper-Funktion, um die Summe eines Lebensbereichs abzurufen
   int _getLebensbereichSum(Result result, String sumKey) {
@@ -377,7 +322,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -546,6 +490,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                         mainAxisAlignment:
                                         MainAxisAlignment.end,
                                         children: [
+                                          // Teilen-Icon mit kreisförmigem Hintergrund
                                           GestureDetector(
                                             onTap: () {
                                               // Teilen-Funktion
@@ -553,30 +498,54 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                                   '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!\n\n${userResult.finalCharacterDescription}';
                                               Share.share(shareText);
                                             },
-                                            child: SvgPicture.asset(
-                                              'assets/icons/share-svgrepo-com.svg',
-                                              width: 24,
-                                              height: 24,
-                                              color: Colors.black, // Passe die Farbe an
+                                            child: Container(
+                                              width: 36, // Breite des Kreises
+                                              height: 36, // Höhe des Kreises
+                                              decoration: BoxDecoration(
+                                                color: middleColor,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                child: SvgPicture.asset(
+                                                  'assets/icons/share-svgrepo-com.svg',
+                                                  width: 24,
+                                                  height: 24,
+                                                  color: Colors.black, // Icon-Farbe anpassen
+                                                ),
+                                              ),
                                             ),
                                           ),
                                           SizedBox(width: 16), // Abstand zwischen den Icons
-                                          // Expand/Collapse Icon
+                                          // Expand/Collapse-Icon mit kreisförmigem Hintergrund
                                           GestureDetector(
                                             onTap: () {
                                               setState(() {
-                                                if (_expandedResults.contains(index)) {
+                                                if (_expandedResults
+                                                    .contains(index)) {
                                                   _expandedResults.remove(index);
                                                 } else {
                                                   _expandedResults.add(index);
                                                 }
                                               });
                                             },
-                                            child: SvgPicture.asset(
-                                              'assets/icons/arrow-expand-svgrepo-com.svg',
-                                              width: 24,
-                                              height: 24,
-                                              color: Colors.black, // Passe die Farbe an
+                                            child: Container(
+                                              width: 36, // Breite des Kreises
+                                              height: 36, // Höhe des Kreises
+                                              decoration: BoxDecoration(
+                                                color: middleColor,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                child: SvgPicture.asset(
+                                                  _expandedResults
+                                                      .contains(index)
+                                                      ? 'assets/icons/shrink-svgrepo-com.svg'
+                                                      : 'assets/icons/expand-svgrepo-com.svg',
+                                                  width: 24,
+                                                  height: 24,
+                                                  color: Colors.black, // Icon-Farbe anpassen
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -599,7 +568,8 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                         CrossAxisAlignment.start,
                                         children: [
                                           SelectableText(
-                                            userResult.finalCharacterDescription ?? '',
+                                            userResult.finalCharacterDescription ??
+                                                '',
                                             style: TextStyle(
                                               color: Colors.black,
                                               fontFamily: 'Roboto',
@@ -626,7 +596,7 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                               SizedBox(height: 10),
 
                               // Detaillierte Ergebnisse (Lebensbereiche)
-                              _buildDetailedResultUI(userResult, index),
+                              buildDetailedResultUI(userResult, index),
                             ],
                           ),
                         );

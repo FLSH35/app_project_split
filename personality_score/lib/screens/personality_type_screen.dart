@@ -142,7 +142,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                     "Die 8 Persönlichkeitsstufen",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 40, // Adjusted font size for Mobile
+                      fontSize: 32, // Adjusted font size for Mobile
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                       fontFamily: 'Roboto',
