@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base href="/">
+  <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <title>Personality Score</title>
@@ -16,44 +16,18 @@
 
   <!-- Favicon -->
   <link rel="icon" href="assets/wasserzeichen.ico" type="image/x-icon" />
-  <!-- Optional: Fallback für ältere Browser -->
-  <link rel="shortcut icon" href="assets/wasserzeichen.ico" type="image/x-icon" />
 
   <link rel="manifest" href="manifest.json">
 
-  <!-- Ladebildschirm CSS -->
-  <style>
-    /* Stil für den Ladebildschirm */
-    #loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #EDE8DB; /* Hintergrundfarbe anpassen */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    /* Stil für das Lade-Icon */
-    #loading-screen img {
-      width: 150px; /* Größe des Icons anpassen */
-      height: auto;
-    }
-  </style>
-
   <script>
-    var serviceWorkerVersion = "4067818952";
+    var serviceWorkerVersion = "{{flutter_service_worker_version}}";
   </script>
-
-  <!-- Firebase CDN für nicht-modulare Version -->
+  <!-- Use the Firebase CDN for non-modular version -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script>
-    // Deine Firebase-Konfiguration
+    // Your web app's Firebase configuration
     var firebaseConfig = {
       apiKey: "AIzaSyBYoub2zhvn4ZFjHMKnriDGRBFoLsXFM_Q",
       authDomain: "personality-score.firebaseapp.com",
@@ -63,20 +37,13 @@
       appId: "1:580383824204:web:6c030b86591bb5db2357e9",
       measurementId: "G-PZ67801578"
     };
-    // Firebase initialisieren
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
   </script>
-
-  <!-- Flutter Initialisierungsskript -->
+  <!-- This script adds the flutter initialization JS code -->
   <script src="flutter_bootstrap.js" async></script>
 </head>
 <body>
-<!-- Ladebildschirm -->
-<div id="loading-screen">
-  <img src="assets/wasserzeichen.ico" alt="Loading..." />
-</div>
-
-<!-- Flutter Initialisierung und Entfernen des Ladebildschirms -->
 <script>
     window.addEventListener('load', function(ev) {
       _flutter.loader.load({
@@ -86,11 +53,6 @@
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(function(appRunner) {
             appRunner.runApp();
-            // Ladebildschirm entfernen
-            var loadingScreen = document.getElementById('loading-screen');
-            if (loadingScreen) {
-              loadingScreen.style.display = 'none';
-            }
           });
         }
       });
