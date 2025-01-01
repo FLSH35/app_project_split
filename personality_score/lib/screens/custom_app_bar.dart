@@ -64,7 +64,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                           children: [
                             Image.asset(
                               'assets/$character.webp',
-                              height: 32.0,
+                              height: 50.0,
                             ),
                             SizedBox(width: 8),
                             Text(
