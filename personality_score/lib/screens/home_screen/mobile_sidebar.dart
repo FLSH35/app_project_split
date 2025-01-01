@@ -89,13 +89,31 @@ class _MobileSidebarState extends State<MobileSidebar> {
                   Navigator.of(context).pushNamed('/personality_types');
                 },
               ),
+              ListTile(
+                leading: const Icon(
+                  Icons.stairs,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                title: const Text(
+                  'Einstufung',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushNamed('/personality_types');
+                },
+              ),
 
               // Login or Profile Section
               Consumer<AuthService>(
                 builder: (context, authService, child) {
                   final user = authService.user;
 
-                  if (true) {
+                  if (user == null || user.displayName == null) {
                     // Not logged in
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
