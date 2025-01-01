@@ -89,24 +89,6 @@ class _MobileSidebarState extends State<MobileSidebar> {
                   Navigator.of(context).pushNamed('/personality_types');
                 },
               ),
-              ListTile(
-                leading: const Icon(
-                  Icons.stairs,
-                  color: Colors.black,
-                  size: 30,
-                ),
-                title: const Text(
-                  'Einstufung',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed('/personality_types');
-                },
-              ),
 
               // Login or Profile Section
               Consumer<AuthService>(
@@ -172,36 +154,18 @@ class _MobileSidebarState extends State<MobileSidebar> {
                   } else {
                     // Logged in, display final character image and name
                     return ListTile(
-                              leading: FutureBuilder<String>(
-                              future: _fetchFinalCharacter(authService.user!),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
-                                    strokeWidth: 2.0,
-                                  );
-                                }
-
-                              String character = snapshot.data ?? "Explorer";
-
-                              return Image.asset(
-                                'assets/$character.webp',
-                                height: 30.0,
-                              );}
-
-                              ),
-                              title: Text(
-                                authService.user!.displayName ?? "User",
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            onTap: () {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pushNamed('/profile');
-                            },
-                          );
+                        leading: CircleAvatar(
+                        radius: 20,
+                        backgroundImage: user.photoURL != null
+                        ? NetworkImage(user.photoURL!) // User's profile picture
+                      : AssetImage('assets/placeholder.png') as ImageProvider, // Placeholder
+                  ),
+                  title: Text(
+                  user.displayName!,
+                  style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.black,
+                  ),));
 
                   }
                 },
