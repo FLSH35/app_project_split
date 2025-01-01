@@ -1,5 +1,5 @@
-// custom_app_bar.dart
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
@@ -35,11 +35,24 @@ class _CustomAppBarState extends State<CustomAppBar> {
             top: 0, // Adjusted position to be at the top
             child: Consumer<AuthService>(
               builder: (context, authService, child) {
-                return Column(
-                  children: [
-                    // Profile Icon and Name or Login Button
-                    authService.user != null && authService.user!.displayName != null
-                        ? InkWell(
+                if (authService.user == null) {
+                  return _buildLoginButton();
+                }
+
+                // Use FutureBuilder to fetch `finalCharacter`
+                return FutureBuilder<String>(
+                  future: _fetchFinalCharacter(authService.user!),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                        strokeWidth: 2.0,
+                      );
+                    }
+
+                    String character = snapshot.data ?? "Explorer";
+
+                    return InkWell(
                       onTap: () {
                         Navigator.of(context).pop();
                         Navigator.of(context).pushNamed('/profile');
@@ -49,15 +62,13 @@ class _CustomAppBarState extends State<CustomAppBar> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.person,
-                              color: Colors.black,
-                              size: 32,
-                              semanticLabel: 'Profil',
+                            Image.asset(
+                              'assets/$character.webp',
+                              height: 32.0,
                             ),
                             SizedBox(width: 8),
                             Text(
-                              authService.user!.displayName!,
+                              authService.user!.displayName ?? "User",
                               style: const TextStyle(
                                 fontSize: 20,
                                 color: Colors.black,
@@ -66,67 +77,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
                           ],
                         ),
                       ),
-                    )
-                        : Padding(
-                      padding: EdgeInsets.all(6.0),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          side: BorderSide(color: Color(0xFFCB9935)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/profile');
-                        },
-                        child: Text(
-                          'Anmelden',
-                          style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-                        ),
-                      ),
-                    ),
-
-                    // Spacer between Profile/Login and "Beginne den Test"
-                    SizedBox(height: 5),
-
-                    // "Beginne den Test" Button or CircularProgressIndicator
-                    // Nur anzeigen, wenn der Benutzer nicht eingeloggt ist
-                    if (authService.user == null)
-                      isLoading
-                          ? SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
-                          strokeWidth: 2.0,
-                        ),
-                      )
-                          : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFCB9935),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                          ),
-                        ),
-                        onPressed: isLoading
-                            ? null
-                            : () async {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          await handleTakeTest(context);
-                          setState(() {
-                            isLoading = false;
-                          });
-                        },
-                        child: Text(
-                          'Beginne den Test',
-                          style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
-                        ),
-                      ),
-                  ],
+                    );
+                  },
                 );
               },
             ),
@@ -168,6 +120,28 @@ class _CustomAppBarState extends State<CustomAppBar> {
     );
   }
 
+  Widget _buildLoginButton() {
+    return Padding(
+      padding: EdgeInsets.all(6.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.black,
+          side: BorderSide(color: Color(0xFFCB9935)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          ),
+        ),
+        onPressed: () {
+          Navigator.of(context).pushNamed('/profile');
+        },
+        child: Text(
+          'Anmelden',
+          style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+        ),
+      ),
+    );
+  }
+
   Widget _buildNavButton(BuildContext context, String label, String route) {
     bool isSelected = ModalRoute.of(context)?.settings.name == route;
     return TextButton(
@@ -189,24 +163,15 @@ class _CustomAppBarState extends State<CustomAppBar> {
     );
   }
 
-  // Entfernte _getIconColor Funktion, da sie nicht mehr benötigt wird
-
-  // Add the showSignInDialog function
-  void showSignInDialog(BuildContext context) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => SignInDialog(
-        emailController: emailController,
-        passwordController: passwordController,
-        allowAnonymous: false,
-      ),
-    ).then((_) {
-      // Dispose controllers when the dialog is closed
-      emailController.dispose();
-      passwordController.dispose();
-    });
+  Future<String> _fetchFinalCharacter(User user) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (userDoc.exists && userDoc.data() != null) {
+        return userDoc.data()!['currentFinalCharacter'] ?? 'Explorer';
+      }
+    } catch (error) {
+      print("Error fetching FinalCharacter: $error");
+    }
+    return 'Explorer'; // Default character
   }
 }
