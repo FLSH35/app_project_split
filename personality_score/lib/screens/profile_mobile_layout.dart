@@ -310,19 +310,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
     }
   }
 
-  /// Widget zur Anzeige einzelner Lebensbereiche dynamisch
-  Widget _buildLebensbereichRow(String title, int sum, int count) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: Row(
-        children: [
-          Expanded(child: Text('$title: Sum = $sum')),
-          Text('Count = $count'),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
@@ -331,257 +318,240 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
       backgroundColor: Color(0xFFEDE8DB),
       appBar: _buildAppBar(context),
       endDrawer: MobileSidebar(),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0), // Erhöhtes Padding
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Name-Editing Section
+            widget.isEditingName
+                ? Row(
               children: [
-                // Name-Editing
-                widget.isEditingName
-                    ? Row(
+                Expanded(
+                  child: TextField(
+                    controller: widget.nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Anzeigename',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.check),
+                  onPressed: widget.onSaveName,
+                ),
+              ],
+            )
+                : Column(
+              children: [
+                // Logout Button Aligned to Top-Right
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: Icon(Icons.logout, color: Colors.black),
+                    onPressed: () async {
+                      await authService.logout(context);
+                    },
+                    tooltip: 'Abmelden',
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: TextField(
-                        controller: widget.nameController,
-                        decoration: InputDecoration(
-                          labelText: 'Anzeigename',
-                          border: OutlineInputBorder(),
-                        ),
+                    SelectableText(
+                      widget.nameController.text,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontFamily: 'Roboto',
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.check),
-                      onPressed: widget.onSaveName,
-                    ),
-                  ],
-                )
-                    : Column(
-                  children: [
-                    Center(
-                      child: Container(
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: IconButton(
-                            icon: Icon(Icons.logout, color: Colors.black),
-                            onPressed: () async {
-                              await authService.logout(context);
-                            },
-                            alignment: Alignment.topRight,
-                            tooltip: 'Abmelden',
-                          ),
-                        ),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SelectableText(
-                          widget.nameController.text,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: widget.onEditName,
-                        ),
-                      ],
+                      icon: Icon(Icons.edit),
+                      onPressed: widget.onEditName,
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+              ],
+            ),
+            SizedBox(height: 20),
 
-                if (_isLoading)
-                  Center(child: CircularProgressIndicator())
-                else if (validResults.isNotEmpty)
-                  SizedBox(
-                    height: 800, // ausreichend Platz fürs Scrollen
-                    child: PageView.builder(
-                      controller: _pageController,
-                      onPageChanged: (index) {
-                        setState(() {
-                          selectedIndex = index;
-                        });
-                      },
-                      itemCount: validResults.length,
-                      itemBuilder: (context, index) {
-                        Result userResult = validResults[index];
+            // Loading Indicator or Results
+            if (_isLoading)
+              Center(child: CircularProgressIndicator())
+            else if (validResults.isNotEmpty)
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      selectedIndex = index;
+                    });
+                  },
+                  itemCount: validResults.length,
+                  itemBuilder: (context, index) {
+                    Result userResult = validResults[index];
 
-                        String completionDate =
-                        _formatCompletionDate(userResult.completionDate);
+                    String completionDate =
+                    _formatCompletionDate(userResult.completionDate);
 
-                        // Da wir die Reihenfolge beibehalten, ist Index + 1 die "Ergebnisnummer"
-                        int resultNumber = index + 1;
+                    int resultNumber = index + 1;
 
-                        return SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                    return SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 10),
+                          // Navigation Buttons
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              SizedBox(height: 10),
-                              // Navigations-Buttons
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.arrow_left),
-                                    onPressed: index > 0
-                                        ? () {
-                                      _pageController.previousPage(
-                                        duration:
-                                        Duration(milliseconds: 300),
-                                        curve: Curves.ease,
-                                      );
-                                    }
-                                        : null,
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      'Ergebnis $resultNumber: abgeschlossen am $completionDate',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Roboto',
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.arrow_right),
-                                    onPressed: index < validResults.length - 1
-                                        ? () {
-                                      _pageController.nextPage(
-                                        duration:
-                                        Duration(milliseconds: 300),
-                                        curve: Curves.ease,
-                                      );
-                                    }
-                                        : null,
-                                  ),
-                                ],
+                              IconButton(
+                                icon: Icon(Icons.arrow_left),
+                                onPressed: index > 0
+                                    ? () {
+                                  _pageController.previousPage(
+                                    duration:
+                                    Duration(milliseconds: 300),
+                                    curve: Curves.ease,
+                                  );
+                                }
+                                    : null,
                               ),
-                              SizedBox(height: 10),
-
-                              // Avatar
-                              CircleAvatar(
-                                radius: 60,
-                                backgroundImage: AssetImage(
-                                  'assets/${userResult.finalCharacter}.webp',
+                              Expanded(
+                                child: Text(
+                                  'Ergebnis $resultNumber: abgeschlossen am $completionDate',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Roboto',
+                                  ),
                                 ),
-                                backgroundColor: Colors.transparent,
                               ),
-                              SizedBox(height: 10),
+                              IconButton(
+                                icon: Icon(Icons.arrow_right),
+                                onPressed: index < validResults.length - 1
+                                    ? () {
+                                  _pageController.nextPage(
+                                    duration:
+                                    Duration(milliseconds: 300),
+                                    curve: Curves.ease,
+                                  );
+                                }
+                                    : null,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
 
-                              // Card für Short-Description mit Icons oben rechts
-                              Card(
-                                color: Color(0xFFF7F5EF),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0), // Erhöhtes Padding
-                                  child: Column(
+                          // Avatar
+                          CircleAvatar(
+                            radius: 60,
+                            backgroundImage: AssetImage(
+                              'assets/${userResult.finalCharacter}.webp',
+                            ),
+                            backgroundColor: Colors.transparent,
+                          ),
+                          SizedBox(height: 10),
+
+                          // Card for Short Description with Icons
+                          Card(
+                            color: Color(0xFFF7F5EF),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  // Icons at the Top Right
+                                  Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.end,
+                                    children: [
+                                      // Share Icon with Circular Background
+                                      GestureDetector(
+                                        onTap: () {
+                                          String shareText =
+                                              '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!\n\n${userResult.finalCharacterDescription}';
+                                          Share.share(shareText);
+                                        },
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          decoration: BoxDecoration(
+                                            color: middleColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: SvgPicture.asset(
+                                              'assets/icons/share-svgrepo-com.svg',
+                                              width: 24,
+                                              height: 24,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 16),
+                                      // Expand/Collapse Icon with Circular Background
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            if (_expandedResults
+                                                .contains(index)) {
+                                              _expandedResults
+                                                  .remove(index);
+                                            } else {
+                                              _expandedResults
+                                                  .add(index);
+                                            }
+                                          });
+                                        },
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          decoration: BoxDecoration(
+                                            color: middleColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: SvgPicture.asset(
+                                              _expandedResults
+                                                  .contains(index)
+                                                  ? 'assets/icons/shrink-svgrepo-com.svg'
+                                                  : 'assets/icons/expand-svgrepo-com.svg',
+                                              width: 24,
+                                              height: 24,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                  SelectableText(
+                                    '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: 8),
+
+                                  // Description with Expand/Collapse
+                                  _expandedResults.contains(index)
+                                      ? Column(
                                     crossAxisAlignment:
                                     CrossAxisAlignment.start,
                                     children: [
-                                      // Icons oben rechts
-                                      Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.end,
-                                        children: [
-                                          // Teilen-Icon mit kreisförmigem Hintergrund
-                                          GestureDetector(
-                                            onTap: () {
-                                              // Teilen-Funktion
-                                              String shareText =
-                                                  '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!\n\n${userResult.finalCharacterDescription}';
-                                              Share.share(shareText);
-                                            },
-                                            child: Container(
-                                              width: 36, // Breite des Kreises
-                                              height: 36, // Höhe des Kreises
-                                              decoration: BoxDecoration(
-                                                color: middleColor,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Center(
-                                                child: SvgPicture.asset(
-                                                  'assets/icons/share-svgrepo-com.svg',
-                                                  width: 24,
-                                                  height: 24,
-                                                  color: Colors.black, // Icon-Farbe anpassen
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 16), // Abstand zwischen den Icons
-                                          // Expand/Collapse-Icon mit kreisförmigem Hintergrund
-                                          GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                if (_expandedResults
-                                                    .contains(index)) {
-                                                  _expandedResults.remove(index);
-                                                } else {
-                                                  _expandedResults.add(index);
-                                                }
-                                              });
-                                            },
-                                            child: Container(
-                                              width: 36, // Breite des Kreises
-                                              height: 36, // Höhe des Kreises
-                                              decoration: BoxDecoration(
-                                                color: middleColor,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Center(
-                                                child: SvgPicture.asset(
-                                                  _expandedResults
-                                                      .contains(index)
-                                                      ? 'assets/icons/shrink-svgrepo-com.svg'
-                                                      : 'assets/icons/expand-svgrepo-com.svg',
-                                                  width: 24,
-                                                  height: 24,
-                                                  color: Colors.black, // Icon-Farbe anpassen
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 8),
                                       SelectableText(
-                                        '${userResult.combinedTotalScore} Prozent deines Potentials erreicht!\nDu bist ein ${userResult.finalCharacter}!',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: 'Roboto',
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      SizedBox(height: 8),
-
-                                      // Beschreibungstext mit Expand/Collapse
-                                      _expandedResults.contains(index)
-                                          ? Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children: [
-                                          SelectableText(
-                                            userResult.finalCharacterDescription ??
-                                                '',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontFamily: 'Roboto',
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                          : SelectableText(
-                                        _truncateDescription(
-                                          userResult.finalCharacterDescription,
-                                        ),
+                                        userResult
+                                            .finalCharacterDescription ??
+                                            '',
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontFamily: 'Roboto',
@@ -589,40 +559,51 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
                                         ),
                                       ),
                                     ],
+                                  )
+                                      : SelectableText(
+                                    _truncateDescription(
+                                      userResult
+                                          .finalCharacterDescription,
+                                    ),
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Roboto',
+                                      fontSize: 14,
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-
-                              SizedBox(height: 10),
-
-                              // Detaillierte Ergebnisse (Lebensbereiche)
-                              buildDetailedResultUI(userResult),
-                            ],
+                            ),
                           ),
-                        );
-                      },
-                    ),
-                  )
-                else
-                  SelectableText(
-                    'Kein Ergebnis gefunden.',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'Roboto',
-                    ),
-                  ),
 
-                SizedBox(height: 20),
+                          SizedBox(height: 10),
 
-                // Weitere Inhalte können hier hinzugefügt werden
+                          // Detailed Results (Lebensbereiche)
+                          buildDetailedResultUI(userResult),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              )
+            else
+              SelectableText(
+                'Kein Ergebnis gefunden.',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Roboto',
+                ),
+              ),
 
-              ],
-            ),
-          ),
+            SizedBox(height: 20),
+
+            // Weitere Inhalte können hier hinzugefügt werden
+          ],
         ),
       ),
     );
   }
+
 
   /// Angepasste AppBar
   AppBar _buildAppBar(BuildContext context) {

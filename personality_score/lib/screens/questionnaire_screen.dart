@@ -150,20 +150,23 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
 
   /// AppBar mit Menü-Button für Mobile
   AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Text('FRAGEN'),
+    return AppBar( title: Image.asset(
+      'assets/Logo-IYC-gross.png', height: 50,
+    ),
       backgroundColor: Color(0xFFF7F5EF),
+      iconTheme: IconThemeData(color: Colors.black),
       actions: [
         Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
+            icon: const Icon(Icons.menu, color: Colors.black),
             onPressed: () {
               Scaffold.of(context).openEndDrawer();
             },
+            tooltip: 'Menü öffnen',
           ),
         ),
       ],
-      automaticallyImplyLeading: false, // Kein Zurück-Button automatisch
+      automaticallyImplyLeading: false,
     );
   }
 

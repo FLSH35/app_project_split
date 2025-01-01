@@ -45,8 +45,6 @@ class _DesktopVideoSection2State extends State<DesktopVideoSection2> {
         });
       }
 
-      // Optionally auto-play
-      _videoController?.play();
     } catch (e) {
       debugPrint('Error loading video: $e');
     } finally {

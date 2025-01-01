@@ -29,6 +29,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
       padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
       child: Stack(
         children: [
+
+
+
+
           // First row with the buttons (Profile/Login and optionally "Beginne den Test")
           Positioned(
             right: 0,
@@ -36,7 +40,40 @@ class _CustomAppBarState extends State<CustomAppBar> {
             child: Consumer<AuthService>(
               builder: (context, authService, child) {
                 if (authService.user == null) {
-                  return _buildLoginButton();
+                  return Column(children: [_buildLoginButton(), if (authService.user == null)
+                    isLoading
+                        ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                        strokeWidth: 2.0,
+                      ),
+                    )
+                        : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFCB9935),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                        setState(() {
+                          isLoading = true;
+                        });
+                        await handleTakeTest(context);
+                        setState(() {
+                          isLoading = false;
+                        });
+                      },
+                      child: Text(
+                        'Beginne den Test',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+                      ),
+                    ),],);
                 }
 
                 // Use FutureBuilder to fetch `finalCharacter`

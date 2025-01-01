@@ -179,7 +179,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                               ),
                             onTap: () {
                               Navigator.of(context).pop();
-                              Navigator.of(context).pushNamed('/personality_types');
+                              Navigator.of(context).pushNamed('/profile');
                             },
                           );
                         },
