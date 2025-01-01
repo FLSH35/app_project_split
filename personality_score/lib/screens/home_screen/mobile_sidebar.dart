@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:personality_score/screens/signin_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MobileSidebar extends StatefulWidget {
   const MobileSidebar({Key? key}) : super(key: key);
@@ -53,7 +55,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                 leading: const Icon(
                   Icons.home_outlined,
                   color: Colors.black,
-                  size: 26,
+                  size: 30,
                 ),
                 title: const Text(
                   'Allgemein',
@@ -73,7 +75,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                 leading: const Icon(
                   Icons.stairs,
                   color: Colors.black,
-                  size: 26,
+                  size: 30,
                 ),
                 title: const Text(
                   'Einstufung',
@@ -150,25 +152,42 @@ class _MobileSidebarState extends State<MobileSidebar> {
                       ),
                     );
                   } else {
-                    // Logged in, display profile picture or placeholder
-                    return ListTile(
-                      leading: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: user.photoURL != null
-                            ? NetworkImage(user.photoURL!) // User's profile picture
-                            : AssetImage('assets/placeholder.png') as ImageProvider, // Placeholder
+                    // Logged in, display final character image and name
+                    return Positioned(
+                      right: 0,
+                      top: 0,
+                      child: FutureBuilder<String>(
+                        future: _fetchFinalCharacter(authService.user!),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                              strokeWidth: 2.0,
+                            );
+                          }
+
+                          String character = snapshot.data ?? "Explorer";
+
+                          return InkWell(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pushNamed('/profile');
+                            },
+                            child:ListTile(
+                              leading: Image.asset(
+                                'assets/$character.webp',
+                                height: 30.0,
+                              ),
+                              title: Text(
+                                authService.user!.displayName ?? "User",
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.black,
+                                ),
+                              ),)
+                          );
+                        },
                       ),
-                      title: Text(
-                        user.displayName!,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pushNamed('/profile');
-                      },
                     );
                   }
                 },
@@ -178,6 +197,18 @@ class _MobileSidebarState extends State<MobileSidebar> {
         ),
       ),
     );
+  }
+
+  Future<String> _fetchFinalCharacter(User user) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (userDoc.exists && userDoc.data() != null) {
+        return userDoc.data()!['currentFinalCharacter'] ?? 'Explorer';
+      }
+    } catch (error) {
+      print("Error fetching FinalCharacter: $error");
+    }
+    return 'Explorer'; // Default character
   }
 
   void showSignInDialog(BuildContext context) {
