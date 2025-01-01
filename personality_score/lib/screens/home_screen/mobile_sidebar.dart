@@ -153,10 +153,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                     );
                   } else {
                     // Logged in, display final character image and name
-                    return Positioned(
-                      right: 0,
-                      top: 0,
-                      child: FutureBuilder<String>(
+                    return FutureBuilder<String>(
                         future: _fetchFinalCharacter(authService.user!),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -187,7 +184,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                               ),)
                           );
                         },
-                      ),
+
                     );
                   }
                 },

@@ -1,18 +1,18 @@
 // lib/screens/home_screen.dart
-// home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:personality_score/screens/home_screen/personality_home_mobile.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:personality_score/screens/home_desktop_layout/desktop_layout.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../adventurer_image_desktop.dart';
+import '../mobile_layout/lazy_load_image.dart';
+import '../mobile_layout/mobile_video_section1.dart';
+import '../mobile_layout/mobile_video_section2.dart';
 import 'mobile_sidebar.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'custom_footer.dart'; // Import for the custom footer
-import 'package:video_player/video_player.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:math'; // For transformations
 import 'package:personality_score/helper_functions/video_helper.dart'; // Import VideoWidget
 
 class HomeScreen extends StatefulWidget {
@@ -36,9 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   final Map<int, int> answers = {};
 
-  // Video player controllers
-  VideoPlayerController? _videoController1;
-  VideoPlayerController? _videoController2;
+  // Removed pre-initialized VideoPlayerControllers
+  // VideoPlayerController? _videoController1;
+  // VideoPlayerController? _videoController2;
 
   // Testimonial PageController
   late PageController _testimonialPageController;
@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeVideos();
+    // Removed _initializeVideos();
     _loadTutorialQuestions();
 
     // PageController infinite scrolling
@@ -97,25 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _initializeVideos() async {
-    final storage = FirebaseStorage.instance;
-    final gsUrl1 = 'gs://personality-score.appspot.com/PS_3_cut.mp4';
-    final gsUrl2 = 'gs://personality-score.appspot.com/PS_1_cut.mp4';
-
-    try {
-      String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
-      _videoController1 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
-        ..setLooping(true)
-        ..initialize().then((_) => setState(() {}));
-
-      String downloadUrl2 = await storage.refFromURL(gsUrl2).getDownloadURL();
-      _videoController2 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl2))
-        ..setLooping(true)
-        ..initialize().then((_) => setState(() {}));
-    } catch (e) {
-      print('Error loading video: $e');
-    }
-  }
+  // Removed _initializeVideos()
 
   Future<void> _loadTutorialQuestions() async {
     await Future.delayed(const Duration(milliseconds: 500));
@@ -126,8 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _videoController1?.dispose();
-    _videoController2?.dispose();
+    // Removed _videoController1?.dispose();
+    // Removed _videoController2?.dispose();
     _testimonialPageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -183,14 +165,15 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _scrollController,
       child: Column(
         children: [
-          // Schnelleres Laden: Nur 1 großes Bild am Anfang
-          Image.asset('assets/ps_background_ai.jpg'),
-
+          const LazyLoadImage(
+            assetPath: 'assets/ps_background_ai.jpg',
+            fit: BoxFit.cover
+          ),
           _buildHeaderSection(context, screenHeight, screenWidth),
           const SizedBox(height: 200),
-          _buildVideoSection1(),
+          _buildVideoSection1(), // Updated to use MobileVideoSection1
           const SizedBox(height: 200),
-          _buildPersonalityTypesSection(context, screenHeight, screenWidth),
+          buildPersonalityTypesSection(context, screenHeight, screenWidth),
           const SizedBox(height: 200),
           isLoading ? const CircularProgressIndicator() : _buildTutorialSection(context),
           const SizedBox(height: 200),
@@ -277,100 +260,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Updated to use the new MobileVideoSection1
   Widget _buildVideoSection1() {
-    return VideoWidget(
-      videoController: _videoController1,
-      screenHeight: MediaQuery.of(context).size.height * 1.15,
-      headerText: "Wieso MUSST du den Personality Score ausfüllen?",
-      subHeaderText: "Erfahre es im Video!",
-    );
+    return const MobileVideoSection1();
   }
 
+  // Updated to use the new MobileVideoSection2
   Widget _buildVideoSection2() {
-    return VideoWidget(
-      videoController: _videoController2,
-      screenHeight: MediaQuery.of(context).size.height * 1.15,
-      headerText: "Starte Hier",
-      subHeaderText: "10 Minuten. 120 Fragen. Bis zu deinem Ergebnis!",
-    );
-  }
-
-  Widget _buildPersonalityTypesSection(BuildContext context, double screenHeight, double screenWidth) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: SvgPicture.asset(
-            'assets/background_personality_type.svg',
-            fit: BoxFit.cover,
-            width: screenWidth,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "PERSÖNLICHKEITSSTUFEN",
-                style: TextStyle(
-                  fontSize: screenHeight * 0.021,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Verstehe dich selbst und andere",
-                style: TextStyle(
-                  fontSize: screenHeight * 0.056,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Vom Anonymus zum LifeArtist: Die 8 Stufen symbolisieren die wichtigsten Etappen auf dem Weg, dein Potenzial voll auszuschöpfen. Mit einem fundierten Verständnis des Modells wirst du nicht nur dich selbst, sondern auch andere Menschen viel besser verstehen und einordnen können.",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                  fontSize: screenHeight * 0.021,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 70),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFCB9935),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.07,
-                    vertical: screenHeight * 0.021,
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/personality_types');
-                },
-                child: Text(
-                  'Erfahre mehr',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Roboto',
-                    fontSize: screenHeight * 0.025,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 40),
-              Image.asset('assets/adventurer_front.png', height: 300,)
-            ],
-          ),
-        ),
-      ],
-    );
+    return const MobileVideoSection2();
   }
 
   // TUTORIAL SECTION
@@ -719,5 +616,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-
