@@ -27,7 +27,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Logo-Bereich
+              // Logo Section
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 36.0),
                 child: GestureDetector(
@@ -48,7 +48,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                 ),
               ),
 
-              // "Allgemein" ListTile mit Icon
+              // "Allgemein" ListTile with Icon
               ListTile(
                 leading: const Icon(
                   Icons.home_outlined,
@@ -68,10 +68,10 @@ class _MobileSidebarState extends State<MobileSidebar> {
                 },
               ),
 
-              // "Einstufung" ListTile mit Icon (z. B. Treppen)
+              // "Einstufung" ListTile with Icon
               ListTile(
                 leading: const Icon(
-                  Icons.stairs, // Alternative: Icons.assessment, Icons.bar_chart
+                  Icons.stairs,
                   color: Colors.black,
                   size: 26,
                 ),
@@ -88,77 +88,75 @@ class _MobileSidebarState extends State<MobileSidebar> {
                 },
               ),
 
-              // Anmelden oder Profil (abhängig vom Status des Users)
+              // Login or Profile Section
               Consumer<AuthService>(
                 builder: (context, authService, child) {
                   final user = authService.user;
 
-                  // Noch nicht eingeloggt
                   if (user == null || user.displayName == null) {
+                    // Not logged in
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                       child: SizedBox(
-                  width: double.infinity, // <-- match_parent
-                  child: ElevatedButton(
-
-                        style: ElevatedButton.styleFrom(
-
-                          backgroundColor: Colors.black,
-                          side: const BorderSide(color: Colors.black),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                          ),
-                        ),
-                        onPressed: () async {
-                          await showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) => SignInDialog(
-                              emailController: TextEditingController(),
-                              passwordController: TextEditingController(),
-                              allowAnonymous: false,
-                              nextRoute: '/profile',
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            side: const BorderSide(color: Colors.black),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
                             ),
-                          ).then((_) {
-                            final updatedAuthService =
-                            Provider.of<AuthService>(context, listen: false);
+                          ),
+                          onPressed: () async {
+                            await showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => SignInDialog(
+                                emailController: TextEditingController(),
+                                passwordController: TextEditingController(),
+                                allowAnonymous: false,
+                                nextRoute: '/profile',
+                              ),
+                            ).then((_) {
+                              final updatedAuthService =
+                              Provider.of<AuthService>(context, listen: false);
 
-                            // Prüfen, ob User existiert und displayName gesetzt ist
-                            if (updatedAuthService.user != null &&
-                                updatedAuthService.user!.displayName != null) {
-                              setState(() {
-                                _nameController.text =
-                                updatedAuthService.user!.displayName!;
-                              });
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+                              if (updatedAuthService.user != null &&
+                                  updatedAuthService.user!.displayName != null) {
+                                setState(() {
+                                  _nameController.text =
+                                  updatedAuthService.user!.displayName!;
+                                });
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+                                    ),
                                   ),
-                                ),
-                              );
-                            }
-                          });
-                        },
-                        child: const Text(
-
-                          'Anmelden',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Roboto',
-                            fontSize: 20,
+                                );
+                              }
+                            });
+                          },
+                          child: const Text(
+                            'Anmelden',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Roboto',
+                              fontSize: 20,
+                            ),
                           ),
                         ),
-                      ),)
+                      ),
                     );
                   } else {
-                    // Bereits eingeloggt, Name vorhanden
+                    // Logged in, display profile picture or placeholder
                     return ListTile(
-                      leading: const Icon(
-                        Icons.person,
-                        color: Colors.black,
-                        size: 26,
+                      leading: CircleAvatar(
+                        radius: 20,
+                        backgroundImage: user.photoURL != null
+                            ? NetworkImage(user.photoURL!) // User's profile picture
+                            : AssetImage('assets/placeholder.png') as ImageProvider, // Placeholder
                       ),
                       title: Text(
                         user.displayName!,
@@ -182,7 +180,6 @@ class _MobileSidebarState extends State<MobileSidebar> {
     );
   }
 
-  // Diese Methode kannst du weiterverwenden, falls du sie in anderer Form benötigst
   void showSignInDialog(BuildContext context) {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
