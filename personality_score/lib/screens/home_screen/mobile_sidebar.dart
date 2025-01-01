@@ -153,22 +153,24 @@ class _MobileSidebarState extends State<MobileSidebar> {
                     );
                   } else {
                     // Logged in, display final character image and name
-                    return FutureBuilder<String>(
-                        future: _fetchFinalCharacter(authService.user!),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
-                              strokeWidth: 2.0,
-                            );
-                          }
+                    return ListTile(
+                              leading: FutureBuilder<String>(
+    future: _fetchFinalCharacter(authService.user!),
+    builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+    return CircularProgressIndicator(
+    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+    strokeWidth: 2.0,
+    );
+    }
 
-                          String character = snapshot.data ?? "Explorer";
+    String character = snapshot.data ?? "Explorer";
 
-                          return ListTile(
-                              leading: Image.asset(
+    return Image.asset(
                                 'assets/$character.webp',
                                 height: 30.0,
+                              );}
+
                               ),
                               title: Text(
                                 authService.user!.displayName ?? "User",
@@ -182,9 +184,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                               Navigator.of(context).pushNamed('/profile');
                             },
                           );
-                        },
 
-                    );
                   }
                 },
               ),
