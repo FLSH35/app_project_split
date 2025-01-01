@@ -107,16 +107,6 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Zeige einen Ladekreisel, solange nicht authentifiziert oder noch geladen wird
-    if (!_isAuthenticated || isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Fragen'),
-          backgroundColor: Color(0xFFF7F5EF),
-        ),
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
 
     // Layout für Mobile vs. Desktop
     return ScreenTypeLayout(

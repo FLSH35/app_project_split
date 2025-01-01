@@ -175,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 200),
           buildPersonalityTypesSection(context, screenHeight, screenWidth),
           const SizedBox(height: 200),
-          isLoading ? const CircularProgressIndicator() : _buildTutorialSection(context),
+          _buildTutorialSection(context),
           const SizedBox(height: 200),
           _buildTestimonialSection(),
           const SizedBox(height: 100),
@@ -421,15 +421,15 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
       ),
-      onPressed: isLoading
+      onPressed: isLoadingTest
           ? null
           : () async {
         setState(() {
-          isLoading = true;
+          isLoadingTest = true;
         });
         await handleTakeTest(context);
         setState(() {
-          isLoading = false;
+          isLoadingTest = false;
         });
       },
       child: Text(

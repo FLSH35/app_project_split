@@ -42,7 +42,6 @@ class _MobileVideoSection2State extends State<MobileVideoSection2> {
         });
       }
 
-      _videoController?.play();
     } catch (e) {
       debugPrint('Error loading video: $e');
     } finally {
