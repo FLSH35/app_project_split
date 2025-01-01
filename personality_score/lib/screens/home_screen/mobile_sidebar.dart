@@ -95,7 +95,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                 builder: (context, authService, child) {
                   final user = authService.user;
 
-                  if (user == null || user.displayName == null) {
+                  if (true) {
                     // Not logged in
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -155,18 +155,18 @@ class _MobileSidebarState extends State<MobileSidebar> {
                     // Logged in, display final character image and name
                     return ListTile(
                               leading: FutureBuilder<String>(
-    future: _fetchFinalCharacter(authService.user!),
-    builder: (context, snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-    return CircularProgressIndicator(
-    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
-    strokeWidth: 2.0,
-    );
-    }
+                              future: _fetchFinalCharacter(authService.user!),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                                    strokeWidth: 2.0,
+                                  );
+                                }
 
-    String character = snapshot.data ?? "Explorer";
+                              String character = snapshot.data ?? "Explorer";
 
-    return Image.asset(
+                              return Image.asset(
                                 'assets/$character.webp',
                                 height: 30.0,
                               );}
