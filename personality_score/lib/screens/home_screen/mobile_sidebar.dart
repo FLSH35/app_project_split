@@ -165,12 +165,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
 
                           String character = snapshot.data ?? "Explorer";
 
-                          return InkWell(
-                            onTap: () {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pushNamed('/profile');
-                            },
-                            child:ListTile(
+                          return ListTile(
                               leading: Image.asset(
                                 'assets/$character.webp',
                                 height: 30.0,
@@ -181,7 +176,11 @@ class _MobileSidebarState extends State<MobileSidebar> {
                                   fontSize: 20,
                                   color: Colors.black,
                                 ),
-                              ),)
+                              ),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pushNamed('/personality_types');
+                            },
                           );
                         },
 

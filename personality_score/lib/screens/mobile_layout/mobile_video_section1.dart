@@ -85,7 +85,7 @@ class _MobileVideoSection1State extends State<MobileVideoSection1> {
 
     return VideoWidget(
       videoController: _videoController,
-      screenHeight: MediaQuery.of(context).size.height * 0.5,
+      screenHeight: MediaQuery.of(context).size.height * 1.2,
       headerText: "Wieso MUSST du den Personality Score ausfüllen?",
       subHeaderText: "Erfahre es im Video!",
     );
