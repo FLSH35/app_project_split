@@ -1,19 +1,15 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:personality_score/screens/home_screen/personality_home_mobile.dart';
-import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:personality_score/screens/home_desktop_layout/desktop_layout.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../adventurer_image_desktop.dart';
 import '../mobile_layout/lazy_load_image.dart';
 import '../mobile_layout/mobile_video_section1.dart';
 import '../mobile_layout/mobile_video_section2.dart';
 import 'mobile_sidebar.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'custom_footer.dart'; // Import for the custom footer
-import 'package:personality_score/helper_functions/video_helper.dart'; // Import VideoWidget
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -474,15 +470,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     int adjustedIndex = index % testimonials.length;
                     bool isSelected = adjustedIndex == selectedTestimonialIndex;
-                    return Transform.scale(
-                      scale: isSelected ? 1.1 : 0.9,
-                      child: _buildTestimonialCard(
+                    return _buildTestimonialCard(
                         testimonials[adjustedIndex]['name'] ?? '',
                         testimonials[adjustedIndex]['text'] ?? '',
                         testimonials[adjustedIndex]['personalityType'] ?? '',
                         testimonials[adjustedIndex]['image'] ?? '',
                         isSelected,
-                      ),
                     );
                   },
                 ),
@@ -519,7 +512,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
         ],
       ),
     );
@@ -533,10 +525,10 @@ class _HomeScreenState extends State<HomeScreen> {
       bool isSelected,
       ) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double nameFontSize = isSelected ? 18 : 16;
-    double typeFontSize = isSelected ? 16 : 14;
-    double textFontSize = isSelected ? 14 : 12;
-    double imageSize = isSelected ? 110 : 85;
+    double nameFontSize = 24;
+    double typeFontSize = 20;
+    double textFontSize = 18;
+    double imageSize = 150;
 
     return Container(
       width: screenWidth * 0.7,
@@ -555,8 +547,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 20),
-          ClipRRect(
+          const SizedBox(height: 15),
+
+          Row(children: [const SizedBox(width: 15), ClipRRect(
             borderRadius: BorderRadius.circular(imageSize / 2),
             child: Image.asset(
               imagePath,
@@ -575,32 +568,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-          ),
-          const SizedBox(height: 16),
+          ),const SizedBox(width: 30),
+            Column(children: [const SizedBox(height: 5),
+              Text(
+                name,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: nameFontSize,
+                  fontFamily: 'Roboto',
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                personalityType,
+                style: TextStyle(
+                  fontSize: typeFontSize,
+                  fontFamily: 'Roboto',
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),],)
+            ],),
+
+          const SizedBox(height: 25),
           Text(
-            name,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: nameFontSize,
-              fontFamily: 'Roboto',
-              color: Colors.black,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            personalityType,
-            style: TextStyle(
-              fontSize: typeFontSize,
-              fontFamily: 'Roboto',
-              color: Colors.grey[600],
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Text(
               text,
               style: TextStyle(
                 fontSize: textFontSize,
@@ -609,8 +601,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 16),
         ],
       ),
     );

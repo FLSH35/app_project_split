@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:personality_score/screens/signin_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../helper_functions/questionnaire_helpers.dart';
+
 class MobileSidebar extends StatefulWidget {
   const MobileSidebar({Key? key}) : super(key: key);
 
@@ -14,8 +16,9 @@ class MobileSidebar extends StatefulWidget {
 }
 
 class _MobileSidebarState extends State<MobileSidebar> {
-  final TextEditingController _nameController = TextEditingController();
+  bool isLoadingTest = false;
 
+  final TextEditingController _nameController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -29,6 +32,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+
               // Logo Section
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 36.0),
@@ -49,6 +53,11 @@ class _MobileSidebarState extends State<MobileSidebar> {
                   ),
                 ),
               ),
+
+
+
+
+
 
               // "Allgemein" ListTile with Icon
               ListTile(
@@ -106,7 +115,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                             backgroundColor: Colors.black,
                             side: const BorderSide(color: Colors.black),
                             shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
                             ),
                           ),
                           onPressed: () async {
@@ -145,7 +154,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                             style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Roboto',
-                              fontSize: 20,
+                              fontSize: 18,
                             ),
                           ),
                         ),
@@ -175,7 +184,7 @@ class _MobileSidebarState extends State<MobileSidebar> {
                               title: Text(
                                 authService.user!.displayName ?? "User",
                                 style: const TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   color: Colors.black,
                                 ),
                               ),
@@ -188,6 +197,49 @@ class _MobileSidebarState extends State<MobileSidebar> {
                   }
                 },
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: SizedBox(
+                    width: double.infinity,
+                    child: isLoadingTest
+                        ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                        strokeWidth: 2.0,
+                      ),
+                    )
+                        : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFCB9935),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      onPressed: isLoadingTest
+                          ? null
+                          : () async {
+                        setState(() {
+                          isLoadingTest = true;
+                        });
+                        await handleTakeTest(context);
+                        setState(() {
+                          isLoadingTest = false;
+                        });
+                      },
+                      child: Text(
+                        'Beginne den Test',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Roboto',
+                          fontSize: 18),
+                      ),
+                    )
+                ),
+              ),
+
             ],
           ),
         ),

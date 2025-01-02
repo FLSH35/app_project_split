@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For rootBundle
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../helper_functions/questionnaire_helpers.dart';
 import 'personality_types_desktop_layout.dart'; // Import the Desktop Layout
 import 'home_screen/mobile_sidebar.dart'; // Import the mobile Sidebar
@@ -19,7 +18,7 @@ class PersonalityTypesPage extends StatefulWidget {
 class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
   // Video player controller
   VideoPlayerController? _videoController1;
-
+  bool isLoadingTest = false;
   final List<Map<String, String>> personalityTypes = [
     {
       "name": "Stufe 1: Anonymous",
@@ -178,7 +177,6 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                 children: [
                   Column(
                     children: personalityTypes.asMap().entries.map((entry) {
-                      int index = entry.key;
                       Map<String, String> type = entry.value;
                       String name = type['name']!;
                       String image = type['image']!;
@@ -220,30 +218,40 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
                           ),
                         ),
                         SizedBox(height: 50),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFCB9935),
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(8.0)),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.07,
-                              vertical: screenHeight * 0.021,
-                            ),
-                          ),
-                          onPressed: () {
-                            handleTakeTest(context);
-                          },
-                          child: Text(
-                            'Beginne den Test',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Roboto',
-                              fontSize: screenHeight * 0.021,
-                            ),
-                          ),
-                        ),
+    isLoadingTest
+    ? SizedBox(
+    width: 24,
+    height: 24,
+    child: CircularProgressIndicator(
+    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+    strokeWidth: 2.0,
+    ),
+    )
+        : ElevatedButton(
+    style: ElevatedButton.styleFrom(
+    backgroundColor: Color(0xFFCB9935),
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+    ),
+    ),
+    onPressed: isLoadingTest
+    ? null
+        : () async {
+    setState(() {
+    isLoadingTest = true;
+    });
+    await handleTakeTest(context);
+    setState(() {
+    isLoadingTest = false;
+    });
+    },
+    child: Text(
+    'Weiter',
+    style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 20),
+    ),
+    )
+
                       ],
                     ),
                   ),

@@ -15,7 +15,7 @@ class PersonalityTypesDesktopLayout extends StatefulWidget {
 
 class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopLayout> {
 
-
+  bool isLoadingTest = false;
   // Video player controllers
   VideoPlayerController? _videoController1;
 
@@ -215,30 +215,39 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
                           ),
                         ),
                         SizedBox(height: 50),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFCB9935),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.07,
-                              vertical: screenHeight * 0.021,
-                            ),
-                          ),
-                          onPressed: () {
-                            // Implement your handleTakeTest(context) method
-                            handleTakeTest(context);
-                          },
-                          child: Text(
-                            'Beginne den Test',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Roboto',
-                              fontSize: screenHeight * 0.021,
-                            ),
-                          ),
+                    isLoadingTest
+                        ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                        strokeWidth: 2.0,
+                      ),
+                    )
+                        : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFCB9935),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
                         ),
+                      ),
+                      onPressed: isLoadingTest
+                          ? null
+                          : () async {
+                        setState(() {
+                          isLoadingTest = true;
+                        });
+                        await handleTakeTest(context);
+                        setState(() {
+                          isLoadingTest = false;
+                        });
+                      },
+                      child: Text(
+                        'Weiter',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 20),
+                      ),
+                    )
                       ],
                     ),
                   ),
