@@ -548,51 +548,49 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 15),
-
-          Row(children: [const SizedBox(width: 15), ClipRRect(
-            borderRadius: BorderRadius.circular(imageSize / 2),
-            child: Image.asset(
-              imagePath,
-              width: imageSize,
-              height: imageSize,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return CircleAvatar(
-                  radius: imageSize / 2,
-                  backgroundColor: Colors.grey[300],
-                  child: Icon(
-                    Icons.person,
-                    size: imageSize / 2,
-                    color: Colors.white,
-                  ),
-                );
-              },
-            ),
-          ),const SizedBox(width: 30),
-            Column(children: [const SizedBox(height: 5),
-              Text(
-                name,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: nameFontSize,
-                  fontFamily: 'Roboto',
-                  color: Colors.black,
+          Row(
+            children: [
+              const SizedBox(width: 15),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(imageSize / 2),
+                child: LazyLoadImage(
+                  assetPath: imagePath,
+                  width: imageSize,
+                  height: imageSize,
+                  fit: BoxFit.cover,
                 ),
-                textAlign: TextAlign.center,
               ),
-              Text(
-                personalityType,
-                style: TextStyle(
-                  fontSize: typeFontSize,
-                  fontFamily: 'Roboto',
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),],)
-            ],),
-
+              const SizedBox(width: 30),
+              Column(
+                children: [
+                  const SizedBox(height: 5),
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: nameFontSize,
+                      fontFamily: 'Roboto',
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    personalityType,
+                    style: TextStyle(
+                      fontSize: typeFontSize,
+                      fontFamily: 'Roboto',
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ],
+          ),
           const SizedBox(height: 25),
-          Text(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
               text,
               style: TextStyle(
                 fontSize: textFontSize,
@@ -601,8 +599,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               textAlign: TextAlign.center,
             ),
+          ),
         ],
       ),
     );
   }
+
 }

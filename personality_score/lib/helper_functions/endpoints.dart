@@ -130,6 +130,77 @@ int _extractNumberFromResultX(String resultX) {
   }
 }
 
+/// Funktion zum Exportieren von Benutzerergebnissen.
+///
+/// [userUuid] ist die UUID des Benutzers.
+/// [resultsX] ist der Name der Ergebnisse.
+/// [combinedTotalScore] ist der kombinierte Gesamtscore.
+/// [completionDate] ist das Abschlussdatum im ISO-Format.
+/// [finalCharacter] ist der finale Charakter.
+/// [finalCharacterDescription] ist die Beschreibung des finalen Charakters.
+///
+/// Gibt eine Map zurück, die die Antwort der Cloud-Funktion enthält,
+/// oder wirft eine Ausnahme bei Fehlern.
+Future<Map<String, dynamic>> exportUserResults({
+  required String userUuid,
+  required String resultsX,
+  required int combinedTotalScore,
+  required String finalCharacter,
+  required String finalCharacterDescription,
+  // Generiere das Abschlussdatum als ISO 8601-String in UTC
+  required String completionDate
+}) async {
+  // Die URL deiner Cloud-Funktion
+  final String url =
+      'https://us-central1-personality-score.cloudfunctions.net/export_user_results';
+
+
+
+  // Die zu sendenden Daten
+  final Map<String, dynamic> requestBody = {
+    'user_uuid': userUuid,
+    'results_x': resultsX,
+    'combined_total_score': combinedTotalScore,
+    'completion_date': completionDate,
+    'final_character': finalCharacter,
+    'final_character_description': finalCharacterDescription,
+  };
+
+  try {
+    // Sende eine POST-Anfrage mit JSON-Körper
+    final http.Response response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    // Überprüfe den Statuscode der Antwort
+    if (response.statusCode == 200) {
+      // Parse die JSON-Antwort
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return responseData;
+    } else {
+      // Versuche, die Fehlernachricht aus der Antwort zu extrahieren
+      String errorMessage = 'Fehler: ${response.statusCode}';
+
+      try {
+        final Map<String, dynamic> errorData = jsonDecode(response.body);
+        if (errorData.containsKey('error')) {
+          errorMessage = errorData['error'];
+        }
+      } catch (_) {
+        // Ignoriere das Parsen, wenn es fehlschlägt
+      }
+
+      throw Exception(errorMessage);
+    }
+  } catch (e) {
+    // Fange alle anderen Fehler ab
+    throw Exception('Fehler beim Exportieren der Benutzerergebnisse: $e');
+  }
+}
 
 /// Fetches the highest test result (`ResultsX`) for a given `userUuid` from the Cloud Function.
 ///
@@ -305,5 +376,44 @@ Future<Result> fetchResultSummary(String userUUID, String resultsX) async {
   } catch (e) {
     // Handle any errors that occur during the request
     throw Exception('Error fetching result summary: $e');
+  }
+}
+
+Future<void> updateUserFirestore({
+  required String userUuid,
+  required String? currentFinalCharacter,
+  required String? currentCompletionDate,
+  required int currentCombinedTotalScore,
+  required String? currentFinalCharacterDescription,
+}) async {
+  try {
+    // Define the payload
+    final Map<String, dynamic> payload = {
+      'user-uuid': userUuid,
+      if (currentFinalCharacter != null) 'currentFinalCharacter': currentFinalCharacter,
+      if (currentCompletionDate != null) 'currentCompletionDate': currentCompletionDate,
+      if (currentCombinedTotalScore != null) 'currentCombinedTotalScore': currentCombinedTotalScore,
+      if (currentFinalCharacterDescription != null) 'currentFinalCharakterDescription': currentFinalCharacterDescription,
+    };
+
+    // Send POST request to the Cloud Function
+    final response = await http.post(
+      Uri.parse("https://us-central1-personality-score.cloudfunctions.net/update_user_firestore"),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+
+    // Check the response status
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      print('Update successful: ${responseData['message']}');
+    } else {
+      final errorData = jsonDecode(response.body);
+      print('Error updating user: ${errorData['error']}');
+    }
+  } catch (e) {
+    print('An exception occurred: $e');
   }
 }

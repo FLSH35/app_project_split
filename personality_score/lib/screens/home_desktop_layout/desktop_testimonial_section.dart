@@ -73,8 +73,6 @@ class _DesktopTestimonialSectionState extends State<DesktopTestimonialSection> {
   Widget build(BuildContext context) {
     return StatefulBuilder(
       builder: (context, setState) {
-        // Keep track of the selected index
-        int selectedIndex = initialPage % testimonials.length;
 
         return Container(
           padding: EdgeInsets.all(16.0),

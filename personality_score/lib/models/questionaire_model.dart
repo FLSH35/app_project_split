@@ -2,12 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:html' as html;
+
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:personality_score/services/question_service.dart';
 import 'package:personality_score/models/question.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -15,7 +14,6 @@ import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 
 import '../helper_functions/endpoints.dart';
-import '../screens/pdf_viewer_screen.dart';
 import '../screens/signin_dialog.dart';
 
 class QuestionnaireModel with ChangeNotifier {
@@ -291,7 +289,8 @@ class QuestionnaireModel with ChangeNotifier {
       // Await the export operation if it's asynchronous
       await exportUserAnswers(user.uid, highestResultCollection!, _questions, _answers);
 
-      _totalScore += _questions.length;
+      _totalScore = _answers.where((a) => a != null).fold(0, (sum, a) => sum + a!);
+
 
       String message;
       List<String> teamCharacters;
@@ -386,7 +385,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
     exportUserAnswers(user!.uid, highestResultCollection!, _questions, _answers);
 
     score_factor += _questions.length;
-
+    _totalScore = _answers.where((a) => a != null).fold(0, (sum, a) => sum + a!);
     String message;
     List<String> teamCharacters;
     String nextSet;
@@ -510,9 +509,10 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
   Future<void> completeFinalTest(BuildContext context) async {
     User? user = _auth.currentUser;
     exportUserAnswers(user!.uid, highestResultCollection!, _questions, _answers);
-
+    // Generiere das Abschlussdatum als ISO 8601-String in UTC
+    final String completionDate = DateTime.now().toUtc().toIso8601String();
     String finalCharacter;
-
+    _totalScore = _answers.where((a) => a != null).fold(0, (sum, a) => sum + a!);
     final firstScore = await fetchScoreAndCount('Kompetenz');
     final secondScore = await fetchScoreAndCount((['Individual', 'Reacher', 'Resident', 'LifeArtist'].contains(_questions.first.set))?'BewussteInkompetenz' : 'BewussteKompetenz');
     int progressScore = _totalScore + firstScore['score']! + secondScore['score']!;
@@ -566,7 +566,9 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
         await calculateCombinedTotalScore(user.uid,highestResultCollection!);
 
-        await exportUserResults(finalCharacter: _finalCharacter!, userUuid: user.uid, resultsX: highestResultCollection!, combinedTotalScore: combinedTotalScore, finalCharacterDescription: _finalCharacterDescription!);
+        await exportUserResults(completionDate: completionDate,finalCharacter: _finalCharacter!, userUuid: user.uid, resultsX: highestResultCollection!, combinedTotalScore: combinedTotalScore, finalCharacterDescription: _finalCharacterDescription!);
+        updateUserFirestore(currentCompletionDate: completionDate, userUuid: user.uid, currentFinalCharacterDescription:_finalCharacterDescription, currentCombinedTotalScore: combinedTotalScore, currentFinalCharacter: _finalCharacter!);
+
       }
 
     } catch (error) {
@@ -586,26 +588,6 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
   }
 
 
-
-  /// Function to download the existing PDF
-  Future<void> _downloadExistingPDF(String pdf_path) async {
-    try {
-      final ByteData pdfData = await rootBundle.load(pdf_path);
-      final Uint8List pdfBytes = pdfData.buffer.asUint8List();
-
-      final blob = html.Blob([pdfBytes], 'application/pdf');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-
-      final anchor = html.AnchorElement(href: url)
-        ..download = pdf_path.split('/')[1]
-        ..target = 'blank';
-      anchor.click();
-
-      html.Url.revokeObjectUrl(url);
-    } catch (e) {
-      print('Error downloading existing PDF: $e');
-    }
-  }
 
   void showSignInDialog(BuildContext context) {
     final emailController = TextEditingController();
@@ -934,12 +916,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                     },
                                   ),
 
-                                  PDFListItem(
-                                    pdfName:
-                                    '$finalCharacter. Deine Beschreibung zum Herunterladen!',
-                                    onDownload: () => _downloadExistingPDF(
-                                        'auswertungen/$finalCharacter.pdf'),
-                                  ),
+
                                 ],
                                 SizedBox(height: 20),
                                 TextButton(
@@ -1060,7 +1037,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
 
 
   bool isValidEmail(String email) {
-    final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final regex = RegExp(r'^[\w-]+@([\w-]+\.)+[\w-]{2,4}$');
     return regex.hasMatch(email);
   }
   Future<void> saveUserRating(double rating) async {
@@ -1089,95 +1066,6 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       }
     }
   }
-  Future<void> saveCertificatePath(String userId, String path) async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      try {
-
-        if (highestResultCollection != null) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .collection(highestResultCollection!)
-              .doc('finalCharacter')
-              .set({
-            'certificatePath': path, // Save only the certificate path
-          }, SetOptions(merge: true));
-
-          print("Path saved to $highestResultCollection");
-        } else {
-          print("No result collections found to save user rating.");
-        }
-      } catch (e) {
-        print("Error saving certificate path to Firestore: $e");
-        throw Exception("Failed to save certificate path");
-      }
-    }
-  }
-
-
-  Future<String?> getCertificatePath(String userId) async {
-    User? user = _auth.currentUser;
-
-    if (user != null) {
-      try {
-
-
-        if (highestResultCollection != null) {
-          // Retrieve the document
-          final docSnapshot = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .collection(highestResultCollection!)
-              .doc('finalCharacter')
-              .get();
-
-          // Check if the document exists and contains the 'certificatePath' field
-          if (docSnapshot.exists && docSnapshot.data() != null) {
-            final data = docSnapshot.data()!;
-            if (data.containsKey('certificatePath')) {
-              return data['certificatePath'] as String?;
-            }
-          }
-        } else {
-          print("No result collections found to retrieve the certificate path.");
-        }
-      } catch (e) {
-        print("Error retrieving certificate path from Firestore: $e");
-        throw Exception("Failed to retrieve certificate path");
-      }
-    }
-
-    return null; // Return null if not found
-  }
-
-
-  Future<void> checkAndDownloadCertificate() async {
-    User? user = _auth.currentUser;
-
-    if (user != null) {
-      final certificatePath = await getCertificatePath(user.uid);
-
-      if (certificatePath != null) {
-        // Certificate path found, proceed to download
-        final certificateUrl =
-        await FirebaseStorage.instance.ref(certificatePath).getDownloadURL();
-
-        final anchor = html.AnchorElement(href: certificateUrl)
-          ..download = 'Zertifikat_${DateFormat('dd-MM-yyyy').format(DateTime.now())}.pdf'
-          ..target = '_blank';
-        anchor.click();
-
-        print("Certificate downloaded successfully.");
-      } else {
-        // No certificate found
-        print("No certificate path found for this user.");
-      }
-    } else {
-      print("No user logged in.");
-    }
-  }
-
 
   Future<int> getFirstScore() async {
     User? user = _auth.currentUser;
@@ -1287,92 +1175,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
   }
 
 
-  /// Funktion zum Exportieren von Benutzerergebnissen.
-  ///
-  /// [userUuid] ist die UUID des Benutzers.
-  /// [resultsX] ist der Name der Ergebnisse.
-  /// [combinedTotalScore] ist der kombinierte Gesamtscore.
-  /// [completionDate] ist das Abschlussdatum im ISO-Format.
-  /// [finalCharacter] ist der finale Charakter.
-  /// [finalCharacterDescription] ist die Beschreibung des finalen Charakters.
-  ///
-  /// Gibt eine Map zurück, die die Antwort der Cloud-Funktion enthält,
-  /// oder wirft eine Ausnahme bei Fehlern.
-  Future<Map<String, dynamic>> exportUserResults({
-    required String userUuid,
-    required String resultsX,
-    required int combinedTotalScore,
-    required String finalCharacter,
-    required String finalCharacterDescription,
-  }) async {
-    // Die URL deiner Cloud-Funktion
-    final String url =
-        'https://us-central1-personality-score.cloudfunctions.net/export_user_results';
 
-    // Generiere das Abschlussdatum als ISO 8601-String in UTC
-    final String completionDate = DateTime.now().toUtc().toIso8601String();
-
-    // Die zu sendenden Daten
-    final Map<String, dynamic> requestBody = {
-      'user_uuid': userUuid,
-      'results_x': resultsX,
-      'combined_total_score': combinedTotalScore,
-      'completion_date': completionDate,
-      'final_character': finalCharacter,
-      'final_character_description': finalCharacterDescription,
-    };
-
-    try {
-      // Sende eine POST-Anfrage mit JSON-Körper
-      final http.Response response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(requestBody),
-      );
-
-      // Überprüfe den Statuscode der Antwort
-      if (response.statusCode == 200) {
-        // Parse die JSON-Antwort
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        return responseData;
-      } else {
-        // Versuche, die Fehlernachricht aus der Antwort zu extrahieren
-        String errorMessage = 'Fehler: ${response.statusCode}';
-
-        try {
-          final Map<String, dynamic> errorData = jsonDecode(response.body);
-          if (errorData.containsKey('error')) {
-            errorMessage = errorData['error'];
-          }
-        } catch (_) {
-          // Ignoriere das Parsen, wenn es fehlschlägt
-        }
-
-        throw Exception(errorMessage);
-      }
-    } catch (e) {
-      // Fange alle anderen Fehler ab
-      throw Exception('Fehler beim Exportieren der Benutzerergebnisse: $e');
-    }
-  }
-
-  /// Beispielaufruf der Funktion
-  void sendUserResults() async {
-    try {
-      Map<String, dynamic> response = await exportUserResults(
-        userUuid: 'user-1234-uuid',
-        resultsX: 'results_special',
-        combinedTotalScore: 50,
-        finalCharacter: 'Resident',
-        finalCharacterDescription: '',
-      );
-      print('Erfolg: $response');
-    } catch (e) {
-      print('Fehler: $e');
-    }
-  }
   Map<String, dynamic> prepareData(String resultsX, String userUuid) {
     List<Map<String, dynamic>> answersWithIds = [];
 
