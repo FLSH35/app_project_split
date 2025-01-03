@@ -89,9 +89,7 @@ class _SignInDialogState extends State<SignInDialog> {
                 child: IconButton(
                   icon: const Icon(Icons.close, color: Colors.grey),
                   onPressed: () {
-                    Navigator.of(context).pop();
-                    // Oder: Navigator.of(context).pushNamed('/home');
-                    // Je nachdem, ob du wirklich zum Home willst oder nur den Dialog schließen möchtest.
+                    Navigator.of(context).pushNamed('/home');
                   },
                 ),
               ),

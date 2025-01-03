@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 import '../models/result.dart'; // Passe den Pfad entsprechend deinem Projekt an
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:logging/logging.dart';
 
 // Definiere die Hauptbereiche und ihre Unterbereiche
 const Map<String, List<String>> LIFE_AREA_MAP_DART = {
@@ -44,6 +47,39 @@ const Map<String, List<String>> LIFE_AREA_MAP_DART = {
     "Gesundheit"
   ],
 };
+
+
+/// Holt alle Benutzerergebnisse von der Cloud Function
+Future<List<Result>> fetchUserResults(String uuid) async {
+  final url = Uri.parse(
+    'https://us-central1-personality-score.cloudfunctions.net/get_user_results?uuid=$uuid',
+  );
+
+  // Initialisieren des Loggers
+  Logger logger = Logger('fetchUserResults');
+  logger.info("Fetching data from Cloud Function for UUID: $uuid");
+
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = json.decode(response.body);
+      List<Result> results =
+      jsonData.map((item) => Result.fromJson(item)).toList();
+      logger.info(
+          "Successfully fetched and parsed ${results.length} results for UUID: $uuid");
+      return results;
+    } else {
+      logger.severe(
+          "Failed to fetch data. Status code: ${response.statusCode}");
+      throw Exception('Failed to fetch data from server');
+    }
+  } catch (e) {
+    logger.severe("Error fetching user results: $e");
+    throw Exception('Error fetching user results: $e');
+  }
+}
+
 
 // Widget zur Darstellung der detaillierten Ergebnisse
 Widget buildDetailedResultUI(Result detailedResult) {

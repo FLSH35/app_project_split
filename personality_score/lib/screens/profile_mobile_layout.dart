@@ -6,10 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:logging/logging.dart';
 
 import 'detailed_result_ui.dart';
 import 'signin_dialog.dart';
@@ -65,40 +61,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  /// Holt alle Benutzerergebnisse von der Cloud Function
-  Future<List<Result>> fetchUserResults(String uuid) async {
-    final url = Uri.parse(
-      'https://us-central1-personality-score.cloudfunctions.net/get_user_results?uuid=$uuid',
-    );
-
-    // Initialisieren des Loggers
-    Logger logger = Logger('fetchUserResults');
-    logger.info("Fetching data from Cloud Function for UUID: $uuid");
-
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        List<dynamic> jsonData = json.decode(response.body);
-        List<Result> results =
-        jsonData.map((item) => Result.fromJson(item)).toList();
-
-        logger.info(
-            "Successfully fetched and parsed ${results.length} results for UUID: $uuid");
-        return results;
-      } else {
-        logger.severe(
-            "Failed to fetch data. Status code: ${response.statusCode}");
-        throw Exception('Failed to fetch data from server');
-      }
-    } catch (e) {
-      logger.severe("Error fetching user results: $e");
-      throw Exception('Error fetching user results: $e');
-    }
-
-
   }
 
   /// Überprüft, ob der User eingeloggt ist, fragt ggf. nach Login und lädt dann die Ergebnisse
@@ -181,134 +143,6 @@ class _ProfileMobileLayoutState extends State<ProfileMobileLayout> {
   }
 
 
-
-  /// Helper-Funktion, um die Summe eines Lebensbereichs abzurufen
-  int _getLebensbereichSum(Result result, String sumKey) {
-    switch (sumKey) {
-      case 'SelbstwerterhoehungSum':
-        return result.selbstwerterhoehungSum;
-      case 'ZielsetzungSum':
-        return result.zielsetzungSum;
-      case 'WeiterbildungSum':
-        return result.weiterbildungSum;
-      case 'FinanzenSum':
-        return result.finanzenSum;
-      case 'KarriereSum':
-        return result.karriereSum;
-      case 'FitnessSum':
-        return result.fitnessSum;
-      case 'EnergieSum':
-        return result.energieSum;
-      case 'ProduktivitaetSum':
-        return result.produktivitaetSum;
-      case 'StressmanagementSum':
-        return result.stressmanagementSum;
-      case 'ResilienzSum':
-        return result.resilienzSum;
-      case 'InnerCoreInnerChangeSum':
-        return result.innerCoreInnerChangeSum;
-      case 'EmotionenSum':
-        return result.emotionenSum;
-      case 'GlaubenssaetzeSum':
-        return result.glaubenssaetzeSum;
-      case 'BindungBeziehungenSum':
-        return result.bindungBeziehungenSum;
-      case 'KommunikationSum':
-        return result.kommunikationSum;
-      case 'GemeinschaftSum':
-        return result.gemeinschaftSum;
-      case 'FamilieSum':
-        return result.familieSum;
-      case 'NetzwerkSum':
-        return result.netzwerkSum;
-      case 'DatingSum':
-        return result.datingSum;
-      case 'LebenssinnSum':
-        return result.lebenssinnSum;
-      case 'UmweltSum':
-        return result.umweltSum;
-      case 'SpiritualitaetSum':
-        return result.spiritualitaetSum;
-      case 'SpendenSum':
-        return result.spendenSum;
-      case 'LebensplanungSum':
-        return result.lebensplanungSum;
-      case 'SelbstfuersorgeSum':
-        return result.selbstfuersorgeSum;
-      case 'FreizeitSum':
-        return result.freizeitSum;
-      case 'SpassFreudeSum':
-        return result.spassFreudeSum;
-      case 'GesundheitSum':
-        return result.gesundheitSum;
-      default:
-        return 0;
-    }
-  }
-
-  /// Helper-Funktion, um die Count eines Lebensbereichs abzurufen
-  int _getLebensbereichCount(Result result, String countKey) {
-    switch (countKey) {
-      case 'SelbstwerterhoehungCount':
-        return result.selbstwerterhoehungCount;
-      case 'ZielsetzungCount':
-        return result.zielsetzungCount;
-      case 'WeiterbildungCount':
-        return result.weiterbildungCount;
-      case 'FinanzenCount':
-        return result.finanzenCount;
-      case 'KarriereCount':
-        return result.karriereCount;
-      case 'FitnessCount':
-        return result.fitnessCount;
-      case 'EnergieCount':
-        return result.energieCount;
-      case 'ProduktivitaetCount':
-        return result.produktivitaetCount;
-      case 'StressmanagementCount':
-        return result.stressmanagementCount;
-      case 'ResilienzCount':
-        return result.resilienzCount;
-      case 'InnerCoreInnerChangeCount':
-        return result.innerCoreInnerChangeCount;
-      case 'EmotionenCount':
-        return result.emotionenCount;
-      case 'GlaubenssaetzeCount':
-        return result.glaubenssaetzeCount;
-      case 'BindungBeziehungenCount':
-        return result.bindungBeziehungenCount;
-      case 'KommunikationCount':
-        return result.kommunikationCount;
-      case 'GemeinschaftCount':
-        return result.gemeinschaftCount;
-      case 'FamilieCount':
-        return result.familieCount;
-      case 'NetzwerkCount':
-        return result.netzwerkCount;
-      case 'DatingCount':
-        return result.datingCount;
-      case 'LebenssinnCount':
-        return result.lebenssinnCount;
-      case 'UmweltCount':
-        return result.umweltCount;
-      case 'SpiritualitaetCount':
-        return result.spiritualitaetCount;
-      case 'SpendenCount':
-        return result.spendenCount;
-      case 'LebensplanungCount':
-        return result.lebensplanungCount;
-      case 'SelbstfuersorgeCount':
-        return result.selbstfuersorgeCount;
-      case 'FreizeitCount':
-        return result.freizeitCount;
-      case 'SpassFreudeCount':
-        return result.spassFreudeCount;
-      case 'GesundheitCount':
-        return result.gesundheitCount;
-      default:
-        return 0;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

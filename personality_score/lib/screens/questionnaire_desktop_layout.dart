@@ -96,32 +96,32 @@ class _QuestionnaireDesktopLayoutState
 
   @override
   Widget build(BuildContext context) {
-    // Show loading indicator if either authentication or data loading is in progress
-    if (!_isAuthenticated || isLoading) {
-      return Scaffold(
-        appBar: CustomAppBar(
-          title: 'Personality Score',
-        ),
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Personality Score',
       ),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Container(
-              color: Color(0xFFEDE8DB),
-            ),
-          ),
-          Consumer<QuestionnaireModel>(
+          // Main content
+          _isAuthenticated
+              ? Consumer<QuestionnaireModel>(
             builder: (context, model, child) {
               return _buildQuestionnaire(context, model);
             },
-          ),
+          )
+              : Container(), // If not authenticated and not loading, show nothing or a placeholder
+
+          // Loading indicator
+          if (isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
+              child: Center(
+                child: CircularProgressIndicator(
+                  valueColor:
+                  AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -289,10 +289,27 @@ class _QuestionnaireDesktopLayoutState
     int start = model.currentPage * questionsPerPage;
     int end = start + questionsPerPage;
 
+    // Determine if the "Fertigstellen" button should be shown
+    bool showCompleteButton = false;
+    String completeButtonAction = '';
+
+    if (end >= model.questions.length) {
+      if (!model.isFirstTestCompleted) {
+        showCompleteButton = true;
+        completeButtonAction = 'first';
+      } else if (!model.isSecondTestCompleted) {
+        showCompleteButton = true;
+        completeButtonAction = 'second';
+      } else if (model.isSecondTestCompleted) {
+        showCompleteButton = true;
+        completeButtonAction = 'final';
+      }
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        // Previous page button
+        // Zurück-Button
         if (model.currentPage > 0)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -303,15 +320,18 @@ class _QuestionnaireDesktopLayoutState
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
-            onPressed: () => model.prevPage(),
+            onPressed: isLoading ? null : () => model.prevPage(),
             child: Text(
               'Zurück',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+                color: Colors.white,
+                fontFamily: 'Roboto',
+                fontSize: 18,
+              ),
             ),
           ),
 
-        // Next page button
+        // Weiter-Button (sofern noch nicht letzte Seite)
         if (end < model.questions.length)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -321,19 +341,24 @@ class _QuestionnaireDesktopLayoutState
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
             ),
-            onPressed: () {
+            onPressed: isLoading
+                ? null
+                : () {
               model.nextPage(context);
               _scrollToFirstQuestion(context);
             },
             child: Text(
               'Weiter',
               style: TextStyle(
-                  color: Colors.white, fontFamily: 'Roboto', fontSize: 18),
+                color: Colors.white,
+                fontFamily: 'Roboto',
+                fontSize: 18,
+              ),
             ),
           ),
 
         // "Fertigstellen" button for completing tests
-        if (end >= model.questions.length)
+        if (showCompleteButton)
           isLoading
               ? SizedBox(
             width: 24,
@@ -348,10 +373,7 @@ class _QuestionnaireDesktopLayoutState
             style: ElevatedButton.styleFrom(
               padding:
               EdgeInsets.symmetric(vertical: 12.0, horizontal: 40.0),
-              backgroundColor:
-              model.isFirstTestCompleted && model.isSecondTestCompleted
-                  ? Color(0xFFCB9935) // Final test button color
-                  : Color(0xFFCB9935), // Other test button colors can be adjusted
+              backgroundColor: Color(0xFFCB9935),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
@@ -366,14 +388,17 @@ class _QuestionnaireDesktopLayoutState
               try {
                 // Determine which test to complete based on the current state
                 if (!model.isFirstTestCompleted) {
-                  model.completeFirstTest(context);
+                  await model.completeFirstTest(context);
                 } else if (!model.isSecondTestCompleted) {
-                  model.completeSecondTest(context);
+                  await model.completeSecondTest(context);
                 } else if (model.isSecondTestCompleted) {
-                  model.completeFinalTest(context);
+                  await model.completeFinalTest(context);
                 }
 
-                // Optionally, add any additional logic here
+                // Optionally, navigate to a confirmation or results page
+                // For example:
+                // Navigator.pushNamed(context, '/results');
+
                 _scrollToFirstQuestion(context);
               } catch (e) {
                 // Check if the widget is still mounted before showing SnackBar
@@ -395,9 +420,10 @@ class _QuestionnaireDesktopLayoutState
             child: Text(
               'Fertigstellen',
               style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Roboto',
-                  fontSize: 18),
+                color: Colors.white,
+                fontFamily: 'Roboto',
+                fontSize: 18,
+              ),
             ),
           ),
       ],
