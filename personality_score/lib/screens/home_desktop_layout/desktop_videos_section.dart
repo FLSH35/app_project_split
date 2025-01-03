@@ -96,7 +96,7 @@ class _DesktopVideosSectionState extends State<DesktopVideosSection> {
         VideoWidget(
           videoController: _videoController,
           screenHeight: MediaQuery.of(context).size.height * 1.2,
-          headerText: "Wieso MUSST du den Personality Score ausfüllen?",
+          headerText: "Was bringt dir der Test?",
           subHeaderText: "Erfahre es im Video!",
         ),
       ],

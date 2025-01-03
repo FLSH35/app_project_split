@@ -85,7 +85,7 @@ class _MobileVideoSection2State extends State<MobileVideoSection2> {
     return VideoWidget(
       videoController: _videoController,
       screenHeight: MediaQuery.of(context).size.height * 1.2,
-      headerText: "Starte Hier",
+      headerText: "Wie funktioniert der Test?",
       subHeaderText: "10 Minuten. 120 Fragen. Bis zu deinem Ergebnis!",
     );
   }
