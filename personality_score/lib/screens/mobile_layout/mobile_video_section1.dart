@@ -27,7 +27,7 @@ class _MobileVideoSection1State extends State<MobileVideoSection1> {
 
     try {
       final storage = FirebaseStorage.instance;
-      final gsUrl = 'gs://personality-score.appspot.com/PS_3_cut.mp4';
+      final gsUrl = 'gs://personality-score.appspot.com/PS_3_cut_short - (1x1).mp4';
 
       final downloadUrl = await storage.refFromURL(gsUrl).getDownloadURL();
 

@@ -96,32 +96,32 @@ class _QuestionnaireDesktopLayoutState
 
   @override
   Widget build(BuildContext context) {
+    // Show loading indicator if either authentication or data loading is in progress
+    if (!_isAuthenticated || isLoading) {
+      return Scaffold(
+        appBar: CustomAppBar(
+          title: 'Personality Score',
+        ),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Personality Score',
       ),
       body: Stack(
         children: [
-          // Main content
-          _isAuthenticated
-              ? Consumer<QuestionnaireModel>(
+          Positioned.fill(
+            child: Container(
+              color: Color(0xFFEDE8DB),
+            ),
+          ),
+          Consumer<QuestionnaireModel>(
             builder: (context, model, child) {
               return _buildQuestionnaire(context, model);
             },
-          )
-              : Container(), // If not authenticated and not loading, show nothing or a placeholder
-
-          // Loading indicator
-          if (isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
-              child: Center(
-                child: CircularProgressIndicator(
-                  valueColor:
-                  AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
-                ),
-              ),
-            ),
+          ),
         ],
       ),
     );
@@ -388,11 +388,11 @@ class _QuestionnaireDesktopLayoutState
               try {
                 // Determine which test to complete based on the current state
                 if (!model.isFirstTestCompleted) {
-                  await model.completeFirstTest(context);
+                  model.completeFirstTest(context);
                 } else if (!model.isSecondTestCompleted) {
-                  await model.completeSecondTest(context);
+                  model.completeSecondTest(context);
                 } else if (model.isSecondTestCompleted) {
-                  await model.completeFinalTest(context);
+                  model.completeFinalTest(context);
                 }
 
                 // Optionally, navigate to a confirmation or results page
@@ -429,6 +429,7 @@ class _QuestionnaireDesktopLayoutState
       ],
     );
   }
+
 
   void _scrollToFirstQuestion(BuildContext context) {
     widget.scrollController.animateTo(

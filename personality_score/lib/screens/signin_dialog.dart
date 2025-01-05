@@ -62,20 +62,7 @@ class _SignInDialogState extends State<SignInDialog> {
                     _isSignUpMode
                         ? _buildSignUpForm()
                         : _buildSignInForm(),
-                    const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _isSignUpMode = !_isSignUpMode;
-                        });
-                      },
-                      child: Text(
-                        _isSignUpMode
-                            ? 'Hast du bereits einen Account? Hier anmelden!'
-                            : 'Noch keinen Account? Hier registrieren!',
-                        style: const TextStyle(color: Colors.lightBlue),
-                      ),
-                    ),
+
                   ],
                 ),
               ),
@@ -171,6 +158,27 @@ class _SignInDialogState extends State<SignInDialog> {
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
             ),
           ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+    style : ElevatedButton.styleFrom(
+    backgroundColor: Colors.black,
+    side: BorderSide(color: Color(0xFFCB9935)),
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+    ),),
+          onPressed: () {
+            setState(() {
+              _isSignUpMode = !_isSignUpMode;
+            });
+
+          },
+          child: Text(
+            _isSignUpMode
+                ? 'Hast du bereits einen Account? Hier anmelden!'
+                : 'Noch keinen Account? Hier registrieren!',
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
         Consumer<AuthService>(
           builder: (context, authService, child) {
             if (authService.errorMessage != null) {
@@ -258,6 +266,25 @@ class _SignInDialogState extends State<SignInDialog> {
               style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
             ),
           ),
+        const SizedBox(height: 20),
+        TextButton(style : ElevatedButton.styleFrom(
+          backgroundColor: Colors.black,
+          side: BorderSide(color: Color(0xFFCB9935)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          ),),
+          onPressed: () {
+            setState(() {
+              _isSignUpMode = !_isSignUpMode;
+            });
+          },
+          child: Text(
+            _isSignUpMode
+                ? 'Hast du bereits einen Account? Hier anmelden!'
+                : 'Noch keinen Account? Hier registrieren!',
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
         Consumer<AuthService>(
           builder: (context, authService, child) {
             if (authService.errorMessage != null) {

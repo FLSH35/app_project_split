@@ -94,7 +94,7 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
   // Initialize video from Firebase Storage
   Future<void> _initializeVideos() async {
     final storage = FirebaseStorage.instance;
-    final gsUrl1 = 'gs://personality-score.appspot.com/PS_2_cut.mp4';
+    final gsUrl1 = 'gs://personality-score.appspot.com/ps_2_cut_short - (1x1).mp4';
     try {
       // Initialize the video controller
       String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();

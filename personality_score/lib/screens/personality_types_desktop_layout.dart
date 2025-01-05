@@ -73,7 +73,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
   }
   Future<void> _initializeVideos() async {
     final storage = FirebaseStorage.instance;
-    final gsUrl1 = 'gs://personality-score.appspot.com/Personality Score 2.mov';
+    final gsUrl1 = 'gs://personality-score.appspot.com/PS_2_cut_short.mp4';
     try {
       // Initialize the first video controller
       String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
@@ -144,7 +144,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
                   VideoWidget(
                     videoController: _videoController1,
                     screenHeight: MediaQuery.of(context).size.height,
-                    headerText: "Was bedeuten die einzelnen Stufen?",
+                    headerText: "Was ist der Personality Score?",
                     subHeaderText: "Erfahre es im Video!",
                   ),
                   Padding(

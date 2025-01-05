@@ -28,7 +28,7 @@ class _DesktopVideoSection2State extends State<DesktopVideoSection2> {
 
     try {
       final storage = FirebaseStorage.instance;
-      final gsUrl2 = 'gs://personality-score.appspot.com/Personality Score 1.mov';
+      final gsUrl2 = 'gs://personality-score.appspot.com/PS_1_cut_short.mp4';
 
       // Fetch Firebase download URL
       final downloadUrl = await storage.refFromURL(gsUrl2).getDownloadURL();
