@@ -1,4 +1,5 @@
 // personality_types_desktop_layout.dart
+
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For rootBundle
@@ -14,8 +15,8 @@ class PersonalityTypesDesktopLayout extends StatefulWidget {
 }
 
 class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopLayout> {
-
   bool isLoadingTest = false;
+
   // Video player controllers
   VideoPlayerController? _videoController1;
 
@@ -68,20 +69,26 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
   @override
   void initState() {
     super.initState();
-    _loadDescriptions(); // Call the method here
+    _loadDescriptions();
     _initializeVideos();
   }
+
   Future<void> _initializeVideos() async {
     final storage = FirebaseStorage.instance;
     final gsUrl1 = 'gs://personality-score.appspot.com/PS_2_cut_short.mp4';
+
     try {
       // Initialize the first video controller
       String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
       _videoController1 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
-        ..setLooping(true)
         ..initialize().then((_) {
           setState(() {});
-        });
+        })
+        ..addListener(() {
+          // This forces the widget to rebuild on every frame the video updates
+          setState(() {});
+        })
+        ..setLooping(true);
 
     } catch (e) {
       print('Error loading video: $e');
@@ -120,7 +127,6 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
       body: SingleChildScrollView(
         child: Column(
           children: [
-
             // Header Section
             Container(
               height: screenHeight,
@@ -162,6 +168,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
                 ],
               ),
             ),
+
             // Personality Types Section
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -190,6 +197,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
               ),
             ),
             SizedBox(height: 350),
+
             // Footer Section with Background Image and Button
             Stack(
               children: [
@@ -215,39 +223,39 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
                           ),
                         ),
                         SizedBox(height: 50),
-                    isLoadingTest
-                        ? SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
-                        strokeWidth: 2.0,
-                      ),
-                    )
-                        : ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFCB9935),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        ),
-                      ),
-                      onPressed: isLoadingTest
-                          ? null
-                          : () async {
-                        setState(() {
-                          isLoadingTest = true;
-                        });
-                        await handleTakeTest(context);
-                        setState(() {
-                          isLoadingTest = false;
-                        });
-                      },
-                      child: Text(
-                        'Weiter',
-                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 20),
-                      ),
-                    )
+                        isLoadingTest
+                            ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                            strokeWidth: 2.0,
+                          ),
+                        )
+                            : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFCB9935),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                            ),
+                          ),
+                          onPressed: isLoadingTest
+                              ? null
+                              : () async {
+                            setState(() {
+                              isLoadingTest = true;
+                            });
+                            await handleTakeTest(context);
+                            setState(() {
+                              isLoadingTest = false;
+                            });
+                          },
+                          child: Text(
+                            'Weiter',
+                            style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 20),
+                          ),
+                        )
                       ],
                     ),
                   ),
@@ -259,11 +267,7 @@ class _PersonalityTypesDesktopLayoutState extends State<PersonalityTypesDesktopL
         ),
       ),
     );
-
-
-
   }
-
 
   @override
   void dispose() {
@@ -319,7 +323,7 @@ class _PersonalityTypeCardState extends State<PersonalityTypeCard> {
     }
 
     // Set a fixed height for the card
-    double cardHeight = isExpanded? 600: 400; // Adjust this value as needed
+    double cardHeight = isExpanded ? 600 : 400; // Adjust this value as needed
 
     // Define the button style
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
