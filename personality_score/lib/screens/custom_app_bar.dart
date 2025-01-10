@@ -39,8 +39,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
             top: 0, // Adjusted position to be at the top
             child: Consumer<AuthService>(
               builder: (context, authService, child) {
-                if (authService.user == null) {
-                  return Column(children: [_buildLoginButton(), if (authService.user == null)
+                if (authService.user == null || authService.user!.displayName == null) {
+                  return Column(children: [_buildLoginButton(), if (authService.user == null || authService.user!.displayName == null)
                     isLoading
                         ? SizedBox(
                       width: 24,
