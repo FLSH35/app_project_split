@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:personality_score/screens/custom_app_bar.dart';
 import 'package:personality_score/screens/home_screen/home_screen.dart';
+import 'package:personality_score/screens/home_screen/mobile_sidebar.dart';
 import 'package:personality_score/screens/questionnaire_screen.dart';
+import 'package:personality_score/services/impressum.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'auth/auth_service.dart';
 import 'firebase_options.dart'; // Ensure you have this file generated
 import 'package:personality_score/screens/profile_screen.dart';
@@ -34,7 +38,6 @@ Future<void> checkForUpdates() async {
   }
 }
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -45,7 +48,6 @@ void main() async {
 
   runApp(MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -62,7 +64,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        // initialRoute & routes kommen aus routes.dart
+        // initialRoute & routes come from Routes class
         initialRoute: Routes.home,
         onGenerateRoute: Routes.controller,
       ),
@@ -70,12 +72,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 class Routes {
   static const String home = '/home';
   static const String questionnaire = '/questionnaire';
   static const String profile = '/profile';
   static const String personalityTypes = '/personality_types';
+  static const String impressum = '/impressum'; // New Route
 
   static Route<dynamic> controller(RouteSettings settings) {
     switch (settings.name) {
@@ -87,58 +89,12 @@ class Routes {
         return MaterialPageRoute(builder: (context) => ProfileScreen());
       case personalityTypes:
         return MaterialPageRoute(builder: (context) => PersonalityTypesPage());
+      case impressum: // Handle the new route
+        return MaterialPageRoute(builder: (context) => ImpressumPage());
 
       default:
       // Default/Fallback Route:
         return MaterialPageRoute(builder: (context) => HomeScreen());
     }
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-class ImpressumPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Impressum'),
-        backgroundColor: Color(0xFFCB9935), // Same as the app's gold color
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SelectableText(
-          'This is the Impressum page where the legal information goes...',
-          style: TextStyle(fontFamily: 'Roboto'),
-        ),
-      ),
-    );
-  }
-}
-
-class DatenschutzPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Datenschutz'),
-        backgroundColor: Color(0xFFCB9935), // Same as the app's gold color
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SelectableText(
-          'This is the Datenschutz page where privacy policies go...',
-          style: TextStyle(fontFamily: 'Roboto'),
-        ),
-      ),
-    );
   }
 }

@@ -17,18 +17,8 @@ class CustomFooter extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pushNamed('/impressum');
                 },
-                child: SelectableText(
+                child: Text(
                   'Impressum',
-                  style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
-                ),
-              ),
-              SizedBox(width: 10),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/datenschutz');
-                },
-                child: SelectableText(
-                  'Datenschutz',
                   style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
                 ),
               ),
