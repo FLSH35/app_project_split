@@ -1,8 +1,8 @@
 import 'dart:convert';               // Für utf8-Decode
-import 'package:csv/csv.dart';       // Zum Parsen der CSV
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
+import 'dart:math'; // Für Zufallsgenerator, falls erforderlich.
 
 import '../models/question.dart';     // Falls du User-Model hast, optional
 
@@ -30,9 +30,14 @@ class QuestionService {
         final List<dynamic> questionsJson = data['questions'];
 
         // Map each JSON object to a Question instance
-        return questionsJson
+        final questions = questionsJson
             .map((json) => Question.fromJson(json as Map<String, dynamic>))
             .toList();
+
+        // Randomize the order of questions
+        questions.shuffle(Random());
+
+        return questions;
       } else {
         throw Exception('Invalid response format: "questions" key not found or is not a List.');
       }
@@ -41,7 +46,6 @@ class QuestionService {
       throw Exception('Failed to load questions: ${response.statusCode} ${response.reasonPhrase}');
     }
   }
-
 
   // ----------------------------------------------------------------
   // Firestore-Funktionen für User-Daten (bleiben unverändert)

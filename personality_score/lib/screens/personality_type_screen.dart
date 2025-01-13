@@ -96,18 +96,22 @@ class _PersonalityTypesPageState extends State<PersonalityTypesPage> {
     final storage = FirebaseStorage.instance;
     final gsUrl1 = 'gs://personality-score.appspot.com/ps_2_cut_short - (1x1).mp4';
     try {
-      // Initialize the video controller
       String downloadUrl1 = await storage.refFromURL(gsUrl1).getDownloadURL();
-      _videoController1 =
-      VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
+      _videoController1 = VideoPlayerController.networkUrl(Uri.parse(downloadUrl1))
         ..setLooping(true)
         ..initialize().then((_) {
           setState(() {});
         });
+
+      // Add a listener to update UI on every frame
+      _videoController1?.addListener(() {
+        setState(() {}); // Trigger UI rebuild for progress bar
+      });
     } catch (e) {
       print('Error loading video: $e');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
