@@ -528,7 +528,7 @@ class _HomeScreenState extends State<HomeScreen> {
     double nameFontSize = 24;
     double typeFontSize = 20;
     double textFontSize = 18;
-    double imageSize = 150;
+    double imageSize = screenWidth * 0.3;
 
     return Container(
       width: screenWidth * 0.7,
@@ -560,7 +560,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(width: 30),
+              SizedBox(width: screenWidth * 0.05),
               Column(
                 children: [
                   const SizedBox(height: 5),
