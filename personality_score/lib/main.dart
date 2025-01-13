@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:personality_score/screens/custom_app_bar.dart';
 import 'package:personality_score/screens/home_screen/home_screen.dart';
-import 'package:personality_score/screens/home_screen/mobile_sidebar.dart';
 import 'package:personality_score/screens/questionnaire_screen.dart';
 import 'package:personality_score/services/impressum.dart';
 import 'package:provider/provider.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'auth/auth_service.dart';
 import 'firebase_options.dart'; // Ensure you have this file generated
 import 'package:personality_score/screens/profile_screen.dart';

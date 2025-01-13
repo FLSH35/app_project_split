@@ -220,35 +220,27 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: SelectableText(
-                        question.text,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'Roboto',
-                          fontSize: 20,
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height / 6, // Begrenzte Höhe
+                      ),
+                      child: SingleChildScrollView(
+                        child: SelectableText(
+                          question.text,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontFamily: 'Roboto',
+                            fontSize: 20,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: null, // Unbegrenzte Anzahl an Zeilen
                         ),
-                        textAlign: TextAlign.center,
-                        maxLines: null,
                       ),
                     ),
                   ),
-                  // Beispiel: Hintergrundinfo via Tooltip oder Dialog
-                  if (question.backgroundInfo != "empty" && false) ...[
-                    SizedBox(width: 8.0),
-                    GestureDetector(
-                      onTap: () {
-                        _showInfoDialog(context, question.backgroundInfo);
-                      },
-                      child: Icon(
-                        Icons.help_outline,
-                        color: Colors.grey[700],
-                        size: 24.0,
-                      ),
-                    ),
-                  ],
                 ],
               ),
+
               SizedBox(height: 8.0),
 
               // Slider (mit Ticks im Hintergrund)
