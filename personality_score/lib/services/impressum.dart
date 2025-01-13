@@ -33,17 +33,6 @@ Maršala BB, Utjeha
 E-Mail: info@ifyouchange.de  
 Telefon: +49 896 282 4760  
 
-<b>Inhaltsverzeichnis</b>
-1. Datenschutzerklärung ......................................................................................................................................................................................... 2  
-2. Datenschutzerklärung als HTML-Quellcode ............................................................................................................................................ 9  
-
----
-<b>Ihre Datenschutzerklärung</b>
-
-Im Folgenden finden Sie die Textdaten für Ihre persönliche Datenschutzerklärung für Ihre Website gemäß der von Ihnen getätigten Angaben. Sofern Sie in Ihrer Website einen Eingabe-Editor für Ihre Inhalte nutzen, können Sie den folgenden Text direkt herauskopieren und dort einfügen.  
-Sofern Sie die Inhalte alternativ als HTML-Quellcode in Ihre Website integrieren möchten, können Sie den anschließend aufgeführten HTML-Quellcode nutzen.
-
----
 <b>Datenschutzerklärung</b>
 
 1. <b>Datenschutz auf einen Blick</b>
@@ -251,17 +240,6 @@ Maršala BB, Utjeha
 E-Mail: info@ifyouchange.de  
 Telefon: +49 896 282 4760  
 
-<b>Inhaltsverzeichnis</b>
-1. Datenschutzerklärung ......................................................................................................................................................................................... 2  
-2. Datenschutzerklärung als HTML-Quellcode ............................................................................................................................................ 9  
-
----
-<b>Ihre Datenschutzerklärung</b>
-
-Im Folgenden finden Sie die Textdaten für Ihre persönliche Datenschutzerklärung für Ihre Website gemäß der von Ihnen getätigten Angaben. Sofern Sie in Ihrer Website einen Eingabe-Editor für Ihre Inhalte nutzen, können Sie den folgenden Text direkt herauskopieren und dort einfügen.  
-Sofern Sie die Inhalte alternativ als HTML-Quellcode in Ihre Website integrieren möchten, können Sie den anschließend aufgeführten HTML-Quellcode nutzen.
-
----
 <b>Datenschutzerklärung</b>
 
 1. <b>Datenschutz auf einen Blick</b>
