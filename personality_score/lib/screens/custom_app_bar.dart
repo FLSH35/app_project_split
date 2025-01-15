@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:personality_score/screens/signin_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../helper_functions/endpoints.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -246,23 +249,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
     );
   }
 
-  // ------------------------------------------------
-  // Example function for handling subscription
-  // ------------------------------------------------
-  Future<void> subscribeToNewsletter(String email, String firstName, String userId) async {
-    // Customize this to your needs: Firestore, external API call, etc.
-    try {
-      await FirebaseFirestore.instance.collection('newsletter_subscriptions').add({
-        'email': email,
-        'firstName': firstName,
-        'userId': userId,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      print('Newsletter subscription successful');
-    } catch (e) {
-      print('Error subscribing to newsletter: $e');
-    }
-  }
 
   Widget _buildLoginButton() {
     return Padding(
@@ -276,7 +262,15 @@ class _CustomAppBarState extends State<CustomAppBar> {
           ),
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed('/profile');
+          showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => SignInDialog(
+            emailController: TextEditingController(),
+            passwordController: TextEditingController(),
+            allowAnonymous: false,
+          ),
+          );
         },
         child: Text(
           'Anmelden',
@@ -318,4 +312,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
     }
     return 'Explorer'; // Default character
   }
+
+
 }

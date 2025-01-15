@@ -68,54 +68,36 @@ Future<String> createNextResultsCollection(String user_uuid) async {
 /// Throws:
 /// - An exception if the request fails or if the response is invalid.
 Future<String> createTestVersuch(String userUuid, String resultX) async {
-  // Extract the integer x from resultX (e.g., 'results_5' -> 5)
-  final int testVersuchName = _extractNumberFromResultX(resultX);
-
-  // Replace with your actual Cloud Function URL
-  final String cloudFunctionUrl = 'https://us-central1-personality-score.cloudfunctions.net/create_test_versuch';
-
   try {
-    // Send a POST request with JSON body
-    final response = await http.post(
-      Uri.parse(cloudFunctionUrl),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'User_UUID': userUuid,
-        'Test_Versuch_Name': testVersuchName, // Send as integer
-      }),
-    );
+    // Get the reference to the user document
+    final userDocRef = FirebaseFirestore.instance.collection('users').doc(userUuid);
 
-    // Handle CORS preflight or other non-standard responses if necessary
-    if (response.statusCode == 204) {
-      // No Content, typically for OPTIONS requests
-      return 'No Content';
+    // Fetch the document snapshot
+    final userDoc = await userDocRef.get();
+
+    // If the user document does not exist yet, create it with a default 0
+    if (!userDoc.exists) {
+      await userDocRef.set({'highestTestVersuchName': 0});
     }
 
-    // Check if the request was successful
-    if (response.statusCode == 200) {
-      // Parse the JSON response
-      final Map<String, dynamic> data = jsonDecode(response.body);
+    // Retrieve the data (after ensuring the doc exists)
+    final data = (await userDocRef.get()).data() ?? {};
 
-      // Extract the success message
-      if (data.containsKey('message')) {
-        return data['message'] as String;
-      } else {
-        throw Exception("The response does not contain a 'message'.");
-      }
-    } else if (response.statusCode == 400 || response.statusCode == 404) {
-      // Handle client errors
-      final Map<String, dynamic> errorData = jsonDecode(response.body);
-      throw Exception(errorData['error'] ?? errorData['message'] ?? 'Client error.');
-    } else {
-      // Handle other non-success status codes
-      final Map<String, dynamic> errorData = jsonDecode(response.body);
-      throw Exception(errorData['error'] ?? 'Failed to create test attempt.');
-    }
+    // Get the current highest test attempt, defaulting to 0 if not found
+    final currentHighestAttempt = data['highestTestVersuchName'] ?? 0;
+
+    // Increment by 1
+    final newAttemptNumber = currentHighestAttempt + 1;
+
+    // Update the user’s document with the new highest test attempt
+    await userDocRef.update({'highestTestVersuchName': newAttemptNumber});
+
+    // Return a string indicating success (e.g., the new attempt)
+    return 'Highest test attempt updated to: $newAttemptNumber';
   } catch (e) {
-    // Handle any exceptions that occur during the request
-    throw Exception('Error creating test attempt: $e');
+    // Handle the error as needed
+    print('Error creating new test attempt: $e');
+    rethrow;
   }
 }
 
@@ -202,61 +184,35 @@ Future<Map<String, dynamic>> exportUserResults({
   }
 }
 
-/// Fetches the highest test result (`ResultsX`) for a given `userUuid` from the Cloud Function.
-///
-/// Returns the `results_x` string on success (e.g., 'results_5').
-/// Throws an exception if the request fails or if the response is invalid.
-/// Fetches the highest test result (`ResultsX`) for a given `userUuid` from the Cloud Function.
-///
-/// Returns the `results_x` string on success (e.g., 'results_5').
-/// Throws an exception if the request fails or if the response is invalid.
 Future<String> getHighestResultCollection(String userUuid) async {
-  // Replace with your actual Cloud Function URL
-  final String cloudFunctionUrl = 'https://us-central1-personality-score.cloudfunctions.net/get_highest_test_versuch';
-
   try {
-    // Send a POST request with JSON body
-    final response = await http.post(
-      Uri.parse(cloudFunctionUrl),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'User_UUID': userUuid}),
-    );
+    // 1. Reference the user document in Firestore
+    final userDocRef = FirebaseFirestore.instance.collection('users').doc(userUuid);
 
-    // Handle CORS preflight or other non-standard responses if necessary
-    if (response.statusCode == 204) {
-      // No Content, typically for OPTIONS requests
-      return 'No Content';
+    // 2. Fetch the document
+    final userDoc = await userDocRef.get();
+
+    // 3. If no user document exists, handle accordingly (e.g., default to 0)
+    if (!userDoc.exists) {
+      // You can return a default value, throw an exception, or create a doc
+      return 'results_0'; // e.g., defaulting to 'results_0'
     }
 
-    // Check if the request was successful
-    if (response.statusCode == 200) {
-      // Parse the JSON response
-      final Map<String, dynamic> data = jsonDecode(response.body);
-
-      // Extract the 'MaxResultX' field
-      if (data.containsKey('MaxResultX')) {
-        final int maxResultX = data['MaxResultX'] as int;
-
-        // Construct the 'results_x' string
-        final String resultsX = 'results_$maxResultX';
-        return resultsX;
-      } else {
-        throw Exception("The response does not contain 'MaxResultX'.");
-      }
-    } else if (response.statusCode == 404) {
-      // Handle case where no results are found
-      final Map<String, dynamic> errorData = jsonDecode(response.body);
-      throw Exception(errorData['message'] ?? 'No results found.');
-    } else {
-      // Handle other non-success status codes
-      final Map<String, dynamic> errorData = jsonDecode(response.body);
-      throw Exception(errorData['error'] ?? 'Failed to fetch data.');
+    // 4. Retrieve the data
+    final data = userDoc.data();
+    if (data == null) {
+      return 'results_0';
     }
+
+    // 5. Extract the highest test attempt or default to 0 if not found
+    final maxResultX = data['highestTestVersuchName'] ?? 0;
+
+    // 6. Construct and return the string (e.g. 'results_3')
+    final resultsX = 'results_$maxResultX';
+    return resultsX;
+
   } catch (e) {
-    // Handle any exceptions that occur during the request
-    throw Exception('Error fetching ResultsX: $e');
+    throw Exception('Error fetching highest test result: $e');
   }
 }
 

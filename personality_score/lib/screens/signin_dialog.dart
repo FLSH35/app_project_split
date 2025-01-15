@@ -402,7 +402,7 @@ class _SignInDialogState extends State<SignInDialog> {
       try {
         setState(() => _isLoading = true);
 
-        // aktueller User (könnte anonym sein)
+        // Current user (may be anonymous)
         User? currentUser = authService.user;
 
         AuthCredential credential = EmailAuthProvider.credential(
@@ -410,12 +410,12 @@ class _SignInDialogState extends State<SignInDialog> {
           password: widget.passwordController.text,
         );
 
-        // Falls der aktuelle User anonym ist -> Link mit neuem Email/PW-Konto
         if (currentUser != null && currentUser.isAnonymous) {
+          // Link anonymous account with new email/password account
           UserCredential userCredential =
           await currentUser.linkWithCredential(credential);
 
-          // Anzeigenamen & Firestore updaten
+          // Update display name and Firestore
           await userCredential.user!.updateDisplayName(nameController.text);
           await userCredential.user!.reload();
           FirebaseFirestore.instance
@@ -428,45 +428,55 @@ class _SignInDialogState extends State<SignInDialog> {
 
           await subscribeToNewsletter(
             widget.emailController.text,
-            nameController.text, userCredential.user!.uid
+            nameController.text,
+            userCredential.user!.uid,
           );
+
+          // Ensure updated user state is reflected
+          await FirebaseAuth.instance.currentUser!.reload();
 
           setState(() {
             _isAnimating = true;
             _isLoading = false;
           });
 
+
+          // Nach kurzer Verzögerung weiterleiten
           Future.delayed(const Duration(seconds: 1), () {
             Navigator.of(context).pushReplacementNamed(widget.nextRoute);
           });
+
         } else {
-          // Normaler Registrierungsprozess
+          // Normal sign-up process
           await authService.signUpWithEmail(
             widget.emailController.text,
             widget.passwordController.text,
           );
-
-          // Anzeigenamen & Firestore updaten
+          // Update display name and Firestore
           await authService.user!.updateDisplayName(nameController.text);
-          await authService.user!.reload();
-          FirebaseFirestore.instance
-              .collection('users')
-              .doc(authService.user!.uid)
-              .set({
-            'displayName': nameController.text,
-            'email': widget.emailController.text,
-          });
+
+          // Anmelden
+          await authService.signInWithEmail(
+            widget.emailController.text,
+            widget.passwordController.text,
+          );
+
+
 
           await subscribeToNewsletter(
             widget.emailController.text,
-            nameController.text, authService.user!.uid
+            nameController.text,
+            authService.user!.uid,
           );
+
 
           setState(() {
             _isAnimating = true;
             _isLoading = false;
           });
 
+
+          // Nach kurzer Verzögerung weiterleiten
           Future.delayed(const Duration(seconds: 1), () {
             Navigator.of(context).pushReplacementNamed(widget.nextRoute);
           });
@@ -494,6 +504,7 @@ class _SignInDialogState extends State<SignInDialog> {
       _showMessage('Bitte gebe eine gültige E-Mail-Adresse ein.', Colors.red);
     }
   }
+
 
   void _continueWithoutAccount() async {
     final authService = Provider.of<AuthService>(context, listen: false);

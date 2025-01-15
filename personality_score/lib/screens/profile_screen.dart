@@ -8,7 +8,6 @@ import 'package:responsive_builder/responsive_builder.dart';
 import '../auth/auth_service.dart';
 import 'profile_desktop_layout.dart'; // Ensure this import is correct
 import 'profile_mobile_layout.dart'; // Ensure this import is correct
-import 'signin_dialog.dart'; // Ensure this import is correct
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -23,7 +22,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     initializeDateFormatting('de_DE', null);
-    _initialize(); // Initialize and enforce login
   }
 
   @override
@@ -56,46 +54,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onSaveName: updateUserName,
       ), // Desktop layout
     );
-  }
-
-  /// Initialize the screen by enforcing login and fetching data
-  Future<void> _initialize() async {
-    final authService = Provider.of<AuthService>(context, listen: false);
-
-    if (authService.user == null || authService.user?.displayName == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => SignInDialog(
-            emailController: TextEditingController(),
-            passwordController: TextEditingController(),
-            allowAnonymous: false,
-            nextRoute: '/profile',
-          ),
-        );
-
-        final updatedAuthService = Provider.of<AuthService>(context, listen: false);
-        if (updatedAuthService.user != null && updatedAuthService.user!.displayName != null) {
-          setState(() {
-            _nameController.text = updatedAuthService.user!.displayName!;
-          });
-          // Fetch data if needed
-        } else {
-          // Handle failed sign-in
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.')),
-          );
-        }
-      });
-    } else {
-      setState(() {
-        _nameController.text = authService.user!.displayName!;
-      });
-      // Fetch data if needed
-    }
   }
 
   /// Update the user's display name

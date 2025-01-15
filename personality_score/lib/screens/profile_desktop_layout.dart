@@ -162,7 +162,6 @@ class _ProfileDesktopLayoutState extends State<ProfileDesktopLayout> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
-    final user = authService.user;
 
     return Scaffold(
       backgroundColor: Color(0xFFEDE8DB),
