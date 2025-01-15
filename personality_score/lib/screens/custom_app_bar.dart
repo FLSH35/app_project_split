@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:personality_score/auth/auth_service.dart';
 import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:personality_score/screens/signin_dialog.dart'; // Import the SignInDialog
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -22,6 +21,22 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _CustomAppBarState extends State<CustomAppBar> {
   bool isLoading = false; // Loading state
 
+  // Static boolean to ensure the newsletter popup is only shown once per session
+  static bool _newsletterDialogShownThisSession = false;
+
+  // Controllers for the newsletter popup form
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Schedule a check after build is completed to possibly show the newsletter dialog.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowNewsletterDialog(context);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -29,10 +44,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
       padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
       child: Stack(
         children: [
-
-
-
-
           // First row with the buttons (Profile/Login and optionally "Beginne den Test")
           Positioned(
             right: 0,
@@ -40,40 +51,45 @@ class _CustomAppBarState extends State<CustomAppBar> {
             child: Consumer<AuthService>(
               builder: (context, authService, child) {
                 if (authService.user == null || authService.user!.displayName == null) {
-                  return Column(children: [_buildLoginButton(), if (authService.user == null || authService.user!.displayName == null)
-                    isLoading
-                        ? SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
-                        strokeWidth: 2.0,
-                      ),
-                    )
-                        : ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFCB9935),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                  return Column(
+                    children: [
+                      _buildLoginButton(),
+                      if (authService.user == null || authService.user!.displayName == null)
+                        isLoading
+                            ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+                            strokeWidth: 2.0,
+                          ),
+                        )
+                            : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFCB9935),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                            ),
+                          ),
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            await handleTakeTest(context);
+                            setState(() {
+                              isLoading = false;
+                            });
+                          },
+                          child: Text(
+                            'Beginne den Test',
+                            style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+                          ),
                         ),
-                      ),
-                      onPressed: isLoading
-                          ? null
-                          : () async {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        await handleTakeTest(context);
-                        setState(() {
-                          isLoading = false;
-                        });
-                      },
-                      child: Text(
-                        'Beginne den Test',
-                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
-                      ),
-                    ),],);
+                    ],
+                  );
                 }
 
                 // Use FutureBuilder to fetch `finalCharacter`
@@ -155,6 +171,97 @@ class _CustomAppBarState extends State<CustomAppBar> {
         ],
       ),
     );
+  }
+
+  // -----------------------------------------------
+  // Show the Newsletter Popup if user is logged out
+  // and if it hasn't been shown yet this session.
+  // -----------------------------------------------
+  void _maybeShowNewsletterDialog(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    // If user NOT logged in and the dialog has not been shown yet this session
+    if (authService.user == null && !_newsletterDialogShownThisSession) {
+      _newsletterDialogShownThisSession = true; // Ensure it only shows once
+      _showNewsletterDialog(context);
+    }
+  }
+
+  // --------------------------
+  // The actual popup dialog
+  // --------------------------
+  void _showNewsletterDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // Hier ein individuell gestalteter Title:
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Newsletter abonnieren'),
+              IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Trage deine Daten ein, um unseren Newsletter zu erhalten.'),
+                SizedBox(height: 20),
+                TextField(
+                  controller: _firstNameController,
+                  decoration: InputDecoration(labelText: 'Vorname'),
+                ),
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(labelText: 'E-Mail Adresse'),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+              ],
+            ),
+          ),
+          // Nur noch ein Button "Anmelden"
+          actions: [
+            TextButton(
+              child: Text('Anmelden'),
+              onPressed: () async {
+                // Hier die Funktion, die am Ende abonniert (trotz Button "Anmelden")
+                await subscribeToNewsletter(
+                  _emailController.text,
+                  _firstNameController.text,
+                  'no-user-logged-in', // oder eine andere Logik
+                );
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ------------------------------------------------
+  // Example function for handling subscription
+  // ------------------------------------------------
+  Future<void> subscribeToNewsletter(String email, String firstName, String userId) async {
+    // Customize this to your needs: Firestore, external API call, etc.
+    try {
+      await FirebaseFirestore.instance.collection('newsletter_subscriptions').add({
+        'email': email,
+        'firstName': firstName,
+        'userId': userId,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      print('Newsletter subscription successful');
+    } catch (e) {
+      print('Error subscribing to newsletter: $e');
+    }
   }
 
   Widget _buildLoginButton() {

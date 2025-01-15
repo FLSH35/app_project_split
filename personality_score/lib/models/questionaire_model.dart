@@ -695,11 +695,12 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // Code excerpt for the email subscription flow
                                 if ((user == null || user.displayName == null) && !isSubscribed) ...[
                                   Icon(Icons.lock, size: 50, color: Colors.grey),
                                   SizedBox(height: 10),
                                   SelectableText(
-                                    "Ergebnis gesperrt. Melde dich an, um es zu sehen.",
+                                    "Dein Testergebnis ist bereit! Melde dich an oder gib deine Daten ein, um es zu erhalten.",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.black,
@@ -708,35 +709,14 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                     ),
                                   ),
                                   SizedBox(height: 20),
-                                  // Option 1: Direct login
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 12.0, horizontal: 32.0),
-                                      backgroundColor: Color(0xFFCB9935),
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(8.0)),
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      showSignInDialog(context); // Show the SignInDialog
-                                    },
-                                    child: Text(
-                                      'Einloggen',
-                                      style: TextStyle(fontFamily: 'Roboto'),
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  // Option 2: Enter email address
                                   SelectableText(
-                                    "Ohne Login. Gebe jetzt deinen Namen und deine Email an, um das Testergebnis freizuschalten.",
+                                    "Wichtig: Bitte gib deine korrekte E-Mail-Adresse ein. Du erhältst eine Bestätigungsmail, mit der du deine E-Mail-Adresse verifizieren musst, bevor wir dir dein Ergebnis senden.",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Colors.black,
+                                      color: Colors.redAccent,
                                       fontFamily: 'Roboto',
-                                      fontSize: 16,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   SizedBox(height: 10),
@@ -745,8 +725,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                     decoration: InputDecoration(
                                       labelText: 'Dein Vorname',
                                       border: OutlineInputBorder(),
-                                      contentPadding:
-                                      EdgeInsets.symmetric(horizontal: 10),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
                                     ),
                                   ),
                                   SizedBox(height: 10),
@@ -755,72 +734,84 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
                                     decoration: InputDecoration(
                                       labelText: 'E-Mail-Adresse eingeben',
                                       border: OutlineInputBorder(),
-                                      contentPadding:
-                                      EdgeInsets.symmetric(horizontal: 10),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                                      hintText: 'z.B. max.mustermann@example.com',
                                     ),
+                                    keyboardType: TextInputType.emailAddress,
                                   ),
                                   SizedBox(height: 10),
                                   ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 12.0, horizontal: 32.0),
+                                      padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
                                       backgroundColor: Color(0xFFCB9935),
                                       foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(8.0)),
+                                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
                                       ),
                                     ),
                                     onPressed: () async {
                                       if (emailController.text.isNotEmpty &&
                                           isValidEmail(emailController.text) &&
                                           nameController.text.isNotEmpty) {
-                                        setState(() {
-                                          isSubscribed = true;
-                                          showContent =
-                                          true; // Update to show subscribed content
-
-                                        });
-
                                         try {
-                                          // Newsletter subscription (call Cloud Function)
-                                          final Uri cloudFunctionUrl = Uri.parse(
-                                            'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter',
+                                          await subscribeToNewsletter2(
+                                            emailController.text,
+                                            nameController.text,
+                                            user?.uid ?? '',
+                                            combinedTotalScore.toString(),
+                                            finalCharacter,
+                                            finalCharacterDescription,
                                           );
+                                          setState(() {
+                                            isSubscribed = true;
+                                          });
 
-                                          final response = await http.get(
-                                            cloudFunctionUrl.replace(
-                                              queryParameters: {
-                                                'email': emailController.text,
-                                                'first_name':
-                                                nameController.text,
-                                              },
-                                            ),
+                                          // Erfolgsmeldung anzeigen
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: Text('E-Mail-Bestätigung erforderlich'),
+                                                content: Text(
+                                                  'Wir haben dir eine Bestätigungsmail an ${emailController.text} geschickt. Bitte überprüfe dein Postfach und bestätige deine E-Mail-Adresse, um dein Ergebnis zu erhalten.',
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop(); // Schließt den Dialog
+                                                      Navigator.of(context).pushNamed('/home'); // Zur Startseite
+                                                    },
+                                                    child: Text('Okay'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
                                           );
-
-                                          if (response.statusCode == 200) {
-                                            print(
-                                                'Newsletter erfolgreich abonniert!');
-                                          } else {
-                                            print(
-                                                'Fehler beim Abonnieren des Newsletters: ${response.body}');
-                                          }
                                         } catch (e) {
-                                          // Netzwerk- oder Serverfehler
                                           print('Ein Fehler ist aufgetreten: $e');
+                                          showErrorMessage(
+                                            context,
+                                            'Ein Fehler ist aufgetreten. Bitte überprüfe deine Internetverbindung und versuche es erneut.',
+                                          );
                                         }
                                       } else {
-                                        // Ungültige Eingaben
-                                        print(
-                                            'Bitte gebe eine gültige E-Mail-Adresse und deinen Vornamen ein.');
+                                        // Eingabefehler melden
+                                        showErrorMessage(
+                                          context,
+                                          'Bitte gib eine gültige E-Mail-Adresse und deinen Vornamen ein.',
+                                        );
                                       }
                                     },
                                     child: Text(
-                                      'Ergebnis ansehen',
+                                      'E-Mail-Bestätigung senden',
                                       style: TextStyle(fontFamily: 'Roboto'),
                                     ),
-                                  )
-                                ] else ...[
+                                  ),
+                                ]
+
+
+                                else ...[
                                   // Content for logged-in users
                                   SelectableText(
                                     "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
@@ -1242,6 +1233,34 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     }
   }
 
+  void showErrorMessage(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Fehler',
+            style: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            message,
+            style: TextStyle(fontFamily: 'Roboto'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'OK',
+                style: TextStyle(color: Color(0xFFCB9935)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 
 }

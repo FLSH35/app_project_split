@@ -6,6 +6,8 @@ import 'package:personality_score/helper_functions/questionnaire_helpers.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../helper_functions/endpoints.dart';
+
 class SignInDialog extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -35,6 +37,7 @@ class _SignInDialogState extends State<SignInDialog> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
+
       onWillPop: () async => false, // Schließen via Back-Button verhindern
       child: Dialog(
         shape: RoundedRectangleBorder(
@@ -160,12 +163,12 @@ class _SignInDialogState extends State<SignInDialog> {
           ),
         const SizedBox(height: 20),
         ElevatedButton(
-    style : ElevatedButton.styleFrom(
-    backgroundColor: Colors.black,
-    side: BorderSide(color: Color(0xFFCB9935)),
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(8.0)),
-    ),),
+          style : ElevatedButton.styleFrom(
+          backgroundColor: Colors.black,
+          side: BorderSide(color: Color(0xFFCB9935)),
+          shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          ),),
           onPressed: () {
             setState(() {
               _isSignUpMode = !_isSignUpMode;
@@ -425,7 +428,7 @@ class _SignInDialogState extends State<SignInDialog> {
 
           await subscribeToNewsletter(
             widget.emailController.text,
-            nameController.text,
+            nameController.text, userCredential.user!.uid
           );
 
           setState(() {
@@ -456,7 +459,7 @@ class _SignInDialogState extends State<SignInDialog> {
 
           await subscribeToNewsletter(
             widget.emailController.text,
-            nameController.text,
+            nameController.text, authService.user!.uid
           );
 
           setState(() {
@@ -599,26 +602,5 @@ class _SignInDialogState extends State<SignInDialog> {
     return resultsCollections;
   }
 
-  Future<void> subscribeToNewsletter(String email, String firstName) async {
-    try {
-      final Uri cloudFunctionUrl = Uri.parse(
-        'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter',
-      );
 
-      final response = await http.get(
-        cloudFunctionUrl.replace(queryParameters: {
-          'email': email,
-          'first_name': firstName,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        print('Newsletter erfolgreich abonniert!');
-      } else {
-        print('Fehler beim Abonnieren des Newsletters: ${response.body}');
-      }
-    } catch (e) {
-      print('Ein Fehler ist aufgetreten: $e');
-    }
-  }
 }

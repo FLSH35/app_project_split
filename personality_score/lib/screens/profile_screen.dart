@@ -6,7 +6,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import '../auth/auth_service.dart';
-import '../models/newsletter_service.dart';
 import 'profile_desktop_layout.dart'; // Ensure this import is correct
 import 'profile_mobile_layout.dart'; // Ensure this import is correct
 import 'signin_dialog.dart'; // Ensure this import is correct

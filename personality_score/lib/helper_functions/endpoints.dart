@@ -392,7 +392,7 @@ Future<void> updateUserFirestore({
       'user-uuid': userUuid,
       if (currentFinalCharacter != null) 'currentFinalCharacter': currentFinalCharacter,
       if (currentCompletionDate != null) 'currentCompletionDate': currentCompletionDate,
-      if (currentCombinedTotalScore != null) 'currentCombinedTotalScore': currentCombinedTotalScore,
+      'currentCombinedTotalScore': currentCombinedTotalScore,
       if (currentFinalCharacterDescription != null) 'currentFinalCharakterDescription': currentFinalCharacterDescription,
     };
 
@@ -415,5 +415,68 @@ Future<void> updateUserFirestore({
     }
   } catch (e) {
     print('An exception occurred: $e');
+  }
+}
+
+Future<void> subscribeToNewsletter(String email, String firstName, String userId) async {
+  try {
+    final Uri cloudFunctionUrl = Uri.parse(
+      'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter',
+    );
+
+    final response = await http.get(
+      cloudFunctionUrl.replace(queryParameters: {
+        'email': email,
+        'first_name': firstName,
+        'user_id': userId, // user_id als String
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Newsletter erfolgreich abonniert!');
+    } else {
+      print('Fehler beim Abonnieren des Newsletters: ${response.body}');
+    }
+  } catch (e) {
+    print('Ein Fehler ist aufgetreten: $e');
+  }
+}
+
+
+Future<void> subscribeToNewsletter2(
+    String email,
+    String firstName,
+    String userId,
+    String combinedTotalScore,
+    String finalCharacter,
+    String finalCharacterDescription
+    ) async {
+  try {
+    final Uri cloudFunctionUrl = Uri.parse(
+      'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter2',
+    );
+
+    // Query-Parameter erstellen, einschließlich optionaler Felder
+    final queryParams = {
+      'email': email,
+      'first_name': firstName,
+      'user_id': userId, // Pflichtparameter
+      'combinedTotalScore': combinedTotalScore,
+      'finalCharacter': finalCharacter,
+      'finalCharacterDescription': finalCharacterDescription,
+    };
+
+    // HTTP GET-Request mit den Query-Parametern
+    final response = await http.get(cloudFunctionUrl.replace(queryParameters: queryParams));
+
+    // Erfolgs- oder Fehlermeldung basierend auf dem Statuscode
+    if (response.statusCode == 200) {
+      print('Newsletter erfolgreich abonniert!');
+      print('Antwort: ${response.body}');
+    } else {
+      print('Fehler beim Abonnieren des Newsletters: ${response.body}');
+    }
+  } catch (e) {
+    print('Ein Fehler ist aufgetreten: $e');
   }
 }
