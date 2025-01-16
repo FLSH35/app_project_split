@@ -197,53 +197,103 @@ class _CustomAppBarState extends State<CustomAppBar> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          // Hier ein individuell gestalteter Title:
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Newsletter abonnieren'),
-              IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Trage deine Daten ein, um unseren Newsletter zu erhalten.'),
-                SizedBox(height: 20),
-                TextField(
-                  controller: _firstNameController,
-                  decoration: InputDecoration(labelText: 'Vorname'),
-                ),
-                TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(labelText: 'E-Mail Adresse'),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-              ],
+        return Dialog(
+          backgroundColor: Color(0xFFF7F5EF),
+          insetPadding: EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 350),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          shape: BoxShape.circle,
+                        ),
+                        padding: EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.close,
+                          size: 20,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Papierflieger-Icon
+                  Icon(
+                    Icons.send,
+                    size: 50,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  SizedBox(height: 20),
+                  // Überschrift
+                  Text(
+                    'Meistere jeden Bereich deines Lebens auf dem nächsten Level',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 10),
+                  // Klare Message
+                  Text(
+                    'Ob Beruf, Finanzen oder persönliche Beziehungen – erhalte wertvolle Tipps direkt in dein Postfach. \nAbonniere jetzt unseren Newsletter!',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[700],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 20),
+                  // E-Mail Eingabefeld
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Deine E-Mail-Adresse',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  SizedBox(height: 20),
+                  // Anmelde-Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        side: BorderSide(color: Color(0xFFCB9935)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                      child: Text(
+                        'Jetzt abonnieren',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                      onPressed: () async {
+                        // Funktion zum Abonnieren des Newsletters
+                        await subscribeToNewsletter_ohneName(
+                          _emailController.text,
+                          'no-user-logged-in', // oder eine andere Logik
+                        );
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+
+                ],
+              ),
             ),
           ),
-          // Nur noch ein Button "Anmelden"
-          actions: [
-            TextButton(
-              child: Text('Anmelden'),
-              onPressed: () async {
-                // Hier die Funktion, die am Ende abonniert (trotz Button "Anmelden")
-                await subscribeToNewsletter(
-                  _emailController.text,
-                  _firstNameController.text,
-                  'no-user-logged-in', // oder eine andere Logik
-                );
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
         );
       },
     );

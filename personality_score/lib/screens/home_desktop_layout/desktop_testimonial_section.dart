@@ -1,11 +1,13 @@
-// lib/screens/desktop_layout/desktop_testimonial_section.dart
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class DesktopTestimonialSection extends StatefulWidget {
   const DesktopTestimonialSection({Key? key}) : super(key: key);
 
   @override
-  State<DesktopTestimonialSection> createState() => _DesktopTestimonialSectionState();
+  State<DesktopTestimonialSection> createState() =>
+      _DesktopTestimonialSectionState();
 }
 
 class _DesktopTestimonialSectionState extends State<DesktopTestimonialSection> {
@@ -13,22 +15,26 @@ class _DesktopTestimonialSectionState extends State<DesktopTestimonialSection> {
   late int selectedIndex;
 
   int initialPage = 0;
+
   final List<Map<String, String>> testimonials = [
     {
       "name": "Andrés",
-      "text": "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
+      "text":
+      "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
       "image": "assets/testimonials/Andres.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Jana",
-      "text": "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
+      "text":
+      "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
       "image": "assets/testimonials/Jana.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Christoph",
-      "text": "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
+      "text":
+      "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
       "image": "assets/testimonials/Christoph.jpg",
       "personalityType": "Individual",
     },
@@ -49,18 +55,39 @@ class _DesktopTestimonialSectionState extends State<DesktopTestimonialSection> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(
-      initialPage: testimonials.length * 1000,
-      viewportFraction: 0.4,
-    );
-
-    // Set initialPage to a large value to simulate infinite scrolling
+    // Set initialPage to a large value to simulieren "endloses" Blättern
     initialPage = testimonials.length * 1000;
     selectedIndex = initialPage % testimonials.length;
+
     _pageController = PageController(
       initialPage: initialPage,
-      viewportFraction: 0.4,
+      // Wenn du mehr oder weniger Karten auf einmal zeigen willst,
+      // passe die viewportFraction an. 0.4 ~ ca. 2-3 Karten
+      viewportFraction:   0.2  ,
     );
+  }
+
+  double mapWidthToValue() {
+    const double stepValue = 0.2;
+    const int steps = 5;
+    double currentWidth = MediaQuery.of(context).size.width;
+    double idealWidth = 2560; // Beispiel für eine 27-Zoll-Bildschirmbreite in Pixeln
+    // Berechne die Schrittgröße
+    double stepSize = idealWidth / steps;
+
+    // Berechne die aktuelle Schrittzahl
+    int stepNumber = (currentWidth / stepSize).floor();
+
+    // Wenn es einen Rest gibt, erhöhe die Schrittzahl um 1
+    if (currentWidth % stepSize != 0 && stepNumber < steps) {
+      stepNumber += 1;
+    }
+
+    // Stelle sicher, dass die Schrittzahl innerhalb des gültigen Bereichs liegt
+    stepNumber = stepNumber.clamp(1, steps);
+
+    // Mappe die Schrittzahl auf den entsprechenden Wert
+    return stepValue * stepNumber;
   }
 
   @override
@@ -69,168 +96,206 @@ class _DesktopTestimonialSectionState extends State<DesktopTestimonialSection> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-
-        return Container(
-          padding: EdgeInsets.all(16.0),
-          color: Color(0xFFF7F5EF),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Was unsere Nutzer sagen",
-                style: TextStyle(
-                  fontSize: 28, // Larger font size for the section title
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Roboto',
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                height: 450, // Adjust height based on design
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    PageView.builder(
-                      controller: _pageController,
-                      onPageChanged: (index) {
-                        setState(() {
-                          // Update selectedIndex using modulo to wrap around
-                          selectedIndex = index % testimonials.length;
-                        });
-                      },
-                      // Set itemCount to null for infinite scrolling
-                      itemBuilder: (context, index) {
-                        // Adjust index to wrap around using modulo
-                        int adjustedIndex = index % testimonials.length;
-                        return Align(
-                          alignment: Alignment.center,
-                          child: _buildTestimonialCard(
-                              testimonials[adjustedIndex]['name']!,
-                              testimonials[adjustedIndex]['text']!,
-                              testimonials[adjustedIndex]['personalityType']!,
-                              testimonials[adjustedIndex]['image']!
-
-                          ),
-                        );
-                      },
-                    ),
-                    Positioned(
-                      left: 0,
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios),
-                        onPressed: () {
-                          if (_pageController.hasClients) {
-                            _pageController.previousPage(
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_forward_ios),
-                        onPressed: () {
-                          if (_pageController.hasClients) {
-                            _pageController.nextPage(
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildTestimonialCard(
       String name,
       String text,
       String personalityType,
       String imagePath,
       ) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    return _HoverableTestimonialCard(
+      name: name,
+      text: text,
+      personalityType: personalityType,
+      imagePath: imagePath,
+    );
+  }
 
-    // Dynamische Größen basierend auf der Bildschirmgröße
-    double cardWidth = screenWidth *0.25; // 25% der Bildschirmbreite
-    double imageSize = (cardWidth * 0.4); // 40% der Card-Breite, 25% kleiner
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      color: const Color(0xFFF7F5EF),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            "WAS UNSERE NUTZER SAGEN",
+            style: TextStyle(
+              fontSize: 22,
+              fontFamily: 'Roboto',
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 450, // Höhe entsprechend deinem Design
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // PageView zum Blättern durch Testimonials
+                PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      selectedIndex = index % testimonials.length;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    int adjustedIndex = index % testimonials.length;
+                    return Align(
+                      alignment: Alignment.center,
+                      child: _buildTestimonialCard(
+                        testimonials[adjustedIndex]['name']!,
+                        testimonials[adjustedIndex]['text']!,
+                        testimonials[adjustedIndex]['personalityType']!,
+                        testimonials[adjustedIndex]['image']!,
+                      ),
+                    );
+                  },
+                ),
+                // Pfeil nach links
+                Positioned(
+                  left: 20, // ein wenig nach innen gerückt
+                  child: IconButton(
+                    iconSize: 100, // größerer Button
+                    icon: const Icon(Icons.arrow_back_ios, size: 48),
+                    splashRadius: 28, // Klick-Fläche bei Bedarf anpassen
+                    onPressed: () {
+                      if (_pageController.hasClients) {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                  ),
+                ),
+                // Pfeil nach rechts
+                Positioned(
+                  right: 20, // ein wenig nach innen gerückt
+                  child: IconButton(
+                    iconSize: 48,
+                    icon: const Icon(Icons.arrow_forward_ios, size: 48),
+                    splashRadius: 28,
+                    onPressed: () {
+                      if (_pageController.hasClients) {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
 
-    return SizedBox(
-      width: cardWidth,
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.0),
+///
+/// Dieses Widget kümmert sich um den Hover-Effekt.
+///
+class _HoverableTestimonialCard extends StatefulWidget {
+  final String name;
+  final String text;
+  final String personalityType;
+  final String imagePath;
+
+  const _HoverableTestimonialCard({
+    Key? key,
+    required this.name,
+    required this.text,
+    required this.personalityType,
+    required this.imagePath,
+  }) : super(key: key);
+
+  @override
+  State<_HoverableTestimonialCard> createState() =>
+      _HoverableTestimonialCardState();
+}
+
+class _HoverableTestimonialCardState extends State<_HoverableTestimonialCard> {
+  bool _isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: _isHovering ? screenHeight * 0.6 : screenHeight * 0.5,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(color: Colors.grey.shade300, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 5,
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
             ),
           ],
+          image: DecorationImage(
+            image: AssetImage(widget.imagePath),
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Stack(
           children: [
-            SizedBox(height: 15),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(imageSize / 2),
-              child: Image.asset(
-                imagePath,
-                width: imageSize, // Verkleinertes Bild
-                height: imageSize,
-                fit: BoxFit.cover,
-              ),
-            ),
-            SizedBox(height: 6),
-            Text(
-              name,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: screenHeight * 0.01875 * 1.35, // 25% größere Schriftgröße
-                fontFamily: 'Roboto',
-                color: Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 3),
-            Text(
-              personalityType,
-              style: TextStyle(
-                fontSize: screenHeight * 0.0125 * 1.35, // 25% größere Schriftgröße
-                fontFamily: 'Roboto',
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: screenHeight * 0.01 * 1.4, // 25% größere Schriftgröße
-                  fontFamily: 'Roboto',
-                  color: Colors.grey[800],
+            // Gray box at the bottom
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: _isHovering ? 450 * 1 : 450 * 0.5,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                color: Colors.grey.withOpacity(0.6),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto',
+                        color: Colors.black,
+                        fontSize: screenHeight * 0.026,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      widget.personalityType,
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.023,
+                        fontFamily: 'Roboto',
+                        color: Colors.grey[900],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.text,
+                      style: TextStyle(
+                        fontSize: _isHovering? screenHeight * 0.022 : screenHeight * 0.016,
+                        fontFamily: 'Roboto',
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 4,
+                      overflow: TextOverflow.clip,
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ],

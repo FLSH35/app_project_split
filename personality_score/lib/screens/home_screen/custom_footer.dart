@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 class CustomFooter extends StatelessWidget {
   @override
@@ -18,8 +17,8 @@ class CustomFooter extends StatelessWidget {
                   Navigator.of(context).pushNamed('/impressum');
                 },
                 child: Text(
-                  'Impressum',
-                  style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
+                  'IMPRESSUM',
+                  style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Roboto'),
                 ),
               ),
             ],
