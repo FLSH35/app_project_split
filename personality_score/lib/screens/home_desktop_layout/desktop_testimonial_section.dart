@@ -234,10 +234,10 @@ class _HoverableTestimonialCardState extends State<_HoverableTestimonialCard> {
         duration: const Duration(milliseconds: 300),
         height: _isHovering ? screenHeight * 0.6 : screenHeight * 0.5,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300, width: 1),
+          border: Border.all(color: Colors.white, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.white.withOpacity(0.4),
               spreadRadius: 1,
               blurRadius: 3,
             ),
@@ -250,7 +250,6 @@ class _HoverableTestimonialCardState extends State<_HoverableTestimonialCard> {
         ),
         child: Stack(
           children: [
-            // Gray box at the bottom
             Positioned(
               left: 0,
               right: 0,
@@ -259,7 +258,7 @@ class _HoverableTestimonialCardState extends State<_HoverableTestimonialCard> {
                 duration: const Duration(milliseconds: 300),
                 height: _isHovering ? 450 * 1 : 450 * 0.5,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                color: Colors.grey.withOpacity(0.6),
+                color: Colors.white.withOpacity(0.6),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
