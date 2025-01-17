@@ -420,6 +420,31 @@ Future<void> subscribeToNewsletter_ohneName(String email, String userId) async {
   }
 }
 
+Future<void> subscribeToNewsletter_competenceScore(String email, String userId, int competenceScore, String firstName) async {
+  try {
+    final Uri cloudFunctionUrl = Uri.parse(
+      'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter2-1',
+    );
+
+    final response = await http.get(
+      cloudFunctionUrl.replace(queryParameters: {
+        'email': email,
+        'user_id': userId, // user_id als String
+        'competenceScore': competenceScore.toString(),
+        'first_name': firstName
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Newsletter erfolgreich abonniert!');
+    } else {
+      print('Fehler beim Abonnieren des Newsletters: ${response.body}');
+    }
+  } catch (e) {
+    print('Ein Fehler ist aufgetreten: $e');
+  }
+}
+
 
 Future<void> subscribeToNewsletter2(
     String email,

@@ -4,6 +4,7 @@ import 'package:personality_score/screens/home_screen/personality_home_mobile.da
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:personality_score/screens/home_desktop_layout/desktop_layout.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:personality_score/screens/home_screen/testimonial_card.dart';
 import '../mobile_layout/lazy_load_image.dart';
 import '../mobile_layout/mobile_video_section1.dart';
 import '../mobile_layout/mobile_video_section2.dart';
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _tutorialKey = GlobalKey();
   bool isLoading = false; // Loading state
   bool isLoadingTest = false; // Loading state
+
   // State variables
   int currentPage = 0;
   final int questionsPerPage = 7;
@@ -32,14 +34,13 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   final Map<int, int> answers = {};
 
-  // Removed pre-initialized VideoPlayerControllers
-  // VideoPlayerController? _videoController1;
-  // VideoPlayerController? _videoController2;
-
   // Testimonial PageController
   late PageController _testimonialPageController;
   int initialTestimonialPage = 0;
   late int selectedTestimonialIndex;
+
+  // Für das “pseudo-endlose” Karussell
+  static const int infiniteItemCount = 10000;
 
   // Testimonials Data
   final List<Map<String, String>> testimonials = [
@@ -81,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Removed _initializeVideos();
     _loadTutorialQuestions();
 
     // PageController infinite scrolling
@@ -89,11 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
     selectedTestimonialIndex = initialTestimonialPage % testimonials.length;
     _testimonialPageController = PageController(
       initialPage: initialTestimonialPage,
-      viewportFraction: 0.8,
+      viewportFraction: 0.8, // Für mobile geeignet
     );
   }
-
-  // Removed _initializeVideos()
 
   Future<void> _loadTutorialQuestions() async {
     await Future.delayed(const Duration(milliseconds: 500));
@@ -104,8 +102,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    // Removed _videoController1?.dispose();
-    // Removed _videoController2?.dispose();
     _testimonialPageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -133,11 +129,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   AppBar _buildAppBar(BuildContext context) {
-    return AppBar( title: Image.asset(
-      'assets/Logo-IYC-gross.png', height: 50,
-    ),
-      backgroundColor: Color(0xFFF7F5EF),
-      iconTheme: IconThemeData(color: Colors.black),
+    return AppBar(
+      title: Image.asset(
+        'assets/Logo-IYC-gross.png',
+        height: 50,
+      ),
+      backgroundColor: const Color(0xFFF7F5EF),
+      iconTheme: const IconThemeData(color: Colors.black),
       actions: [
         Builder(
           builder: (context) => IconButton(
@@ -163,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const LazyLoadImage(
             assetPath: 'assets/ps_background_ai.jpg',
-            fit: BoxFit.cover
+            fit: BoxFit.cover,
           ),
           _buildHeaderSection(context, screenHeight, screenWidth),
           const SizedBox(height: 200),
@@ -399,9 +397,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNavigationButton(BuildContext context) {
-
     return isLoadingTest
-        ? SizedBox(
+        ? const SizedBox(
       width: 24,
       height: 24,
       child: CircularProgressIndicator(
@@ -411,9 +408,9 @@ class _HomeScreenState extends State<HomeScreen> {
     )
         : ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFFCB9935),
+        backgroundColor: const Color(0xFFCB9935),
         elevation: 0,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
       ),
@@ -428,7 +425,7 @@ class _HomeScreenState extends State<HomeScreen> {
           isLoadingTest = false;
         });
       },
-      child: Text(
+      child: const Text(
         'Weiter',
         style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 20),
       ),
@@ -455,154 +452,34 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 20),
           SizedBox(
             height: 360,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                PageView.builder(
-                  controller: _testimonialPageController,
-                  onPageChanged: (index) {
-                    if (mounted) {
-                      setState(() {
-                        selectedTestimonialIndex = index % testimonials.length;
-                      });
-                    }
-                  },
-                  itemBuilder: (context, index) {
-                    int adjustedIndex = index % testimonials.length;
-                    bool isSelected = adjustedIndex == selectedTestimonialIndex;
-                    return _buildTestimonialCard(
-                        testimonials[adjustedIndex]['name'] ?? '',
-                        testimonials[adjustedIndex]['text'] ?? '',
-                        testimonials[adjustedIndex]['personalityType'] ?? '',
-                        testimonials[adjustedIndex]['image'] ?? '',
-                        isSelected,
-                    );
-                  },
-                ),
-                Positioned(
-                  left: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: () {
-                      if (_testimonialPageController.hasClients) {
-                        _testimonialPageController.previousPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    },
-                    tooltip: 'Vorherige Bewertung',
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios),
-                    onPressed: () {
-                      if (_testimonialPageController.hasClients) {
-                        _testimonialPageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    },
-                    tooltip: 'Nächste Bewertung',
-                  ),
-                ),
-              ],
+            child: PageView.builder(
+              controller: _testimonialPageController,
+              // Wir verwenden infiniteItemCount für “endloses” Blättern
+              itemCount: infiniteItemCount,
+              onPageChanged: (index) {
+                if (mounted) {
+                  setState(() {
+                    selectedTestimonialIndex = index % testimonials.length;
+                  });
+                }
+              },
+              itemBuilder: (context, index) {
+                // Tatsächlicher Index in der Testimonials-Liste
+                int adjustedIndex = index % testimonials.length;
+                bool isSelected = adjustedIndex == selectedTestimonialIndex;
+
+                return TestimonialCard(
+                  name: testimonials[adjustedIndex]['name'] ?? '',
+                  text: testimonials[adjustedIndex]['text'] ?? '',
+                  personalityType: testimonials[adjustedIndex]['personalityType'] ?? '',
+                  imagePath: testimonials[adjustedIndex]['image'] ?? '',
+                  isSelected: isSelected,
+                );
+              },
             ),
           ),
         ],
       ),
     );
   }
-
-  Widget _buildTestimonialCard(
-      String name,
-      String text,
-      String personalityType,
-      String imagePath,
-      bool isSelected,
-      ) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double nameFontSize = 24;
-    double typeFontSize = 20;
-    double textFontSize = 18;
-    double imageSize = screenWidth * 0.3;
-
-    return Container(
-      width: screenWidth * 0.7,
-      margin: const EdgeInsets.symmetric(horizontal: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 15),
-          Row(
-            children: [
-              const SizedBox(width: 15),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(imageSize / 2),
-                child: LazyLoadImage(
-                  assetPath: imagePath,
-                  width: imageSize,
-                  height: imageSize,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              SizedBox(width: screenWidth * 0.05),
-              Column(
-                children: [
-                  const SizedBox(height: 5),
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: nameFontSize,
-                      fontFamily: 'Roboto',
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    personalityType,
-                    style: TextStyle(
-                      fontSize: typeFontSize,
-                      fontFamily: 'Roboto',
-                      color: Colors.grey[600],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 25),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: textFontSize,
-                fontFamily: 'Roboto',
-                color: Colors.grey[800],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 }

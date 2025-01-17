@@ -37,7 +37,9 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       // Ist noch niemand eingeloggt?
       if (authService.user == null) {
         // Sign-In-Dialog anzeigen
-        await showSignInDialog(context);
+
+
+        await authService.signInAnonymously();
 
         // Prüfen, ob sich jemand eingeloggt hat; wenn nein, Seite schließen:
         if (authService.user == null) {
@@ -56,7 +58,6 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       await _loadQuestions();
     });
   }
-
   /// Lädt die Fragen (z.B. aus Firestore).
   Future<void> _loadQuestions() async {
     final model = Provider.of<QuestionnaireModel>(context, listen: false);
@@ -85,25 +86,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     }
   }
 
-  /// Zeigt den SignInDialog an, um sich einzuloggen.
-  Future<void> showSignInDialog(BuildContext context) async {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
 
-    await showDialog(
-      context: context,
-      builder: (context) => SignInDialog(
-        emailController: emailController,
-        passwordController: passwordController,
-        allowAnonymous: true,
-        nextRoute: '/questionnaire',
-      ),
-    );
-
-    // Nach dem Schließen des Dialogs die Controller entsorgen
-    emailController.dispose();
-    passwordController.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
