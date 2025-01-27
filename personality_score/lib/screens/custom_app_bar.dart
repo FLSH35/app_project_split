@@ -34,10 +34,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
   @override
   void initState() {
     super.initState();
-    // Schedule a check after build is completed to possibly show the newsletter dialog.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _maybeShowNewsletterDialog(context);
-    });
+
   }
 
   @override
@@ -176,128 +173,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
     );
   }
 
-  // -----------------------------------------------
-  // Show the Newsletter Popup if user is logged out
-  // and if it hasn't been shown yet this session.
-  // -----------------------------------------------
-  void _maybeShowNewsletterDialog(BuildContext context) {
-    final authService = Provider.of<AuthService>(context, listen: false);
-
-    // If user NOT logged in and the dialog has not been shown yet this session
-    if (authService.user == null && !_newsletterDialogShownThisSession) {
-      _newsletterDialogShownThisSession = true; // Ensure it only shows once
-      _showNewsletterDialog(context);
-    }
-  }
-
-  // --------------------------
-  // The actual popup dialog
-  // --------------------------
-  void _showNewsletterDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Color(0xFFF7F5EF),
-          insetPadding: EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 350),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          shape: BoxShape.circle,
-                        ),
-                        padding: EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.close,
-                          size: 20,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Papierflieger-Icon
-                  Icon(
-                    Icons.send,
-                    size: 50,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  SizedBox(height: 20),
-                  // Überschrift
-                  Text(
-                    'Meistere jeden Bereich deines Lebens auf dem nächsten Level',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 10),
-                  // Klare Message
-                  Text(
-                    'Ob Beruf, Finanzen oder persönliche Beziehungen – erhalte wertvolle Tipps direkt in dein Postfach. \nAbonniere jetzt unseren Newsletter!',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[700],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20),
-                  // E-Mail Eingabefeld
-                  TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Deine E-Mail-Adresse',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  SizedBox(height: 20),
-                  // Anmelde-Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        side: BorderSide(color: Color(0xFFCB9935)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        ),
-                      ),
-                      child: Text(
-                        'Jetzt abonnieren',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-                      onPressed: () async {
-                        // Funktion zum Abonnieren des Newsletters
-                        await subscribeToNewsletter_ohneName(
-                          _emailController.text,
-                          'no-user-logged-in', // oder eine andere Logik
-                        );
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
 
   Widget _buildLoginButton() {

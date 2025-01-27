@@ -61,17 +61,20 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        // initialRoute & routes come from Routes class
-        initialRoute: Routes.home,
+        // Remove initialRoute to support deep linking
+        // initialRoute: Routes.home,
         onGenerateRoute: Routes.controller,
+        // Optionally, set a fallback home
+        home: HomeScreen(),
       ),
     );
   }
 }
 
+
 class Routes {
   static const String home = '/home';
-  static const String questionnaire = '/questionnaire';
+  static const String questionnaire = '/questionnaire'; // Ensure correct spelling
   static const String profile = '/profile';
   static const String personalityTypes = '/personality_types';
   static const String impressum = '/impressum'; // New Route
@@ -86,7 +89,7 @@ class Routes {
         return MaterialPageRoute(builder: (context) => ProfileScreen());
       case personalityTypes:
         return MaterialPageRoute(builder: (context) => PersonalityTypesPage());
-      case impressum: // Handle the new route
+      case impressum:
         return MaterialPageRoute(builder: (context) => ImpressumPage());
 
       default:
