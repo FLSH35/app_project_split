@@ -27,34 +27,33 @@ class _QuestionnaireDesktopLayoutState
   void initState() {
     super.initState();
 
-    // Use addPostFrameCallback to ensure context is available
+    // Nach dem ersten Frame prüfen, ob ein User eingeloggt ist;
+    // ggf. SignIn-Dialog anzeigen und Fragen laden.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final authService = Provider.of<AuthService>(context, listen: false);
 
+      // Ist noch niemand eingeloggt?
       if (authService.user == null) {
-        // Show the sign-in dialog
-        await showSignInDialog(context);
+        // Sign-In-Dialog anzeigen
 
-        // After the dialog is closed, check if the user is authenticated
-        if (authService.user != null) {
-          setState(() {
-            _isAuthenticated = true;
-            isLoading = true; // Start loading questions
-          });
-          // Load questions after authentication
-          await _loadQuestions();
-        } else {
-          // User did not sign in; handle accordingly
-          Navigator.of(context).pop(); // Close the questionnaire screen
+
+        await authService.signInAnonymously();
+
+        // Prüfen, ob sich jemand eingeloggt hat; wenn nein, Seite schließen:
+        if (authService.user == null) {
+          Navigator.of(context).pop();
+          return; // Abbrechen
         }
-      } else {
-        // User is already authenticated
-        setState(() {
-          _isAuthenticated = true;
-          isLoading = true; // Start loading questions
-        });
-        await _loadQuestions();
       }
+
+      // Falls wir hier ankommen, ist jemand eingeloggt:
+      setState(() {
+        _isAuthenticated = true;
+        isLoading = true; // Startet das Laden der Fragen
+      });
+
+      // Fragen laden
+      await _loadQuestions();
     });
   }
 

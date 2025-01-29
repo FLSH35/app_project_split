@@ -50,6 +50,8 @@ class QuestionnaireModel with ChangeNotifier {
   List<Question> get questions => _questions;
 
   bool get isLoading => _isLoading; // Expose loading state to the UI
+
+
   int get currentQuestionIndex => _currentQuestionIndex;
 
 
@@ -74,6 +76,8 @@ class QuestionnaireModel with ChangeNotifier {
   TextEditingController nameController = TextEditingController();
 
   String? highestResultCollection = null;
+
+
 
 
   Future<void> saveProgress() async {
@@ -280,7 +284,6 @@ class QuestionnaireModel with ChangeNotifier {
   }
 
   Future<void> completeFirstTest(BuildContext context) async {
-
     User? user = _auth.currentUser;
     if (user == null) {
       throw Exception('User not authenticated');
@@ -290,7 +293,6 @@ class QuestionnaireModel with ChangeNotifier {
     await exportUserAnswers(user.uid, highestResultCollection!, _questions, _answers);
 
     _totalScore = _answers.where((a) => a != null).fold(0, (sum, a) => sum + a!);
-
 
     String message;
     List<String> teamCharacters;
@@ -320,60 +322,177 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
       nextSet = 'BewussteInkompetenz';
     }
 
+    // Controller für die E-Mail-Eingabe und den Vornamen
+    TextEditingController emailController = TextEditingController();
+    TextEditingController nameController = TextEditingController(); // Controller für den Vornamen
+    bool isSubscribed = false;
+    bool showResults = false; // New variable to control when to show results
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Color(0xFFC7C7C7), // Soft background
-          title: Text('$_totalScore von $possibleScore Punkte erreicht',
-              style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SelectableText(message +
-                    '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n'
-                    ,
-                    style: TextStyle(color: Colors.black, fontFamily: 'Roboto',
-                        fontSize: 18)),
-                SizedBox(height: 10),
-                Wrap(
-                  spacing: 10.0,
-                  runSpacing: 10.0,
-                  alignment: WrapAlignment.center,
-                  children: teamCharacters
-                      .map((character) =>
-                      Image.asset('assets/$character', width: 100, height: 100))
-                      .toList(),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Color(0xFFCB9935),
-                // Gold background for the button
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                shape: RoundedRectangleBorder( // Create square corners
-                  borderRadius: BorderRadius.all(
-                      Radius.circular(8.0)), // No rounded corners
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              backgroundColor: Color(0xFFC7C7C7), // Soft background
+              title: Text('PersonalityScore-Ergebnis',
+                  style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!isSubscribed) ...[
+                      SelectableText(
+                        "Um dein Ergebnis zu sehen, abonniere unseren Newsletter.",
+                        style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: nameController, // Vorname-Eingabefeld
+                        decoration: InputDecoration(
+                          labelText: 'Dein Vorname',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: emailController, // E-Mail-Eingabefeld
+                        decoration: InputDecoration(
+                          labelText: 'E-Mail-Adresse',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFCB9935),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        onPressed: () async {
+                          if (emailController.text.isNotEmpty &&
+                              isValidEmail(emailController.text) &&
+                              nameController.text.isNotEmpty) {
+                            try {
+                              await subscribeToNewsletter_competenceScore(
+                                emailController.text,
+                                user.uid,
+                                _totalScore,
+                                nameController.text, // Vorname wird übergeben
+                              );
+                              setState(() {
+                                isSubscribed = true;
+                              });
+                              notifyListeners(); // Notify listeners to rebuild UI
+                              // Erfolgsmeldung anzeigen
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('E-Mail-Bestätigung erforderlich'),
+                                    content: Text(
+                                      'Wir haben dir eine Bestätigungsmail an ${emailController.text} geschickt. Bitte überprüfe dein Postfach und bestätige deine E-Mail-Adresse, um dein Ergebnis zu erhalten.',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(); // Schließt den Dialog
+                                        },
+                                        child: Text('Okay'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            } catch (e) {
+                              print('Ein Fehler ist aufgetreten: $e');
+                              showErrorMessage(
+                                context,
+                                'Ein Fehler ist aufgetreten. Bitte überprüfe deine Internetverbindung und versuche es erneut.',
+                              );
+                            }
+                          } else {
+                            showErrorMessage(
+                              context,
+                              'Bitte gib eine gültige E-Mail-Adresse und deinen Vornamen ein.',
+                            );
+                          }
+                        },
+                        child: Text('Newsletter abonnieren'),
+                      ),
+                    ] else if (!showResults) ...[
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFCB9935),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        onPressed: () async {
+                          bool isEmailVerified = await isVerified(emailController.text);
+                          if (isEmailVerified) {
+                            setState(() {
+                              showResults = true;
+                            });
+                          } else {
+                            showErrorMessage(
+                              context,
+                              'Bitte bestätige deine E-Mail-Adresse, um dein Ergebnis zu sehen.',
+                            );
+                          }
+                        },
+                        child: Text('Ergebnis anzeigen'),
+                      ),
+                    ] else ...[
+                      SelectableText('$_totalScore von $possibleScore Punkte erreicht',
+                          style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18)),
+                      SizedBox(height: 10),
+                      SelectableText(message +
+                          '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n',
+                          style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18)),
+                      SizedBox(height: 10),
+                      Wrap(
+                        spacing: 10.0,
+                        runSpacing: 10.0,
+                        alignment: WrapAlignment.center,
+                        children: teamCharacters
+                            .map((character) =>
+                            Image.asset('assets/$character', width: 100, height: 100))
+                            .toList(),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-
-              onPressed: () {
-                loadQuestions(nextSet);
-                _isFirstTestCompleted = true;
-                _currentPage = 0;
-                _answers = List<int?>.filled(_questions.length, 5);
-                notifyListeners();
-                Navigator.of(context).pop();
-              },
-              child: Text('Weiter',
-                  style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
-            ),
-          ],
+              actions: [
+                if (showResults) ...[
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Color(0xFFCB9935),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    onPressed: () async {
+                      loadQuestions(nextSet);
+                      _isFirstTestCompleted = true;
+                      _currentPage = 0;
+                      _answers = List<int?>.filled(_questions.length, 5);
+                      notifyListeners();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Weiter',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
+                  ),
+                ],
+              ],
+            );
+          },
         );
       },
     );
@@ -624,10 +743,6 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     bool showContent = false; // Steuert die Sichtbarkeit der Inhalte
     bool isDialogActive = true; // Verfolgt, ob der Dialog noch geöffnet ist
 
-    // Controller für die E-Mail-Eingabe
-    TextEditingController emailController = TextEditingController();
-    TextEditingController nameController = TextEditingController(); // Added nameController
-
     // Video-Controller initialisieren
     String videoUrl;
     try {
@@ -665,356 +780,229 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: StreamBuilder<User?>(
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
-              User? user = snapshot.data;
-
-              return StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  // Start timer to show content after 14 seconds
-                  Future.delayed(Duration(seconds: 14), () {
-                    if (isDialogActive) {
-                      setState(() {
-                        showContent = true;
-                      });
-                    }
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              // Start timer to show content after 14 seconds
+              Future.delayed(Duration(seconds: 14), () {
+                if (isDialogActive) {
+                  setState(() {
+                    showContent = true;
                   });
+                }
+              });
 
-                  return Container(
-                    width: dialogWidth,
-                    height: dialogHeight,
-                    child: SingleChildScrollView(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Main content
-                          AnimatedOpacity(
-                            opacity: showContent ? 1.0 : 0.0,
-                            duration: Duration(milliseconds: 500),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Code excerpt for the email subscription flow
-                                if ((user == null || user.displayName == null) && !isSubscribed) ...[
-                                  Icon(Icons.lock, size: 50, color: Colors.grey),
-                                  SizedBox(height: 10),
-                                  SelectableText(
-                                    "Dein Testergebnis ist bereit! Melde dich an oder gib deine Daten ein, um es zu erhalten.",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Roboto',
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  SizedBox(height: 20),
-                                  SelectableText(
-                                    "Wichtig: Bitte gib deine korrekte E-Mail-Adresse ein. Du erhältst eine Bestätigungsmail, mit der du deine E-Mail-Adresse verifizieren musst, bevor wir dir dein Ergebnis senden.",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.redAccent,
-                                      fontFamily: 'Roboto',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  TextField(
-                                    controller: nameController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Dein Vorname',
-                                      border: OutlineInputBorder(),
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  TextField(
-                                    controller: emailController,
-                                    decoration: InputDecoration(
-                                      labelText: 'E-Mail-Adresse eingeben',
-                                      border: OutlineInputBorder(),
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                                      hintText: 'z.B. max.mustermann@example.com',
-                                    ),
-                                    keyboardType: TextInputType.emailAddress,
-                                  ),
-                                  SizedBox(height: 10),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
-                                      backgroundColor: Color(0xFFCB9935),
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      if (emailController.text.isNotEmpty &&
-                                          isValidEmail(emailController.text) &&
-                                          nameController.text.isNotEmpty) {
-                                        try {
-                                          await subscribeToNewsletter2(
-                                            emailController.text,
-                                            nameController.text,
-                                            user?.uid ?? '',
-                                            combinedTotalScore.toString(),
-                                            finalCharacter,
-                                            finalCharacterDescription,
-                                          );
-                                          setState(() {
-                                            isSubscribed = true;
-                                          });
-
-                                          // Erfolgsmeldung anzeigen
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: Text('E-Mail-Bestätigung erforderlich'),
-                                                content: Text(
-                                                  'Wir haben dir eine Bestätigungsmail an ${emailController.text} geschickt. Bitte überprüfe dein Postfach und bestätige deine E-Mail-Adresse, um dein Ergebnis zu erhalten.',
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop(); // Schließt den Dialog
-                                                      Navigator.of(context).pushNamed('/home'); // Zur Startseite
-                                                    },
-                                                    child: Text('Okay'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        } catch (e) {
-                                          print('Ein Fehler ist aufgetreten: $e');
-                                          showErrorMessage(
-                                            context,
-                                            'Ein Fehler ist aufgetreten. Bitte überprüfe deine Internetverbindung und versuche es erneut.',
-                                          );
-                                        }
-                                      } else {
-                                        // Eingabefehler melden
-                                        showErrorMessage(
-                                          context,
-                                          'Bitte gib eine gültige E-Mail-Adresse und deinen Vornamen ein.',
-                                        );
-                                      }
-                                    },
-                                    child: Text(
-                                      'E-Mail-Bestätigung senden',
-                                      style: TextStyle(fontFamily: 'Roboto'),
-                                    ),
-                                  ),
-                                ]
-
-
-                                else ...[
-                                  // Content for logged-in users
-                                  SelectableText(
-                                    "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Roboto',
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Image.asset(
-                                    'assets/$finalCharacter.webp',
-                                    width: 200,
-                                    height: 200,
-                                  ),
-                                  SizedBox(height: 10),
-                                  // Expandable description
-                                  isExpanded
-                                      ? Container(
-                                    height: 150,
-                                    child: SingleChildScrollView(
-                                      child: SelectableText(
-                                        finalCharacterDescription,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: 'Roboto',
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                      : SelectableText(
-                                    finalCharacterDescription
-                                        .split(' ')
-                                        .take(15)
-                                        .join(' ') +
-                                        '...',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Roboto',
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 12.0, horizontal: 32.0),
-                                      backgroundColor: isExpanded
-                                          ? Colors.black
-                                          : Color(0xFFCB9935),
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(8.0)),
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        isExpanded = !isExpanded;
-                                      });
-                                    },
-                                    child: Text(
-                                      isExpanded ? 'Lese weniger' : 'Lese mehr',
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    'Wie sehr identifizierst du dich mit diesem Ergebnis?',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Roboto',
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  RatingBar.builder(
-                                    initialRating: rating,
-                                    minRating: 1,
-                                    direction: Axis.horizontal,
-                                    allowHalfRating: false,
-                                    itemCount: 5,
-                                    itemPadding:
-                                    EdgeInsets.symmetric(horizontal: 4.0),
-                                    itemBuilder: (context, _) => Icon(
-                                      Icons.star,
-                                      color: Colors.amber,
-                                    ),
-                                    onRatingUpdate: (newRating) {
-                                      setState(() {
-                                        rating = newRating;
-                                      });
-                                    },
-                                  ),
-
-
-                                ],
-                                SizedBox(height: 20),
-                                TextButton(
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Color(0xFFCB9935),
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(8.0)),
-                                    ),
-                                  ),
-                                  onPressed: () async {
-                                    // Save rating
-                                    await saveUserRating(rating);
-                                    Navigator.of(context).pop();
-                                    _videoController
-                                        ?.dispose(); // Release video controller
-
-                                    Navigator.of(context).pushNamed('/home');
-                                  },
-                                  child: Text(
-                                    'Abschließen',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto'),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Video Overlay
-                          IgnorePointer(
-                            ignoring: true, // Prevent interaction with the video
-                            child: AnimatedOpacity(
-                              opacity: showContent ? 0.0 : 1.0,
-                              duration: Duration(milliseconds: 500),
-                              child: Container(
-                                width: dialogWidth,
-                                height: dialogHeight * 0.9,
-                                color: Colors.transparent,
-                                child: _videoController != null &&
-                                    _videoController!.value.isInitialized
-                                    ? ClipRect(
-                                  child: OverflowBox(
-                                    alignment: Alignment.center,
-                                    minWidth: 0.0,
-                                    minHeight: 0.0,
-                                    maxWidth: double.infinity,
-                                    maxHeight: double.infinity,
-                                    child: FittedBox(
-                                      fit: BoxFit.cover,
-                                      child: SizedBox(
-                                        width: _videoController!
-                                            .value.size.width,
-                                        height: _videoController!
-                                            .value.size.height,
-                                        child:
-                                        VideoPlayer(_videoController!),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                    : SizedBox(), // Or any placeholder widget
+              return Container(
+                width: dialogWidth,
+                height: dialogHeight,
+                child: SingleChildScrollView(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Main content
+                      AnimatedOpacity(
+                        opacity: showContent ? 1.0 : 0.0,
+                        duration: Duration(milliseconds: 500),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Content for logged-in users
+                            SelectableText(
+                              "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Roboto',
                               ),
                             ),
-                          ),
-
-                          // Skip Button
-                          Positioned(
-                            bottom: 10,
-                            right: 10,
-                            child: AnimatedOpacity(
-                              opacity: showContent ? 0.0 : 1.0,
-                              duration: Duration(milliseconds: 500),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.all(12.0),
-                                  backgroundColor: Colors.red,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
+                            SizedBox(height: 10),
+                            Image.asset(
+                              'assets/$finalCharacter.webp',
+                              width: 200,
+                              height: 200,
+                            ),
+                            SizedBox(height: 10),
+                            // Expandable description
+                            isExpanded
+                                ? Container(
+                              height: 150,
+                              child: SingleChildScrollView(
+                                child: SelectableText(
+                                  finalCharacterDescription,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Roboto',
+                                    fontSize: 18,
                                   ),
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    showContent = true; // Show content
-                                  });
-                                  _videoController?.pause(); // Pause the video
-                                  _videoController?.setVolume(0); // Mute the video sound
-                                  Future.delayed(Duration(milliseconds: 500), () {
-                                    _videoController
-                                        ?.dispose(); // Dispose of the video completely
-                                    _videoController = null;
-                                  });
-                                },
-                                child: Icon(
-                                  Icons.arrow_forward, // Arrow icon instead of text
-                                  color: Colors.white,
-                                ),
+                              ),
+                            )
+                                : SelectableText(
+                              finalCharacterDescription
+                                  .split(' ')
+                                  .take(15)
+                                  .join(' ') +
+                                  '...',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Roboto',
+                                fontSize: 18,
                               ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 12.0, horizontal: 32.0),
+                                backgroundColor: isExpanded
+                                    ? Colors.black
+                                    : Color(0xFFCB9935),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(8.0)),
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isExpanded = !isExpanded;
+                                });
+                              },
+                              child: Text(
+                                isExpanded ? 'Lese weniger' : 'Lese mehr',
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Wie sehr identifizierst du dich mit diesem Ergebnis?',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            RatingBar.builder(
+                              initialRating: rating,
+                              minRating: 1,
+                              direction: Axis.horizontal,
+                              allowHalfRating: false,
+                              itemCount: 5,
+                              itemPadding:
+                              EdgeInsets.symmetric(horizontal: 4.0),
+                              itemBuilder: (context, _) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                              onRatingUpdate: (newRating) {
+                                setState(() {
+                                  rating = newRating;
+                                });
+                              },
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor: Color(0xFFCB9935),
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(8.0)),
+                                ),
+                              ),
+                              onPressed: () async {
+                                // Save rating
+                                await saveUserRating(rating);
+                                Navigator.of(context).pop();
+                                _videoController
+                                    ?.dispose(); // Release video controller
+
+                                Navigator.of(context).pushNamed('/home');
+                              },
+                              child: Text(
+                                'Abschließen',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Roboto'),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                      // Video Overlay
+                      IgnorePointer(
+                        ignoring: true, // Prevent interaction with the video
+                        child: AnimatedOpacity(
+                          opacity: showContent ? 0.0 : 1.0,
+                          duration: Duration(milliseconds: 500),
+                          child: Container(
+                            width: dialogWidth,
+                            height: dialogHeight * 0.9,
+                            color: Colors.transparent,
+                            child: _videoController != null &&
+                                _videoController!.value.isInitialized
+                                ? ClipRect(
+                              child: OverflowBox(
+                                alignment: Alignment.center,
+                                minWidth: 0.0,
+                                minHeight: 0.0,
+                                maxWidth: double.infinity,
+                                maxHeight: double.infinity,
+                                child: FittedBox(
+                                  fit: BoxFit.cover,
+                                  child: SizedBox(
+                                    width: _videoController!
+                                        .value.size.width,
+                                    height: _videoController!
+                                        .value.size.height,
+                                    child:
+                                    VideoPlayer(_videoController!),
+                                  ),
+                                ),
+                              ),
+                            )
+                                : SizedBox(), // Or any placeholder widget
+                          ),
+                        ),
+                      ),
+
+                      // Skip Button
+                      Positioned(
+                        bottom: 10,
+                        right: 10,
+                        child: AnimatedOpacity(
+                          opacity: showContent ? 0.0 : 1.0,
+                          duration: Duration(milliseconds: 500),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.all(12.0),
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                showContent = true; // Show content
+                              });
+                              _videoController?.pause(); // Pause the video
+                              _videoController?.setVolume(0); // Mute the video sound
+                              Future.delayed(Duration(milliseconds: 500), () {
+                                _videoController
+                                    ?.dispose(); // Dispose of the video completely
+                                _videoController = null;
+                              });
+                            },
+                            child: Icon(
+                              Icons.arrow_forward, // Arrow icon instead of text
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           ),
@@ -1025,7 +1013,6 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
       _videoController?.dispose(); // Release video controller
     });
   }
-
 
   bool isValidEmail(String email) {
     final regex = RegExp(r'^[\w-]+@([\w-]+\.)+[\w-]{2,4}$');

@@ -8,8 +8,7 @@ import 'auth/auth_service.dart';
 import 'firebase_options.dart'; // Ensure you have this file generated
 import 'package:personality_score/screens/profile_screen.dart';
 import 'package:personality_score/models/questionaire_model.dart';
-import 'package:personality_score/screens/personality_type_screen.dart'; // Import the new screen
-
+import 'package:personality_score/screens/personality_type_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:html' as html;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -43,7 +42,7 @@ void main() async {
 
   await checkForUpdates();
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -61,40 +60,26 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        // Remove initialRoute to support deep linking
-        // initialRoute: Routes.home,
-        onGenerateRoute: Routes.controller,
-        // Optionally, set a fallback home
-        home: HomeScreen(),
+        // IMPORTANT: Do NOT specify initialRoute here.
+        // Flutter will check the browser URL and use the matching route.
+
+        // 1) Named Routes map
+        routes: {
+          // The default path: shows HomeScreen when user navigates to '/'
+          '/': (context) => HomeScreen(),
+          // You can also map /home to HomeScreen if desired
+          '/home': (context) => HomeScreen(),
+          '/questionnaire': (context) => QuestionnaireScreen(),
+          '/profile': (context) => ProfileScreen(),
+          '/personality_types': (context) => PersonalityTypesPage(),
+          '/impressum': (context) => ImpressumPage(),
+        },
+
+        // 2) Handle unknown routes or typos gracefully
+        onUnknownRoute: (settings) {
+          return MaterialPageRoute(builder: (_) => HomeScreen());
+        },
       ),
     );
-  }
-}
-
-
-class Routes {
-  static const String home = '/home';
-  static const String questionnaire = '/questionnaire'; // Ensure correct spelling
-  static const String profile = '/profile';
-  static const String personalityTypes = '/personality_types';
-  static const String impressum = '/impressum'; // New Route
-
-  static Route<dynamic> controller(RouteSettings settings) {
-    switch (settings.name) {
-      case home:
-        return MaterialPageRoute(builder: (context) => HomeScreen());
-      case questionnaire:
-        return MaterialPageRoute(builder: (context) => QuestionnaireScreen());
-      case profile:
-        return MaterialPageRoute(builder: (context) => ProfileScreen());
-      case personalityTypes:
-        return MaterialPageRoute(builder: (context) => PersonalityTypesPage());
-      case impressum:
-        return MaterialPageRoute(builder: (context) => ImpressumPage());
-
-      default:
-      // Default/Fallback Route:
-        return MaterialPageRoute(builder: (context) => HomeScreen());
-    }
   }
 }

@@ -483,3 +483,44 @@ Future<void> subscribeToNewsletter2(
     print('Ein Fehler ist aufgetreten: $e');
   }
 }
+
+Future<bool> isVerified(String email) async {
+  // URL to your cloud function, replace with the actual URL
+  final url = Uri.parse(
+    'https://us-central1-personality-score.cloudfunctions.net/check_subscription',
+  );
+
+
+  // Prepare the query parameters
+  final queryParameters = {
+    'email': email,
+    'list_id': "13",
+  };
+
+  try {
+    // Make the GET request
+    final response = await http.get(url.replace(queryParameters: queryParameters));
+
+    if (response.statusCode == 200) {
+      // Decode the JSON response
+      final Map<String, dynamic> data = json.decode(response.body);
+
+      // Check if the 'is_subscribed' key exists and return its boolean value
+      if (data.containsKey('is_subscribed')) {
+        return data['is_subscribed'] as bool;
+      } else {
+        // If 'is_subscribed' is not found, log an error or handle it appropriately
+        print('Error: Unexpected response format - missing is_subscribed field');
+        return false;
+      }
+    } else {
+      // If the response was not successful, log the error and return false
+      print('Failed to call the cloud function. Status code: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    // Handle any network or JSON decoding errors
+    print('Error calling cloud function: $e');
+    return false;
+  }
+}
