@@ -21,6 +21,8 @@ class QuestionnaireModel with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Question> _questions = [];
   int _currentQuestionIndex = 0;
+  bool _isSubscribing = false;
+  bool _isShowingResults = false;
 
   int score_factor = 0;
 
@@ -327,6 +329,8 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
     TextEditingController nameController = TextEditingController(); // Controller für den Vornamen
     bool isSubscribed = false;
     bool showResults = false; // New variable to control when to show results
+    bool _isSubscribing = false;
+    bool _isShowingResults = false;
 
     showDialog(
       context: context,
@@ -371,21 +375,22 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
-                        onPressed: () async {
-                          if (emailController.text.isNotEmpty &&
-                              isValidEmail(emailController.text) &&
-                              nameController.text.isNotEmpty) {
+                        onPressed: _isSubscribing ? null : () async {
+                          setState(() {
+                            _isSubscribing = true;
+                          });
+                          if (emailController.text.isNotEmpty && isValidEmail(emailController.text) && nameController.text.isNotEmpty) {
                             try {
                               await subscribeToNewsletter_competenceScore(
                                 emailController.text,
                                 user.uid,
                                 _totalScore,
-                                nameController.text, // Vorname wird übergeben
+                                nameController.text,
                               );
                               setState(() {
                                 isSubscribed = true;
+                                _isSubscribing = false; // Reset loading state
                               });
-                              notifyListeners(); // Notify listeners to rebuild UI
                               // Erfolgsmeldung anzeigen
                               showDialog(
                                 context: context,
@@ -409,21 +414,45 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                               );
                             } catch (e) {
                               print('Ein Fehler ist aufgetreten: $e');
+                              setState(() {
+                                _isSubscribing = false; // Reset loading state on error
+                              });
                               showErrorMessage(
                                 context,
                                 'Ein Fehler ist aufgetreten. Bitte überprüfe deine Internetverbindung und versuche es erneut.',
                               );
                             }
                           } else {
+                            setState(() {
+                              _isSubscribing = false; // Reset loading state if validation fails
+                            });
                             showErrorMessage(
                               context,
                               'Bitte gib eine gültige E-Mail-Adresse und deinen Vornamen ein.',
                             );
                           }
                         },
-                        child: Text('Newsletter abonnieren'),
+                        child: _isSubscribing
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : Text('Newsletter abonnieren'),
+                      ),
+                      SelectableText(
+                        'Mit dem Abonnieren unseres Newsletters stimmst du zu, dass wir deine E-Mail-Adresse für zukünftige Mitteilungen verwenden dürfen. Du kannst dich jederzeit abmelden. Dein Vorname wird nur verwendet, um die Kommunikation persönlicher zu gestalten.',
+                        style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 12,
+                            fontFamily: 'Roboto'
+                        ),
                       ),
                     ] else if (!showResults) ...[
+                      SelectableText(
+                        'Klicke auf "Ergebnis anzeigen", um deine Punktzahl und den dazugehörigen Kommentar zu sehen. Du musst deine E-Mail-Adresse bestätigt haben, bevor du dein Ergebnis sehen kannst. Dies ist ein Sicherheits- und Qualitätsschritt.',
+                        style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 12,
+                            fontFamily: 'Roboto'
+                        ),
+                      ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFFCB9935),
@@ -432,20 +461,29 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
-                        onPressed: () async {
+                        onPressed: _isShowingResults ? null : () async {
+                          setState(() {
+                            _isShowingResults = true;
+                          });
                           bool isEmailVerified = await isVerified(emailController.text);
                           if (isEmailVerified) {
                             setState(() {
                               showResults = true;
+                              _isShowingResults = false; // Reset loading state
                             });
                           } else {
+                            setState(() {
+                              _isShowingResults = false; // Reset loading state
+                            });
                             showErrorMessage(
                               context,
                               'Bitte bestätige deine E-Mail-Adresse, um dein Ergebnis zu sehen.',
                             );
                           }
                         },
-                        child: Text('Ergebnis anzeigen'),
+                        child: _isShowingResults
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : Text('Ergebnis anzeigen'),
                       ),
                     ] else ...[
                       SelectableText('$_totalScore von $possibleScore Punkte erreicht',
@@ -497,7 +535,6 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
       },
     );
   }
-
 
   Future<void> completeSecondTest(BuildContext context) async {
     User? user = _auth.currentUser;

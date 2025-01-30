@@ -101,17 +101,6 @@ Future<String> createTestVersuch(String userUuid, String resultX) async {
   }
 }
 
-/// Helper function to extract integer from 'results_x'
-int _extractNumberFromResultX(String resultX) {
-  final RegExp regExp = RegExp(r'results_(\d+)');
-  final Match? match = regExp.firstMatch(resultX);
-  if (match != null && match.groupCount >= 1) {
-    return int.parse(match.group(1)!);
-  } else {
-    throw FormatException("Invalid format for resultX: $resultX");
-  }
-}
-
 /// Funktion zum Exportieren von Benutzerergebnissen.
 ///
 /// [userUuid] ist die UUID des Benutzers.
