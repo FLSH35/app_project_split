@@ -17,7 +17,7 @@ class CustomFooter extends StatelessWidget {
                   Navigator.of(context).pushNamed('/impressum');
                 },
                 child: Text(
-                  'IMPRESSUM',
+                  'IMPRESSUM & DATENSCHUTZ',
                   style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Roboto'),
                 ),
               ),

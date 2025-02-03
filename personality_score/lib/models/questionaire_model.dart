@@ -379,7 +379,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                           setState(() {
                             _isSubscribing = true;
                           });
-                          if (emailController.text.isNotEmpty && isValidEmail(emailController.text) && nameController.text.isNotEmpty) {
+                          if (emailController.text.isNotEmpty && nameController.text.isNotEmpty) {
                             try {
                               await subscribeToNewsletter_competenceScore(
                                 emailController.text,
@@ -1051,10 +1051,7 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     });
   }
 
-  bool isValidEmail(String email) {
-    final regex = RegExp(r'^[\w-]+@([\w-]+\.)+[\w-]{2,4}$');
-    return regex.hasMatch(email);
-  }
+
   Future<void> saveUserRating(double rating) async {
     User? user = _auth.currentUser;
     if (user != null) {
