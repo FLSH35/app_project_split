@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 class CustomFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -18,7 +17,8 @@ class CustomFooter extends StatelessWidget {
                 },
                 child: Text(
                   'IMPRESSUM & DATENSCHUTZ',
-                  style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Roboto'),
+                  style: TextStyle(
+                      color: Colors.black, fontSize: 18, fontFamily: 'Roboto'),
                 ),
               ),
             ],
@@ -27,15 +27,4 @@ class CustomFooter extends StatelessWidget {
       ),
     );
   }
-
-  void _launchURL(String url) async {
-    Uri uri = Uri.parse(url); // Use Uri to parse the URL
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);  // Use launchUrl instead of launch
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
 }

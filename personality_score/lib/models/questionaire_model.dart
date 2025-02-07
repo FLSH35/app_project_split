@@ -302,7 +302,7 @@ class QuestionnaireModel with ChangeNotifier {
 
     int possibleScore = _questions.length * 10; // Calculate possible score for the current set
 
-    if (_totalScore > 275) { // Example condition
+    if (_totalScore > 275) {
       message = """Herzlichen Glückwunsch: Du hast den ersten Teil des Tests absolviert. 
 Damit scheiden 4 von 8 möglichen Persönlichkeitsstufen für dich aus. Deinen Antworten zufolge befindest du dich zwischen Stufe 5 und Stufe 8. Damit hast du bereits echte „Lebenskompetenz“ erreicht und gehörst damit bereits zu einer kleinen Minderheit. Wir gehen davon aus, dass über 90% der Menschen auf den Stufen 1 bis 4 im Bereich der „Inkompetenz“ zu verorten sind. Für deine bisherige Entwicklung also schonmal ein dickes Lob.
 Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
@@ -326,11 +326,20 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
 
     // Controller für die E-Mail-Eingabe und den Vornamen
     TextEditingController emailController = TextEditingController();
-    TextEditingController nameController = TextEditingController(); // Controller für den Vornamen
+    TextEditingController nameController = TextEditingController();
+
+    // Variablen für den Newsletter/Ergebnisablauf
     bool isSubscribed = false;
-    bool showResults = false; // New variable to control when to show results
+    bool showResults = false;
     bool _isSubscribing = false;
     bool _isShowingResults = false;
+
+    // Falls ein displayName vorhanden ist, direkt Ergebnis anzeigen (keine E-Mail-Abfrage nötig)
+    bool userHasDisplayName = user.displayName != null;
+    if (userHasDisplayName) {
+      isSubscribed = true;
+      showResults = true;
+    }
 
     showDialog(
       context: context,
@@ -338,84 +347,101 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              backgroundColor: Color(0xFFC7C7C7), // Soft background
-              title: Text('PersonalityScore-Ergebnis',
-                  style: TextStyle(color: Colors.black, fontFamily: 'Roboto')),
+              backgroundColor: const Color(0xFFC7C7C7), // Soft background
+              title: const Text(
+                'PersonalityScore-Ergebnis',
+                style: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (!isSubscribed) ...[
-                      SelectableText(
+                    // 1) Wenn displayName nicht vorhanden und noch nicht abonniert: Newsletter anbieten
+                    if (!userHasDisplayName && !isSubscribed) ...[
+                      const SelectableText(
                         "Um dein Ergebnis zu sehen, abonniere unseren Newsletter.",
                         style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextField(
-                        controller: nameController, // Vorname-Eingabefeld
-                        decoration: InputDecoration(
+                        controller: nameController,
+                        decoration: const InputDecoration(
                           labelText: 'Dein Vorname',
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextField(
-                        controller: emailController, // E-Mail-Eingabefeld
-                        decoration: InputDecoration(
+                        controller: emailController,
+                        decoration: const InputDecoration(
                           labelText: 'E-Mail-Adresse',
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFCB9935),
+                          backgroundColor: const Color(0xFFCB9935),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
-                        onPressed: _isSubscribing ? null : () async {
+                        onPressed: _isSubscribing
+                            ? null
+                            : () async {
                           setState(() {
                             _isSubscribing = true;
                           });
-                          if (emailController.text.isNotEmpty && nameController.text.isNotEmpty) {
+                          if (emailController.text.isNotEmpty &&
+                              nameController.text.isNotEmpty) {
                             try {
+                              // Abonnieren
                               await subscribeToNewsletter_competenceScore(
                                 emailController.text,
                                 user.uid,
                                 _totalScore,
                                 nameController.text,
                               );
-                              setState(() {
-                                isSubscribed = true;
-                                _isSubscribing = false; // Reset loading state
-                              });
-                              // Erfolgsmeldung anzeigen
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('E-Mail-Bestätigung erforderlich'),
-                                    content: Text(
-                                      'Wir haben dir eine Bestätigungsmail an ${emailController.text} geschickt. Bitte überprüfe dein Postfach und bestätige deine E-Mail-Adresse, um dein Ergebnis zu erhalten.',
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop(); // Schließt den Dialog
-                                        },
-                                        child: Text('Okay'),
+
+                              bool isEmailVerified = await isVerified(emailController.text);
+                              if (isEmailVerified) {
+                                setState(() {
+                                  isSubscribed = true;
+                                  showResults = true;
+                                  _isSubscribing = false;
+                                });
+                              } else {
+                                setState(() {
+                                  isSubscribed = true;
+                                  _isSubscribing = false;
+                                });
+                                // Erfolgsmeldung anzeigen
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('E-Mail-Bestätigung erforderlich'),
+                                      content: Text(
+                                        'Wir haben dir eine Bestätigungsmail an ${emailController.text} geschickt. Bitte überprüfe dein Postfach und bestätige deine E-Mail-Adresse, um dein Ergebnis zu erhalten.',
+                                        textAlign: TextAlign.center,
                                       ),
-                                    ],
-                                  );
-                                },
-                              );
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Okay'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
                             } catch (e) {
                               print('Ein Fehler ist aufgetreten: $e');
                               setState(() {
-                                _isSubscribing = false; // Reset loading state on error
+                                _isSubscribing = false;
                               });
                               showErrorMessage(
                                 context,
@@ -424,7 +450,7 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                             }
                           } else {
                             setState(() {
-                              _isSubscribing = false; // Reset loading state if validation fails
+                              _isSubscribing = false;
                             });
                             showErrorMessage(
                               context,
@@ -433,47 +459,50 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                           }
                         },
                         child: _isSubscribing
-                            ? CircularProgressIndicator(color: Colors.white)
-                            : Text('Newsletter abonnieren'),
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text('Newsletter abonnieren'),
                       ),
-                      SelectableText(
+                      const SelectableText(
                         'Mit dem Abonnieren unseres Newsletters stimmst du zu, dass wir deine E-Mail-Adresse für zukünftige Mitteilungen verwenden dürfen. Du kannst dich jederzeit abmelden. Dein Vorname wird nur verwendet, um die Kommunikation persönlicher zu gestalten.',
                         style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 12,
-                            fontFamily: 'Roboto'
+                          color: Colors.black54,
+                          fontSize: 12,
+                          fontFamily: 'Roboto',
                         ),
                       ),
-                    ] else if (!showResults) ...[
-                      SelectableText(
+                    ]
+                    // 2) Wenn schon abonniert, aber Ergebnis noch nicht angezeigt: Prüfung auf E-Mail-Bestätigung
+                    else if (!showResults) ...[
+                      const SelectableText(
                         'Klicke auf "Ergebnis anzeigen", um deine Punktzahl und den dazugehörigen Kommentar zu sehen. Du musst deine E-Mail-Adresse bestätigt haben, bevor du dein Ergebnis sehen kannst. Dies ist ein Sicherheits- und Qualitätsschritt.',
-                        style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 12,
-                            fontFamily: 'Roboto'
-                        ),
+                        style: TextStyle(color: Colors.black54, fontSize: 12, fontFamily: 'Roboto'),
                       ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFCB9935),
+                          backgroundColor: const Color(0xFFCB9935),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
-                        onPressed: _isShowingResults ? null : () async {
+                        onPressed: _isShowingResults
+                            ? null
+                            : () async {
                           setState(() {
                             _isShowingResults = true;
                           });
-                          bool isEmailVerified = await isVerified(emailController.text);
+                          bool isEmailVerified = userHasDisplayName
+                              ? true // Falls es einen displayName gibt, ist das automatisch "okay"
+                              : await isVerified(emailController.text);
+
                           if (isEmailVerified) {
                             setState(() {
                               showResults = true;
-                              _isShowingResults = false; // Reset loading state
+                              _isShowingResults = false;
                             });
                           } else {
                             setState(() {
-                              _isShowingResults = false; // Reset loading state
+                              _isShowingResults = false;
                             });
                             showErrorMessage(
                               context,
@@ -482,27 +511,38 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                           }
                         },
                         child: _isShowingResults
-                            ? CircularProgressIndicator(color: Colors.white)
-                            : Text('Ergebnis anzeigen'),
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text('Ergebnis anzeigen'),
                       ),
-                    ] else ...[
-                      SelectableText('$_totalScore von $possibleScore Punkte erreicht',
-                          style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18)),
-                      SizedBox(height: 10),
-                      SelectableText(message +
-                          '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n',
-                          style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 18)),
-                      SizedBox(height: 10),
-                      Wrap(
-                        spacing: 10.0,
-                        runSpacing: 10.0,
-                        alignment: WrapAlignment.center,
-                        children: teamCharacters
-                            .map((character) =>
-                            Image.asset('assets/$character', width: 100, height: 100))
-                            .toList(),
-                      ),
-                    ],
+                    ]
+                    // 3) Ergebnis-Bereich
+                    else ...[
+                        SelectableText(
+                          '$_totalScore von $possibleScore Punkte erreicht',
+                          style: const TextStyle(
+                              color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+                        ),
+                        const SizedBox(height: 10),
+                        SelectableText(
+                          message +
+                              '\n\n Thomas A. Edison: "Viele Menschen, die im Leben scheitern, sind Menschen, die nicht erkennen, wie nah sie am Erfolg waren, als sie aufgaben."\n',
+                          style: const TextStyle(
+                              color: Colors.black, fontFamily: 'Roboto', fontSize: 18),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 10.0,
+                          runSpacing: 10.0,
+                          alignment: WrapAlignment.center,
+                          children: teamCharacters
+                              .map((character) => Image.asset(
+                            'assets/$character',
+                            width: 100,
+                            height: 100,
+                          ))
+                              .toList(),
+                        ),
+                      ],
                   ],
                 ),
               ),
@@ -510,8 +550,8 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                 if (showResults) ...[
                   TextButton(
                     style: TextButton.styleFrom(
-                      backgroundColor: Color(0xFFCB9935),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      backgroundColor: const Color(0xFFCB9935),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -524,8 +564,10 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                       notifyListeners();
                       Navigator.of(context).pop();
                     },
-                    child: Text('Weiter',
-                        style: TextStyle(color: Colors.white, fontFamily: 'Roboto')),
+                    child: const Text(
+                      'Weiter',
+                      style: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
+                    ),
                   ),
                 ],
               ],
@@ -535,6 +577,8 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
       },
     );
   }
+
+
 
   Future<void> completeSecondTest(BuildContext context) async {
     User? user = _auth.currentUser;
