@@ -345,33 +345,43 @@ class _SignInDialogState extends State<SignInDialog> {
   }
 
   void _signIn() async {
+    // 1. Grab AuthService without listening to changes.
     final authService = Provider.of<AuthService>(context, listen: false);
+
     try {
-      User? previousUser = authService.user; // aktueller User (könnte anonym sein)
+      // 2. Optional: Check if the user is already logged in.
+      //    If so, we can simply pop the route.
+      if (authService.user != null && !authService.user!.isAnonymous) {
+        Navigator.of(context).pop();
+        return;
+      }
+
+      // Keep track of the user before sign in (could be anonymous).
+      User? previousUser = authService.user;
+
+      // Start loading indicator.
       setState(() => _isLoading = true);
 
-      // Anmelden
+      // 3. Sign in with email and password.
       await authService.signInWithEmail(
         widget.emailController.text,
         widget.passwordController.text,
       );
 
+      // 4. Check if sign-in was successful.
       if (authService.user != null) {
-        // Anonyme Daten mergen, falls vorheriger User anonym war
-        if (previousUser != null && previousUser.isAnonymous) {
-          await mergeAnonymousDataWithUser(previousUser, authService.user!);
-        }
-
+        // Animate success, stop loading.
         setState(() {
           _isAnimating = true;
           _isLoading = false;
         });
 
-        // Nach kurzer Verzögerung weiterleiten
+        // 5. After a small delay, replace current route with the next route.
         Future.delayed(const Duration(seconds: 1), () {
           Navigator.of(context).pushReplacementNamed(widget.nextRoute);
         });
       } else {
+        // Sign-in failed for some reason; show an error message.
         setState(() => _isLoading = false);
         _showMessage(
           authService.errorMessage ?? "Anmeldung fehlgeschlagen.",
@@ -379,7 +389,10 @@ class _SignInDialogState extends State<SignInDialog> {
         );
       }
     } on FirebaseAuthException catch (e) {
+      // Stop loading animation.
       setState(() => _isLoading = false);
+
+      // Handle common FirebaseAuth exceptions.
       String errorMessage;
       if (e.code == 'user-not-found') {
         errorMessage = "Kein Benutzer mit dieser E-Mail gefunden.";
@@ -388,8 +401,10 @@ class _SignInDialogState extends State<SignInDialog> {
       } else {
         errorMessage = e.message ?? "Anmeldung fehlgeschlagen.";
       }
+
       _showMessage(errorMessage, Colors.red);
     } catch (e) {
+      // Handle any other errors.
       setState(() => _isLoading = false);
       _showMessage("Ein Fehler ist aufgetreten.", Colors.red);
     }

@@ -268,14 +268,14 @@ class _HoverableTestimonialCardState extends State<_HoverableTestimonialCard> {
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Roboto',
                         color: Colors.black,
-                        fontSize: screenHeight * 0.026,
+                        fontSize: screenHeight * 0.023,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     Text(
                       widget.personalityType,
                       style: TextStyle(
-                        fontSize: screenHeight * 0.023,
+                        fontSize: screenHeight * 0.020,
                         fontFamily: 'Roboto',
                         color: Colors.grey[900],
                       ),
@@ -285,7 +285,7 @@ class _HoverableTestimonialCardState extends State<_HoverableTestimonialCard> {
                     Text(
                       widget.text,
                       style: TextStyle(
-                        fontSize: _isHovering? screenHeight * 0.022 : screenHeight * 0.016,
+                        fontSize: _isHovering? screenHeight * 0.019 : screenHeight * 0.0135,
                         fontFamily: 'Roboto',
                         color: Colors.black,
                       ),
