@@ -145,24 +145,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
               children: [
                 _buildNavButton(context, 'START', '/home'),
                 SizedBox(width: 10),
-                Flexible(
-                  child: GestureDetector(
-                    onTap: () async {
-                      const url = 'https://ifyouchange.com/';
-                      if (await canLaunch(url)) {
-                        await launch(url);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Konnte die URL nicht öffnen: $url')),
-                        );
-                      }
-                    },
-                    child: Image.asset(
+                Image.asset(
                       'assets/Logo-IYC-gross.png',
                       height: 80, // Your desired height
                     ),
-                  ),
-                ),
                 SizedBox(width: 10),
                 _buildNavButton(context, 'EINSTUFUNG', '/personality_types'),
               ],

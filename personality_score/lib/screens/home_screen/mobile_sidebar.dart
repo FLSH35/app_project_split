@@ -36,23 +36,10 @@ class _MobileSidebarState extends State<MobileSidebar> {
               // Logo Section
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 36.0),
-                child: GestureDetector(
-                  onTap: () async {
-                    const url = 'https://ifyouchange.com/';
-                    if (await canLaunch(url)) {
-                      await launch(url);
-                    } else {
-                      throw 'Could not launch $url';
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Image.asset(
+                child: Image.asset(
                       'assets/Logo-IYC-gross.png',
                     ),
                   ),
-                ),
-              ),
 
 
 

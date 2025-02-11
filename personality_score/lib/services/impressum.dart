@@ -32,6 +32,7 @@ Maršala BB, Utjeha
 85000 Bar, Montenegro  
 E-Mail: info@ifyouchange.de  
 Telefon: +49 896 282 4760  
+Website: www.YourMastermind.de
 
 <b>Datenschutzerklärung</b>
 
@@ -86,6 +87,7 @@ Maršala BB, Utjeha
 85000 Bar, Montenegro  
 Telefon: +49 896 282 4760  
 E-Mail: info@ifyouchange.de  
+Website: www.YourMastermind.de
 
 Verantwortliche Stelle ist die natürliche oder juristische Person, die allein oder gemeinsam mit anderen über die Zwecke und Mittel der Verarbeitung von personenbezogenen Daten (z. B. Namen, E-Mail-Adressen o. Ä.) entscheidet.
 
@@ -239,6 +241,7 @@ Maršala BB, Utjeha
 85000 Bar, Montenegro  
 E-Mail: info@ifyouchange.de  
 Telefon: +49 896 282 4760  
+Website: www.YourMastermind.de
 
 <b>Datenschutzerklärung</b>
 
@@ -293,6 +296,7 @@ Maršala BB, Utjeha
 85000 Bar, Montenegro  
 Telefon: +49 896 282 4760  
 E-Mail: info@ifyouchange.de  
+Website: www.YourMastermind.de
 
 Verantwortliche Stelle ist die natürliche oder juristische Person, die allein oder gemeinsam mit anderen über die Zwecke und Mittel der Verarbeitung von personenbezogenen Daten (z. B. Namen, E-Mail-Adressen o. Ä.) entscheidet.
 
