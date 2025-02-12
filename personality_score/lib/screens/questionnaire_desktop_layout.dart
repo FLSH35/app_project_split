@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:personality_score/models/questionaire_model.dart';
 import '../auth/auth_service.dart';
 import '../models/question.dart';
-import 'custom_app_bar.dart';
 
 class QuestionnaireDesktopLayout extends StatefulWidget {
   final ScrollController scrollController;
@@ -98,17 +97,35 @@ class _QuestionnaireDesktopLayoutState
     // Show loading indicator if either authentication or data loading is in progress
     if (!_isAuthenticated || isLoading) {
       return Scaffold(
-        appBar: CustomAppBar(
-          title: 'Personality Score',
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+
+          // Background color matches your previous design
+          backgroundColor: const Color(0xFFF7F5EF),
+          elevation: 0,
+          centerTitle: true,
+          title: Image.asset(
+            'assets/Logo-IYC-gross.png',
+            height: 40, // Adjust height as desired
+          ),
         ),
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Personality Score',
-      ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+
+        // Background color matches your previous design
+    backgroundColor: const Color(0xFFF7F5EF),
+    elevation: 0,
+    centerTitle: true,
+    title: Image.asset(
+    'assets/Logo-IYC-gross.png',
+    height: 40, // Adjust height as desired
+    ),
+    ),
       body: Stack(
         children: [
           Positioned.fill(

@@ -103,7 +103,6 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   /// Erzeugt das Layout für Mobile
   Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(context),
       endDrawer: MobileSidebar(),
       body: Stack(
         children: [
@@ -121,27 +120,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     );
   }
 
-  /// AppBar mit Menü-Button für Mobile
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar( title: Image.asset(
-      'assets/Logo-IYC-gross.png', height: 50,
-    ),
-      backgroundColor: Color(0xFFF7F5EF),
-      iconTheme: IconThemeData(color: Colors.black),
-      actions: [
-        Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.black),
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer();
-            },
-            tooltip: 'Menü öffnen',
-          ),
-        ),
-      ],
-      automaticallyImplyLeading: false,
-    );
-  }
+
 
   /// Baut den eigentlichen Fragebogen-Body für Mobile
   Widget _buildQuestionnaire(BuildContext context, QuestionnaireModel model) {

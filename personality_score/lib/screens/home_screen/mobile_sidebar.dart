@@ -40,12 +40,6 @@ class _MobileSidebarState extends State<MobileSidebar> {
                       'assets/Logo-IYC-gross.png',
                     ),
                   ),
-
-
-
-
-
-
               // "Allgemein" ListTile with Icon
               ListTile(
                 leading: const Icon(
