@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:personality_score/services/question_service.dart';
 import 'package:personality_score/models/question.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -21,9 +22,6 @@ class QuestionnaireModel with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Question> _questions = [];
   int _currentQuestionIndex = 0;
-  bool _isSubscribing = false;
-  bool _isShowingResults = false;
-
   int score_factor = 0;
 
   bool isSubscribed = false;
@@ -44,6 +42,19 @@ class QuestionnaireModel with ChangeNotifier {
 
   String? _finalCharacter;
   String? _finalCharacterDescription;
+
+
+  String? _userEmail; // New field to cache the email
+
+  // Getter for userEmail
+  String? get userEmail => _userEmail;
+
+  // Setter to update email when captured
+  void setUserEmail(String email) {
+    _userEmail = email;
+    notifyListeners();
+  }
+
 
   set questionService(QuestionService service) {
     _questionService = service;
@@ -396,6 +407,8 @@ Im nächsten Fragensegment engen wir dein Ergebnis noch weiter ein. Viel Spaß!
                           if (emailController.text.isNotEmpty &&
                               nameController.text.isNotEmpty) {
                             try {
+
+                              setUserEmail(emailController.text,); // Cache email if available from auth
                               // Abonnieren
                               await subscribeToNewsletter_competenceScore(
                                 emailController.text,
@@ -839,262 +852,279 @@ Im letzten Fragensegment finden wir heraus, ob du eher der Stufe „Anonymous“
     await _videoController.initialize();
     _videoController.play();
 
-    // Dialog anzeigen
+    User? user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      await subscribeToNewsletter2(
+        _userEmail!,
+        combinedTotalScore.toString(),
+        finalCharacter,
+        finalCharacterDescription,
+      );
+    } catch (e) {
+      print('Fehler vor Dialog: $e');
+    }
+
+    // Dann Dialog anzeigen
     await showDialog(
-      context: context,
-      barrierDismissible: false, // Prevents closing by tapping outside
-      builder: (BuildContext context) {
-        // Dynamic sizes based on the screen
-        double screenHeight = MediaQuery.of(context).size.height;
-        double screenWidth = MediaQuery.of(context).size.width;
-        double dialogWidth = screenWidth * 0.6;
-        double dialogHeight = screenHeight * 0.7;
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          double screenHeight = MediaQuery.of(context).size.height;
+          double screenWidth = MediaQuery.of(context).size.width;
+          double dialogWidth = screenWidth * 0.6;
+          double dialogHeight = screenHeight * 0.7;
 
-        return AlertDialog(
-          backgroundColor: Color(0xFFC7C7C7),
-          title: SelectableText(
-            '$greetingText, du hast es geschafft!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.black,
-              fontFamily: 'Roboto',
-              fontWeight: FontWeight.bold,
+          return AlertDialog(
+            backgroundColor: Color(0xFFC7C7C7),
+            title: SelectableText(
+              '$greetingText, du hast es geschafft!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              // Start timer to show content after 14 seconds
-              Future.delayed(Duration(seconds: 14), () {
-                if (isDialogActive) {
-                  setState(() {
-                    showContent = true;
-                  });
-                }
-              });
+            content: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                Future.delayed(Duration(seconds: 14), () {
+                  if (isDialogActive) {
+                    setState(() {
+                      showContent = true;
+                    });
+                  }
+                });
 
-              return Container(
-                width: dialogWidth,
-                height: dialogHeight,
-                child: SingleChildScrollView(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Main content
-                      AnimatedOpacity(
-                        opacity: showContent ? 1.0 : 0.0,
-                        duration: Duration(milliseconds: 500),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Content for logged-in users
-                            SelectableText(
-                              "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Roboto',
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Image.asset(
-                              'assets/$finalCharacter.webp',
-                              width: 200,
-                              height: 200,
-                            ),
-                            SizedBox(height: 10),
-                            // Expandable description
-                            isExpanded
-                                ? Container(
-                              height: 150,
-                              child: SingleChildScrollView(
-                                child: SelectableText(
-                                  finalCharacterDescription,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Roboto',
-                                    fontSize: 18,
-                                  ),
+                return Container(
+                  width: dialogWidth,
+                  height: dialogHeight,
+                  child: SingleChildScrollView(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        AnimatedOpacity(
+                          opacity: showContent ? 1.0 : 0.0,
+                          duration: Duration(milliseconds: 500),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SelectableText(
+                                "Du hast ${combinedTotalScore} Prozent deines Potentials erreicht!\nDamit bist du ein $finalCharacter.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Roboto',
                                 ),
                               ),
-                            )
-                                : SelectableText(
-                              finalCharacterDescription
-                                  .split(' ')
-                                  .take(15)
-                                  .join(' ') +
-                                  '...',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Roboto',
-                                fontSize: 18,
+                              SizedBox(height: 10),
+                              // SVG Icons Above the Text
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        isExpanded = !isExpanded;
+                                      });
+                                    },
+                                    child: Container(
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFFCB9935), // Button background
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: SvgPicture.asset(
+                                          isExpanded
+                                              ? 'assets/icons/shrink-svgrepo-com.svg'
+                                              : 'assets/icons/expand-svgrepo-com.svg',
+                                          width: 24,
+                                          height: 24,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
+                              SizedBox(height: 10),
+                              // Image and Description in Scrollable Section
+                              isExpanded
+                                  ? Container(
+                                height: dialogHeight * 0.6, // Maximized height
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      Image.asset(
+                                        'assets/$finalCharacter.webp',
+                                        width: 200,
+                                        height: 200,
+                                      ),
+                                      SizedBox(height: 10),
+                                      SelectableText(
+                                        finalCharacterDescription,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Roboto',
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                                  : Column(children:[Image.asset(
+                                'assets/$finalCharacter.webp',
+                                width: 200,
+                                height: 200,
+                              ),SelectableText(
+                                finalCharacterDescription
+                                    .split(' ')
+                                    .take(15)
+                                    .join(' ') +
+                                    '...',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Roboto',
+                                  fontSize: 18,
+                                ),
+                              ),]),
+                              SizedBox(height: 10),
+                              Text(
+                                'Wie sehr identifizierst du dich mit diesem Ergebnis?',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              RatingBar.builder(
+                                initialRating: rating,
+                                minRating: 1,
+                                direction: Axis.horizontal,
+                                allowHalfRating: false,
+                                itemCount: 5,
+                                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                                itemBuilder: (context, _) => Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
+                                onRatingUpdate: (newRating) {
+                                  setState(() {
+                                    rating = newRating;
+                                  });
+                                },
+                              ),
+                              SizedBox(height: 20),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Color(0xFFCB9935),
+                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(8.0)),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  await saveUserRating(rating);
+                                  Navigator.of(context).pop();
+                                  _videoController?.dispose();
+                                  Navigator.of(context).pushNamed('/home');
+                                },
+                                child: Text(
+                                  'Abschließen',
+                                  style: TextStyle(
+                                      color: Colors.white, fontFamily: 'Roboto'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IgnorePointer(
+                          ignoring: true,
+                          child: AnimatedOpacity(
+                            opacity: showContent ? 0.0 : 1.0,
+                            duration: Duration(milliseconds: 500),
+                            child: Container(
+                              width: dialogWidth,
+                              height: dialogHeight * 0.9,
+                              color: Colors.transparent,
+                              child: _videoController != null &&
+                                  _videoController!.value.isInitialized
+                                  ? ClipRect(
+                                child: OverflowBox(
+                                  alignment: Alignment.center,
+                                  minWidth: 0.0,
+                                  minHeight: 0.0,
+                                  maxWidth: double.infinity,
+                                  maxHeight: double.infinity,
+                                  child: FittedBox(
+                                    fit: BoxFit.cover,
+                                    child: SizedBox(
+                                      width: _videoController!.value.size.width,
+                                      height:
+                                      _videoController!.value.size.height,
+                                      child: VideoPlayer(_videoController!),
+                                    ),
+                                  ),
+                                ),
+                              )
+                                  : SizedBox(),
                             ),
-                            SizedBox(height: 10),
-                            ElevatedButton(
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 10,
+                          right: 10,
+                          child: AnimatedOpacity(
+                            opacity: showContent ? 0.0 : 1.0,
+                            duration: Duration(milliseconds: 500),
+                            child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 12.0, horizontal: 32.0),
-                                backgroundColor: isExpanded
-                                    ? Colors.black
-                                    : Color(0xFFCB9935),
+                                padding: EdgeInsets.all(12.0),
+                                backgroundColor: Colors.red,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.all(Radius.circular(8.0)),
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
                               onPressed: () {
                                 setState(() {
-                                  isExpanded = !isExpanded;
+                                  showContent = true;
+                                });
+                                _videoController?.pause();
+                                _videoController?.setVolume(0);
+                                Future.delayed(Duration(milliseconds: 500), () {
+                                  _videoController?.dispose();
+                                  _videoController = null;
                                 });
                               },
-                              child: Text(
-                                isExpanded ? 'Lese weniger' : 'Lese mehr',
+                              child: Icon(
+                                Icons.arrow_forward,
+                                color: Colors.white,
                               ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Wie sehr identifizierst du dich mit diesem Ergebnis?',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Roboto',
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            RatingBar.builder(
-                              initialRating: rating,
-                              minRating: 1,
-                              direction: Axis.horizontal,
-                              allowHalfRating: false,
-                              itemCount: 5,
-                              itemPadding:
-                              EdgeInsets.symmetric(horizontal: 4.0),
-                              itemBuilder: (context, _) => Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                              ),
-                              onRatingUpdate: (newRating) {
-                                setState(() {
-                                  rating = newRating;
-                                });
-                              },
-                            ),
-                            SizedBox(height: 20),
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                backgroundColor: Color(0xFFCB9935),
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.all(Radius.circular(8.0)),
-                                ),
-                              ),
-                              onPressed: () async {
-                                // Save rating
-                                await saveUserRating(rating);
-                                Navigator.of(context).pop();
-                                _videoController
-                                    ?.dispose(); // Release video controller
-
-                                Navigator.of(context).pushNamed('/home');
-                              },
-                              child: Text(
-                                'Abschließen',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Roboto'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Video Overlay
-                      IgnorePointer(
-                        ignoring: true, // Prevent interaction with the video
-                        child: AnimatedOpacity(
-                          opacity: showContent ? 0.0 : 1.0,
-                          duration: Duration(milliseconds: 500),
-                          child: Container(
-                            width: dialogWidth,
-                            height: dialogHeight * 0.9,
-                            color: Colors.transparent,
-                            child: _videoController != null &&
-                                _videoController!.value.isInitialized
-                                ? ClipRect(
-                              child: OverflowBox(
-                                alignment: Alignment.center,
-                                minWidth: 0.0,
-                                minHeight: 0.0,
-                                maxWidth: double.infinity,
-                                maxHeight: double.infinity,
-                                child: FittedBox(
-                                  fit: BoxFit.cover,
-                                  child: SizedBox(
-                                    width: _videoController!
-                                        .value.size.width,
-                                    height: _videoController!
-                                        .value.size.height,
-                                    child:
-                                    VideoPlayer(_videoController!),
-                                  ),
-                                ),
-                              ),
-                            )
-                                : SizedBox(), // Or any placeholder widget
-                          ),
-                        ),
-                      ),
-
-                      // Skip Button
-                      Positioned(
-                        bottom: 10,
-                        right: 10,
-                        child: AnimatedOpacity(
-                          opacity: showContent ? 0.0 : 1.0,
-                          duration: Duration(milliseconds: 500),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.all(12.0),
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                showContent = true; // Show content
-                              });
-                              _videoController?.pause(); // Pause the video
-                              _videoController?.setVolume(0); // Mute the video sound
-                              Future.delayed(Duration(milliseconds: 500), () {
-                                _videoController
-                                    ?.dispose(); // Dispose of the video completely
-                                _videoController = null;
-                              });
-                            },
-                            child: Icon(
-                              Icons.arrow_forward, // Arrow icon instead of text
-                              color: Colors.white,
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
-      },
+                );
+              },
+            ),
+          );
+        },
     ).then((_) {
-      isDialogActive = false; // Mark the dialog as inactive
-      _videoController?.dispose(); // Release video controller
+      isDialogActive = false;
+      _videoController?.dispose();
     });
   }
-
 
   Future<void> saveUserRating(double rating) async {
     User? user = _auth.currentUser;

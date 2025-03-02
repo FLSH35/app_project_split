@@ -435,43 +435,7 @@ Future<void> subscribeToNewsletter_competenceScore(String email, String userId, 
 }
 
 
-Future<void> subscribeToNewsletter2(
-    String email,
-    String firstName,
-    String userId,
-    String combinedTotalScore,
-    String finalCharacter,
-    String finalCharacterDescription
-    ) async {
-  try {
-    final Uri cloudFunctionUrl = Uri.parse(
-      'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter2',
-    );
 
-    // Query-Parameter erstellen, einschließlich optionaler Felder
-    final queryParams = {
-      'email': email,
-      'first_name': firstName,
-      'user_id': userId, // Pflichtparameter
-      'combinedTotalScore': combinedTotalScore,
-      'finalCharacter': finalCharacter,
-      'finalCharacterDescription': finalCharacterDescription,
-    };
-
-    // HTTP GET-Request mit den Query-Parametern
-    final response = await http.get(cloudFunctionUrl.replace(queryParameters: queryParams));
-
-    // Erfolgs- oder Fehlermeldung basierend auf dem Statuscode
-    if (response.statusCode == 200) {
-      print('Newsletter erfolgreich abonniert!');
-      print('Antwort: ${response.body}');
-    } else {
-      print('Fehler beim Abonnieren des Newsletters: ${response.body}');
-    }
-  } catch (e) {
-    print('Ein Fehler ist aufgetreten: $e');
-  }
-}
 
 Future<bool> isVerified(String email) async {
   // URL to your cloud function, replace with the actual URL
@@ -511,5 +475,39 @@ Future<bool> isVerified(String email) async {
     // Handle any network or JSON decoding errors
     print('Error calling cloud function: $e');
     return false;
+  }
+}
+
+Future<void> subscribeToNewsletter2(
+    String email,
+    String combinedTotalScore,
+    String finalCharacter,
+    String finalCharacterDescription
+    ) async {
+  try {
+    final Uri cloudFunctionUrl = Uri.parse(
+      'https://us-central1-personality-score.cloudfunctions.net/manage_newsletter2',
+    );
+
+    // Query-Parameter erstellen, einschließlich optionaler Felder
+    final queryParams = {
+      'email': email,
+      'combinedTotalScore': combinedTotalScore,
+      'finalCharacter': finalCharacter,
+      'finalCharacterDescription': finalCharacterDescription,
+    };
+
+    // HTTP GET-Request mit den Query-Parametern
+    final response = await http.get(cloudFunctionUrl.replace(queryParameters: queryParams));
+
+    // Erfolgs- oder Fehlermeldung basierend auf dem Statuscode
+    if (response.statusCode == 200) {
+      print('Newsletter erfolgreich abonniert!');
+      print('Antwort: ${response.body}');
+    } else {
+      print('Fehler beim Abonnieren des Newsletters: ${response.body}');
+    }
+  } catch (e) {
+    print('Ein Fehler ist aufgetreten: $e');
   }
 }

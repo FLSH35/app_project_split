@@ -8,10 +8,10 @@ class AuthService with ChangeNotifier {
 
   User? get user => _user;
   String? get errorMessage => _errorMessage;
+  String? get email => _user?.email; // Added email getter
 
-  bool get isAnonymous => _user?.isAnonymous ?? true; // Check if the user is anonymous
-  bool get isLoggedIn => _user != null && !_user!.isAnonymous; // Check if the user is logged in
-
+  bool get isAnonymous => _user?.isAnonymous ?? true;
+  bool get isLoggedIn => _user != null && !_user!.isAnonymous;
 
   AuthService(BuildContext context) {
     _auth.authStateChanges().listen((user) => _onAuthStateChanged(user, context));
