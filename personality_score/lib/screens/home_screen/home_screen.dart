@@ -28,9 +28,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentPage = 0;
   final int questionsPerPage = 7;
   final List<String> tutorialQuestions = [
-    'Mit dem Schieberegler kann ich 10 verschiedene Stufen einstellen.',
-    'Die Test-Fragen beantworte ich schnell, ohne lange nachzudenken.',
-    'Ich antworte ehrlich und gewissenhaft.',
+    'Ich kann meine Zeit frei einteilen, ohne dass mein Business darunter leidet.',
+    'Ich fühle mich mental frei und ohne ständigen Druck.',
+    'Ich habe eine klare Strategie, um finanzielle und zeitliche Freiheit zu erreichen.',
   ];
   final Map<int, int> answers = {};
 
@@ -41,39 +41,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Für das “pseudo-endlose” Karussell
   static const int infiniteItemCount = 10000;
-
+  
   // Testimonials Data
   final List<Map<String, String>> testimonials = [
     {
       "name": "Andrés",
       "text":
-      "Der Personality Score hat mir geholfen, meine Stärken besser zu erkennen und meine Ziele klarer zu definieren.",
+      "Der Personality Score hat mir gezeigt, wie ich mein Business so aufbaue, dass ich endlich Zeit für mich habe.",
       "image": "assets/testimonials/Andres.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Jana",
       "text":
-      "Ein tolles Tool, das mir geholfen hat, einen Schritt weiter in meiner Persönlichkeitsentwicklung zu gehen.",
+      "Ein Gamechanger! Ich habe gelernt, wie ich weniger arbeite und trotzdem mehr erreiche.",
       "image": "assets/testimonials/Jana.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Christoph",
       "text":
-      "Ich liebe die Klarheit, die der Test mir gebracht hat. Eine Bereicherung für jeden, der wachsen will!",
+      "Dank Personality Score habe ich die Kontrolle zurück – über meine Zeit und mein Business.",
       "image": "assets/testimonials/Christoph.jpg",
       "personalityType": "Individual",
     },
     {
       "name": "Alex",
-      "text": "Endlich ein Persönlichkeitstest, der mir weiterhilft.",
+      "text": "Endlich ein Tool, das Unternehmern echte Freiheit bringt.",
       "image": "assets/testimonials/Alex.jpg",
       "personalityType": "Traveller",
     },
     {
       "name": "Klaus",
-      "text": "Woher kennt er mich so gut?",
+      "text": "Es hat mir die Augen geöffnet, wie ich Stress reduziere und freier lebe.",
       "image": "assets/testimonials/Klaus.jpg",
       "personalityType": "Individual",
     },
@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 SelectableText(
-                  "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
+                  "Personality Score – Dein Weg zu finanzieller und zeitlicher Freiheit",
                   style: TextStyle(
                     fontSize: screenHeight * 0.025,
                     fontWeight: FontWeight.bold,
@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SelectableText(
-                  "Erhalte messerscharfe Klarheit über deinen Entwicklungsstand und erfahre, wie du das nächste Level erreichen kannst.",
+                  "Finde heraus, wie du dein Business so steuerst, dass es dir dient – und nicht umgekehrt. Mehr Zeit, weniger Stress, echte Kontrolle.",
                   style: TextStyle(
                     fontSize: screenHeight * 0.025,
                     fontWeight: FontWeight.normal,
@@ -229,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _scrollToTutorialSection();
                   },
                   child: Text(
-                    'Mache den Test',
+                    'Starte jetzt',
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Roboto',
@@ -441,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
-            "Was unsere Nutzer sagen",
+            "Was Unternehmer wie du sagen",
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,

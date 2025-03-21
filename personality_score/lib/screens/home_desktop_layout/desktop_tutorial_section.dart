@@ -16,21 +16,24 @@ class DesktopTutorialSection extends StatefulWidget {
 class _DesktopTutorialSectionState extends State<DesktopTutorialSection> {
   bool isLoading = false;
   final List<String> tutorialQuestions = [
-    'Mit dem Schieberegler kann ich 10 verschiedene Stufen einstellen.',
-    'Die Test-Fragen beantworte ich schnell, ...',
-    'Ich antworte ehrlich und gewissenhaft.',
+    'Ich kann meine Zeit frei einteilen, ohne dass mein Business darunter leidet.',
+    'Ich fühle mich mental frei und ohne ständigen Druck.',
+    'Ich habe eine klare Strategie, um finanzielle und zeitliche Freiheit zu erreichen.',
   ];
   Map<int, int> answers = {};
   final GlobalKey _tutorialKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
     _simulateLoading();
   }
+
   @override
   void dispose() {
     super.dispose();
   }
+
   Future<void> _simulateLoading() async {
     await Future.delayed(const Duration(milliseconds: 500));
     setState(() => isLoading = false);
@@ -38,7 +41,6 @@ class _DesktopTutorialSectionState extends State<DesktopTutorialSection> {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       key: _tutorialKey, // Add the key here
       child: Column(
@@ -52,6 +54,7 @@ class _DesktopTutorialSectionState extends State<DesktopTutorialSection> {
       ),
     );
   }
+
   Widget _buildQuestionsList(BuildContext context) {
     int start = 0 * 3;
     int end = start + 3;
@@ -116,19 +119,14 @@ class _DesktopTutorialSectionState extends State<DesktopTutorialSection> {
                       SizedBox(width: 12.0),
                     ],
                   ),
-                  // The slider itselfvalue: (answers[questionIndex] ?? 5).toDouble(),
-                  //                     onChanged: (val) {
-                  //                       setState(() {
-                  //                         answers[questionIndex] = val.toInt();
-                  //                       });
-                  //                     },
+                  // The slider itself
                   Slider(
                     value: (answers[questionIndex] ?? 5).toDouble(),
-    onChanged: (val) {
-                           setState(() {
-                             answers[questionIndex] = val.toInt();
-                           });
-                         },
+                    onChanged: (val) {
+                      setState(() {
+                        answers[questionIndex] = val.toInt();
+                      });
+                    },
                     min: 0,
                     max: 10,
                     divisions: 10,
@@ -189,40 +187,40 @@ class _DesktopTutorialSectionState extends State<DesktopTutorialSection> {
       }).toList(),
     );
   }
+
   Widget _buildNavigationButton(BuildContext context) {
     return isLoading
-              ? SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
-              strokeWidth: 2.0,
-            ),
-          )
-              : ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFCB9935),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              ),
-            ),
-            onPressed: isLoading
-                ? null
-                : () async {
-              setState(() {
-                isLoading = true;
-              });
-              await handleTakeTest(context);
-              setState(() {
-                isLoading = false;
-              });
-            },
-            child: Text(
-              'Beginne den Test',
-              style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
-            ),
-
+        ? SizedBox(
+      width: 24,
+      height: 24,
+      child: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFCB9935)),
+        strokeWidth: 2.0,
+      ),
+    )
+        : ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFFCB9935),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        ),
+      ),
+      onPressed: isLoading
+          ? null
+          : () async {
+        setState(() {
+          isLoading = true;
+        });
+        await handleTakeTest(context);
+        setState(() {
+          isLoading = false;
+        });
+      },
+      child: Text(
+        'Starte jetzt',
+        style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+      ),
     );
   }
 }
