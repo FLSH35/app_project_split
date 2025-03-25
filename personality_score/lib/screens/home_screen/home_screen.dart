@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Für das “pseudo-endlose” Karussell
   static const int infiniteItemCount = 10000;
-  
+
   // Testimonials Data
   final List<Map<String, String>> testimonials = [
     {

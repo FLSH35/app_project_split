@@ -68,7 +68,7 @@ class _DesktopHeaderSectionState extends State<DesktopHeaderSection> {
             child: Column(
               children: [
                 SelectableText(
-                  "Die 8 Stufen der Persönlichkeitsentwicklung – auf welcher stehst du?",
+                  "Personality Score – Dein Weg zu finanzieller und zeitlicher Freiheit",
                   style: TextStyle(
                     fontSize: screenHeight * 0.042,
                     fontWeight: FontWeight.bold,
@@ -76,7 +76,7 @@ class _DesktopHeaderSectionState extends State<DesktopHeaderSection> {
                   ),
                 ),
                 SelectableText(
-                  "Erhalte messerscharfe Klarheit über deinen Entwicklungsstand und erfahre, wie du das nächste Level erreichen kannst.",
+                  "Finde heraus, wie du dein Business so steuerst, dass es dir dient – und nicht umgekehrt. Mehr Zeit, weniger Stress, echte Kontrolle.",
                   style: TextStyle(
                     fontSize: screenHeight * 0.02,
                     color: Colors.black,
