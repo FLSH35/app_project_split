@@ -28,8 +28,8 @@ class ImpressumMobile extends StatelessWidget {
   final String impressumContent = '''
 <b>Geschäftsangaben</b>
 IfYouChange Doo  
-Maršala BB, Utjeha  
-85000 Bar, Montenegro  
+Spyrou Kyprianou 32, 2nd Floor, Flat/Office 4  
+1075 Nicosia, Cyprus  
 E-Mail: info@ifyouchange.de  
 Telefon: +49 896 282 4760  
 Website: www.YourMastermind.de
@@ -83,10 +83,10 @@ Wir weisen darauf hin, dass die Datenübertragung im Internet (z. B. bei der Kom
 Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:
 
 IfYouChange Doo  
-Maršala BB, Utjeha  
-85000 Bar, Montenegro  
-Telefon: +49 896 282 4760  
+Spyrou Kyprianou 32, 2nd Floor, Flat/Office 4  
+1075 Nicosia, Cyprus  
 E-Mail: info@ifyouchange.de  
+Telefon: +49 896 282 4760  
 Website: www.YourMastermind.de
 
 Verantwortliche Stelle ist die natürliche oder juristische Person, die allein oder gemeinsam mit anderen über die Zwecke und Mittel der Verarbeitung von personenbezogenen Daten (z. B. Namen, E-Mail-Adressen o. Ä.) entscheidet.
@@ -237,8 +237,8 @@ class ImpressumDesktop extends StatelessWidget {
   final String impressumContent = '''
 <b>Geschäftsangaben</b>
 IfYouChange Doo  
-Maršala BB, Utjeha  
-85000 Bar, Montenegro  
+Spyrou Kyprianou 32, 2nd Floor, Flat/Office 4  
+1075 Nicosia, Cyprus  
 E-Mail: info@ifyouchange.de  
 Telefon: +49 896 282 4760  
 Website: www.YourMastermind.de
@@ -292,10 +292,10 @@ Wir weisen darauf hin, dass die Datenübertragung im Internet (z. B. bei der Kom
 Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:
 
 IfYouChange Doo  
-Maršala BB, Utjeha  
-85000 Bar, Montenegro  
-Telefon: +49 896 282 4760  
+Spyrou Kyprianou 32, 2nd Floor, Flat/Office 4  
+1075 Nicosia, Cyprus  
 E-Mail: info@ifyouchange.de  
+Telefon: +49 896 282 4760  
 Website: www.YourMastermind.de
 
 Verantwortliche Stelle ist die natürliche oder juristische Person, die allein oder gemeinsam mit anderen über die Zwecke und Mittel der Verarbeitung von personenbezogenen Daten (z. B. Namen, E-Mail-Adressen o. Ä.) entscheidet.
